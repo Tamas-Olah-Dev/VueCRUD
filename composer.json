@@ -1,0 +1,20 @@
+{
+    "name": "olahtamas/vuecrud",
+    "description": "A Laravel/Vue CRUD model manager",
+    "authors": [
+        {
+            "name": "Oláh Tamás",
+            "email": "olah.tamas@caleb.hu"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/OlahTamas/keyvalue"
+        }
+    ],
+
+    "require": {
+        "olahtamas/keyvalue": "^0.1"
+    }
+}
