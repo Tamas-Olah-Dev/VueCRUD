@@ -13,8 +13,19 @@
             "url": "https://github.com/OlahTamas/keyvalue"
         }
     ],
-
+    "autoload": {
+        "psr-4": {
+            "OlahTamas\\VueCRUD\\": "src"
+        }
+    },
     "require": {
         "olahtamas/keyvalue": "^0.1"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "OlahTamas\\VueCRUD\\VueCRUDServiceProvider"
+            ]
+        }
     }
 }

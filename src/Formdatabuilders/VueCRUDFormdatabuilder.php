@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Forms;
+namespace OlahTamas\VueCRUD\Formdatabuilders;
 
 use Illuminate\Validation\Rule;
 
-abstract class VueFormDataBuilder
+abstract class VueCRUDFormdatabuilder
 {
     const REQUEST_TYPE_CREATING = 'creating';
     const REQUEST_TYPE_UPDATING = 'updating';

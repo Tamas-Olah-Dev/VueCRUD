@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests;
+namespace OlahTamas\VueCRUD\Requests;
 
-use App\Forms\VueFormDataBuilder;
+use OlahTamas\VueCRUD\Formdatabuilders\VueCRUDFormdatabuilder;
 use Illuminate\Foundation\Http\FormRequest;
 
-class VueFormSaveRequestBase extends FormRequest
+class VueCRUDRequestBase extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -57,8 +57,8 @@ class VueFormSaveRequestBase extends FormRequest
     protected function getRequestType()
     {
         return (\Route::getCurrentRoute()->hasParameter('id') || (\Route::getCurrentRoute()->hasParameter('subject')))
-            ? VueFormDataBuilder::REQUEST_TYPE_UPDATING
-            : VueFormDataBuilder::REQUEST_TYPE_CREATING;
+            ? VueCRUDFormdatabuilder::REQUEST_TYPE_UPDATING
+            : VueCRUDFormdatabuilder::REQUEST_TYPE_CREATING;
     }
 
     protected function nullIfInvalid($value)

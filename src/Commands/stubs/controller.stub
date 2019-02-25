@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Formdatabuilders\DummyClassVueCRUDFormdatabuilder;
+use App\Http\Requests\SaveDummyClassVueCRUDRequest;
+use OlahTamas\VueCRUD\Interfaces\ICRUDController;
+use App\DummyClass;
+use OlahTamas\VueCRUD\Controllers\VueCRUDControllerBase;
+
+class DummyClassVueCRUDController extends VueCRUDControllerBase implements ICRUDController
+{
+    const SUBJECT_CLASS = DummyClass::class;
+    const SUBJECT_SLUG = 'DummySlug';
+    const SUBJECT_NAME = 'DummyClass';
+
+    function getIndexColumns()
+    {
+        // TODO: Implement getIndexColumns() method.
+    }
+
+    function getDetailsFields()
+    {
+        // TODO: Implement getDetailsFields() method.
+    }
+
+    function getElements()
+    {
+        // TODO: Implement getElements() method.
+    }
+
+}

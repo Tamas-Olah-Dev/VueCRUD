@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Interfaces;
+namespace OlahTamas\VueCRUD\Interfaces;
 
 
 interface ICRUDController

@@ -1,0 +1,22 @@
+<?php
+
+
+namespace App\Formdatabuilders;
+
+
+use App\DummyClass;
+use OlahTamas\VueCRUD\Formdatabuilders\VueCRUDFormdatabuilder
+
+class DummyClassVueCRUDFormdatabuilder extends VueCRUDFormdatabuilder
+{
+    protected static function getFields()
+    {
+        return [];
+    }
+
+    public function __construct(DummyClass $subject = null, $defaults = [])
+    {
+        $this->subject = $subject;
+        $this->defaults = $defaults;
+    }
+}
