@@ -36,13 +36,18 @@
             scripttag.setAttribute('src', this.trixJSUrl);
             document.head.appendChild(csstag);
             document.head.appendChild(scripttag);
-            window.setInterval(this.updateValue, 1000);
+            window.trixIntervals = []
+            window.trixIntervals[this.fieldname] = window.setInterval(this.updateValue, 1000);
         },
         methods: {
             updateValue: function() {
-                if (this.$refs[this.fieldname+'-content'].value != this.latestValue) {
-                    this.$emit('input', this.$refs[this.fieldname+'-content'].value);
-                    this.latestValue = this.$refs[this.fieldname+'-content'].value;
+                if (typeof(this.$refs[this.fieldname+'-content']) == 'undefined') {
+                    window.clearInterval(window.trixIntervals[this.fieldname]);
+                } else {
+                    if (this.$refs[this.fieldname+'-content'].value != this.latestValue) {
+                        this.$emit('input', this.$refs[this.fieldname+'-content'].value);
+                        this.latestValue = this.$refs[this.fieldname+'-content'].value;
+                    }
                 }
             }
         },
