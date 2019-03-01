@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Dataproviders;
+
+use App\DummyClass;
+use Illuminate\Support\Collection;
+use OlahTamas\VueCRUD\Dataproviders\VueCRUDDataproviderBase;
+use OlahTamas\VueCRUD\Dataproviders\IVueCRUDDataprovider;
+
+class DummyClassVueCRUDDataprovider extends VueCRUDDataproviderBase implements IVueCRUDDataprovider
+{
+
+    function getBaseQuery()
+    {
+        return DummyClass::query();
+    }
+
+    function getQuery()
+    {
+        $query = $this->getBaseQuery();
+        $query = $this->addQueryFilters($query, DummyClass::class);
+
+        return $query;
+    }
+}

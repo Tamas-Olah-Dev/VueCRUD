@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Formdatabuilders\DummyClassVueCRUDFormdatabuilder;
 use App\Http\Requests\SaveDummyClassVueCRUDRequest;
+use App\Dataproviders\DummyClassVueCRUDDataprovider;
 use OlahTamas\VueCRUD\Interfaces\ICRUDController;
 use App\DummyClass;
 use OlahTamas\VueCRUD\Controllers\VueCRUDControllerBase;
@@ -14,19 +15,31 @@ class DummyClassVueCRUDController extends VueCRUDControllerBase implements ICRUD
     const SUBJECT_SLUG = 'DummySlug';
     const SUBJECT_NAME = 'DummyClass';
 
-    function getIndexColumns()
+
+    public function store(SaveDummyClassVueCRUDRequest $request)
     {
-        // TODO: Implement getIndexColumns() method.
+        $request->save();
+        $this->setSuccessfulAddPopupMessageInSession();
+
+        return route($this->getRouteName('index'));
     }
 
-    function getDetailsFields()
+    public function update(SaveDummyClassVueCRUDRequest $request, DummyClass $subject)
     {
-        // TODO: Implement getDetailsFields() method.
+        $request->save($subject);
+        $this->setSuccessfulModificationPopupMessageInSession();
+
+        return route($this->getRouteName('index'));
     }
 
     function getElements()
     {
-        // TODO: Implement getElements() method.
+        // returns the result of the getElementsAndCounts method
+        // of the related VueCRUDDataprovider class
+
+        $provider = new DummyClassVueCRUDDataprovider();
+
+        return $provider->getElementsAndCounts();
     }
 
 }

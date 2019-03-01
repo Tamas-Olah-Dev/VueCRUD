@@ -6,17 +6,20 @@
  * Time: 3:31 PM
  */
 
-namespace App\Dataproviders;
+namespace OlahTamas\VueCRUD\Dataproviders;
 
 
 use Illuminate\Support\Collection;
 
-class DataproviderBase
+class VueCRUDDataproviderBase
 {
     protected $filters;
 
-    public function __construct(Collection $filters)
+    public function __construct(Collection $filters = null)
     {
+        if ($filters == null) {
+            $filters = request()->all();
+        }
         $this->filters = $filters;
     }
 
@@ -59,4 +62,25 @@ class DataproviderBase
         return (object) $result;
     }
 
+    function getElements()
+    {
+        return $this->addPaginationToQuery($this->getQuery())->get();
+    }
+
+    public function getElementsAndCounts()
+    {
+        return (object) [
+            'counts'   => $this->getCounts(),
+            'elements' => $this->getElements(),
+        ];
+    }
+
+    protected function addQueryFilters($query, $subjectClass)
+    {
+        foreach ($subjectClass::getVueCRUDIndexFilters() as $property => $vueCRUDIndexFilter) {
+            $query = $vueCRUDIndexFilter->addFilterToQuery($query, $property);
+        }
+
+        return $query;
+    }
 }

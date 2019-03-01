@@ -69,4 +69,16 @@ class VueCRUDRequestBase extends FormRequest
 
         return $value;
     }
+
+    protected function getBaseDatasetFromRequest($subjectClass)
+    {
+        //this is extremely basic, and while could work, you should not rely on it
+        $keys = (new $subjectClass())->getFillable();
+        $result = [];
+        foreach ($keys as $key) {
+            $result[$key] = $this->input($key, null);
+        }
+
+        return $result;
+    }
 }

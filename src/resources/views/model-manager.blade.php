@@ -8,7 +8,7 @@
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
-
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <!-- Styles -->
     <style>
         html, body {
@@ -64,7 +64,7 @@
     </style>
 </head>
 <body>
-<div class="flex-center position-ref full-height">
+<div class="flex-center position-ref full-height" id="app">
     <div class="content">
         <model-manager index-url="{!! $indexUrl !!}"
                        details-url="{!! $detailsUrl !!}"
@@ -74,7 +74,7 @@
                        update-url="{!! $updateUrl !!}"
                        delete-url="{!! $deleteUrl !!}"
                        allow-operations="{{ $allowOperations ? 'true' : 'false' }}"
-                       :buttons="{{ $buttons }}"
+                       :buttons="{{ json_encode($buttons) }}"
         ></model-manager>
 
     </div>

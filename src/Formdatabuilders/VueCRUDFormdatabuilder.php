@@ -29,8 +29,8 @@ abstract class VueCRUDFormdatabuilder
     public function getDefaultOrSubjectValue($fieldId)
     {
         $value = null;
-        if (static::getFields()[$fieldId]['default'] != null) {
-            $value = static::getFields()[$fieldId]['default'];
+        if (static::getFields()->get($fieldId)->getDefault() != null) {
+            $value = static::getFields()->get($fieldId)->getDefault();
         }
         if ((is_array($this->defaults)) && (isset($this->defaults[$fieldId]))) {
             $value = $this->defaults[$fieldId];
@@ -44,18 +44,18 @@ abstract class VueCRUDFormdatabuilder
 
     public function getValueset($fieldId)
     {
-        if (static::getFields()[$fieldId]['type'] == 'yesno') {
+        if (static::getFields()->get($fieldId)->getType() == 'yesno') {
             return collect([0 => 'Nem', 1 => 'Igen']);
         }
-        if (static::getFields()[$fieldId]['type'] == 'custom') {
-            return collect(static::getFields()[$fieldId]['valuesetClass']);
+        if (static::getFields()->get($fieldId)->getType() == 'custom') {
+            return collect(static::getFields()->get($fieldId)->getValuesetClass());
         }
-        $valuesetClass = static::getFields()[$fieldId]['valuesetClass'];
+        $valuesetClass = static::getFields()->get($fieldId)->getValuesetClass();
         if ($valuesetClass === null) {
             return collect([]);
         }
         $result = collect([]);
-        if ((static::getFields()[$fieldId]['addChooseMessage']) && (! $this->isValidValue($this->getValue($fieldId)))) {
+        if ((static::getFields()->get($fieldId)->getAddChooseMessage()) && (! $this->isValidValue($this->getValue($fieldId)))) {
             $result->put(-1, __('Please select:'));
         }
         if (method_exists($valuesetClass, 'getKeyValueCollection')) {
@@ -81,18 +81,17 @@ abstract class VueCRUDFormdatabuilder
         foreach (static::getFields() as $fieldId => $fieldData) {
             if ($this->shouldBuildField($fieldId)) {
                 $element = [
-                    'kind'           => $fieldData['kind'],
-                    'type'           => $fieldData['type'],
-                    'containerClass' => $this->defaultContainerClass.' '.$fieldData['containerClass'],
-                    'class'          => $this->defaultInputClass.' '.$fieldData['additionalClass'],
+                    'kind'           => $fieldData->getKind(),
+                    'type'           => $fieldData->getType(),
+                    'containerClass' => $this->defaultContainerClass.' '.$fieldData->getContainerClass(),
+                    'class'          => $this->defaultInputClass.' '.$fieldData->getAdditionalClass(),
                     'valueset'       => $this->getValueset($fieldId),
                     'valuesetSorted' => $this->getValuesetSorted($fieldId),
-                    'label'          => __($fieldData['label']),
+                    'label'          => __($fieldData->getLabel()),
                     'value'          => $this->getValue($fieldId),
-                    'mandatory'      => $fieldData['mandatory'],
-                    'props'          => isset($fieldData['props']) ? json_encode($fieldData['props'],
-                        JSON_FORCE_OBJECT) : null,
-                    'helpTooltip'    => isset($fieldData['helpTooltip']) ? $fieldData['helpTooltip'] : null,
+                    'mandatory'      => $fieldData->getMandatory(),
+                    'props'          => json_encode($fieldData->getProps(), JSON_FORCE_OBJECT),
+                    'helpTooltip'    => $fieldData->getHelpTooltip(),
                 ];
                 $this->formdata[$fieldId] = $element;
             }
@@ -114,23 +113,23 @@ abstract class VueCRUDFormdatabuilder
                 || (! self::isFieldOnlyNeededWhenCreating($fieldId))
             ) {
                 $ruleset = [];
-                if ($fieldData['mandatory']) {
+                if ($fieldData->getMandatory()) {
                     $ruleset[] = 'required';
                 } else {
                     $ruleset[] = 'nullable';
                 }
-                if ($fieldData['type'] == 'text') {
+                if ($fieldData->getType() == 'text') {
                     $ruleset[] = 'string';
                 }
-                if ($fieldData['type'] == 'numeric') {
+                if ($fieldData->getType() == 'numeric') {
                     $ruleset[] = 'numeric';
                 }
-                if ($fieldData['kind'] == 'select') {
-                    if ($fieldData['mandatory']) {
+                if ($fieldData->getKind() == 'select') {
+                    if ($fieldData->getMandatory()) {
                         $ruleset[] = 'not_in:-1';
                     }
                 }
-                $fieldDataRules = $fieldData['rules'];
+                $fieldDataRules = $fieldData->getRules();
                 if (\Route::getCurrentRoute()->hasParameter('subject')) {
                     $fieldDataRules = collect($fieldDataRules)->transform(function($fieldDataRule, $key) {
                         if (str_contains($fieldDataRule, 'unique:')) {
@@ -154,7 +153,7 @@ abstract class VueCRUDFormdatabuilder
         $messages = [];
         foreach ($rules as $fieldId => $ruleset) {
             foreach ($ruleset as $rule) {
-                $label = __(static::getFields()[$fieldId]['label']);
+                $label = __(static::getFields()->get($fieldId)->getLabel());
                 $rulename = str_before($rule, ':');
                 switch ($rulename) {
                     case 'required':
@@ -214,16 +213,13 @@ abstract class VueCRUDFormdatabuilder
 
     public static function getFielddata($fieldId)
     {
-        return static::getFields()[$fieldId];
+        return static::getFields()->get($fieldId);
     }
 
     protected static function isFieldOnlyNeededWhenCreating($fieldId)
     {
         $fieldData = self::getFielddata($fieldId);
-        if (! isset($fieldData['onlyWhenCreating'])) {
-            return false;
-        }
-        if ($fieldData['onlyWhenCreating'] == false) {
+        if ($fieldData->getOnlyWhenCreating() == false) {
             return false;
         }
 

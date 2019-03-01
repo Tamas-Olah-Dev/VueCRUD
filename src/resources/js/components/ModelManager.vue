@@ -2,23 +2,22 @@
     <div class="container-fluid model-manager-container">
         <div class="row">
             <div class="col-12">
-                <div v-if="mode == 'loading'">{{ $root.translate('Loading') }}...</div>
+                <div v-if="mode == 'loading'">{{ translate('Loading') }}...</div>
                 <div v-if="mode == 'list'" class="row">
-                    <div v-if="$root.userIsAdmin"
-                         class="col-12"
+                    <div class="col-12"
                          style="margin-bottom: 5px"
                     >
-                        <button class="btn btn-primary float-right" v-on:click="createElement">{{ $root.translate('New') }}...</button>
+                        <button class="btn btn-primary float-right" v-on:click="createElement">{{ translate('New') }}...</button>
                     </div>
                     <div v-if="JSON.stringify(filters) != '{}'" class="portlet full-width-div model-manager-filter-container">
                         <div class="portlet-heading  bg-inverse d-flex justify-content-between">
                             <div>
                                 <span class="ti-filter"></span>
-                                {{ $root.translate('Filters') }}
+                                {{ translate('Filters') }}
                             </div>
                             <button class="btn btn-outline-light"
                                     v-on:click="resetFilters"
-                                    v-html="$root.translate('Reset')"
+                                    v-html="translate('Reset')"
                             ></button>
                         </div>
                         <div class="d-flex portlet-body">
@@ -73,7 +72,7 @@
                                 <thead>
                                 <tr>
                                     <th v-for="columnName, columnField in columns" v-html="columnName"></th>
-                                    <th v-if="allowOperations == 'true'">{{ $root.translate('Operations') }}</th>
+                                    <th v-if="allowOperations == 'true'">{{ translate('Operations') }}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -105,7 +104,7 @@
                 <div  v-if="mode == 'details'">
                     <div class="row">
                         <div class="col">
-                            <button class="btn btn-info float-right" v-on:click="fetchElements">{{ $root.translate('Back to the list') }}</button>
+                            <button class="btn btn-info float-right" v-on:click="fetchElements">{{ translate('Back to the list') }}</button>
                         </div>
                     </div>
                     <div class="row">
@@ -128,7 +127,7 @@
                 <div  v-if="mode == 'edit'">
                     <div class="portlet full-width-div">
                         <div class="portlet-heading bg-primary">
-                            {{ $root.translate('Edit element') }}
+                            {{ translate('Edit element') }}
                         </div>
                         <div class="portlet-body">
                             <edit-form
@@ -151,10 +150,10 @@
                     ></edit-form>
                 </div>
                 <div v-if="mode == 'delete-confirmation'">
-                    <div class="alert alert-danger">{{ $root.translate('Are you sure you want to delete this element') }}: {{ currentSubjectName }} ?</div>
+                    <div class="alert alert-danger">{{ translate('Are you sure you want to delete this element') }}: {{ currentSubjectName }} ?</div>
                     <div class="d-flex justify-content-between">
-                        <button class="btn btn-danger" v-on:click="deleteElement">{{ $root.translate('Yes') }}</button>
-                        <button class="btn btn-default" v-on:click="fetchElements">{{ $root.translate('Cancel') }}</button>
+                        <button class="btn btn-danger" v-on:click="deleteElement">{{ translate('Yes') }}</button>
+                        <button class="btn btn-default" v-on:click="fetchElements">{{ translate('Cancel') }}</button>
                     </div>
                 </div>
             </div>
@@ -231,16 +230,23 @@
             },
             totalLabel: function() {
                 if (typeof(this.counts.filtered) == 'undefined') {
-                    return this.$root.translate('Results');
+                    return this.translate('Results');
                 }
 
-                return this.$root.translate('Results')+'&nbsp;('+this.counts.filtered+')';
+                return this.translate('Results')+'&nbsp;('+this.counts.filtered+')';
             }
         },
         methods: {
+            translate: function(string) {
+                if (typeof(this.$root.translate) != 'undefined') {
+                    return this.$root.translate(string);
+                }
+
+                return string;
+            },
             showButton: function(button) {
                 return this.buttons.hasOwnProperty(button)
-                    && (this.$root.userIsAdmin || !this.buttons[button]['adminNeeded']);
+                    && (this.userIsAdmin || !this.buttons[button]['adminNeeded']);
             },
             getFilterTimeoutByType: function(type) {
                 if (type == 'datepicker') {

@@ -2,13 +2,13 @@
 
 namespace App\Http\Requests;
 
-use App\Forms\DummyClassFormDataBuilder;
+use App\Formdatabuilders\DummyClassVueCRUDFormdatabuilder;
 use App\DummyClass;
 use OlahTamas\VueCRUD\Requests\VueCRUDRequestBase;
 
 class SaveDummyClassVueCRUDRequest extends VueCRUDRequestBase
 {
-    const FORMDATABUILDER_CLASS = DummyClassFormDataBuilder::class;
+    const FORMDATABUILDER_CLASS = DummyClassVueCRUDFormdatabuilder::class;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -22,29 +22,21 @@ class SaveDummyClassVueCRUDRequest extends VueCRUDRequestBase
 
     public function save(DummyClass $subject = null)
     {
-        /*
-         * We are using the same request for creation and updates.
-         * If the $subject parameter is null, we are creating a new instance,
-         * otherwise we are updating one.
-         *
-         * I typically use it like this:
-         *  $dataset = $this->getDataset();
-         * if ($subject == null) {
-         *     $dataset['password'] = bcrypt($this->input('password'));
-         *     return $subject = DummyClass::create($dataset);
-         * } else {
-         *     return $subject->update($dataset);
-         * }
-         *
-         */
+        // a very basic create/update method, you should probably replace it
+        // with something customized
+        if ($subject == null) {
+            $subject = DummyClass::create($this-getDataset());
+        } else {
+            $subject->update($this->getDataset());
+        }
 
-
+        return $subject;
     }
 
     public function getDataset()
     {
-        $result = [];
-        // this is where we build the creation/update dataset from $this->input
+        $result = $this->getBaseDatasetFromRequest();
+        // this is very basic, and will probably not suffice except for very simple models
         return $result;
     }
 }

@@ -5,7 +5,7 @@ namespace App\Formdatabuilders;
 
 
 use App\DummyClass;
-use OlahTamas\VueCRUD\Formdatabuilders\VueCRUDFormdatabuilder
+use OlahTamas\VueCRUD\Formdatabuilders\VueCRUDFormdatabuilder;
 
 class DummyClassVueCRUDFormdatabuilder extends VueCRUDFormdatabuilder
 {

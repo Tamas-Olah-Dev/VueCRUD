@@ -38,6 +38,15 @@ class VueCRUDGenerate extends GeneratorCommand
             : $basename;
     }
 
+    protected function getDataproviderName($name, $fullPath = false)
+    {
+        $basename = $name.'VueCRUDDataprovider';
+
+        return $fullPath
+            ? app_path('Dataproviders/'.$basename.'.php')
+            : $basename;
+    }
+
     protected function getFormdatabuilderName($name, $fullPath = false)
     {
         $basename = $name.'VueCRUDFormdatabuilder';
@@ -86,11 +95,19 @@ class VueCRUDGenerate extends GeneratorCommand
         return $this->replaceNamespace($stub, $name)->replaceClass($stub, $name);
     }
 
+    protected function buildDataprovider($name)
+    {
+        $stub = $this->files->get($this->loadStub('dataprovider'));
+
+        return $this->replaceNamespace($stub, $name)->replaceClass($stub, $name);
+    }
+
 
     protected function filesAlreadyExist($name)
     {
         return file_exists($this->getControllerName($name, true))
             || file_exists(app_path('/Http/Requests/'.$this->getRequestName($name).'.php'))
+            || file_exists(app_path('/Dataproviders/'.$this->getDataproviderName($name).'.php'))
             || file_exists(app_path('/Formdatabuilders/'.$this->getFormdatabuilderName($name).'.php'));
     }
 
@@ -119,6 +136,8 @@ class VueCRUDGenerate extends GeneratorCommand
         $this->files->put($this->getRequestName($name, true), $this->buildRequest($name));
         $this->makeDirectory($this->getFormdatabuilderName($name, true));
         $this->files->put($this->getFormdatabuilderName($name, true), $this->buildFormdatabuilder($name));
+        $this->makeDirectory($this->getDataproviderName($name, true));
+        $this->files->put($this->getDataproviderName($name, true), $this->buildDataprovider($name));
 
 
         $this->info('VueCRUD scaffolding created successfully.');

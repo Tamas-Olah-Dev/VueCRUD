@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid vue-editform-container">
-        <div v-if="!loaded"><h4>{{ $root.translate('Betöltés') }}...</h4></div>
+        <div v-if="!loaded"><h4>{{ translate('Betöltés') }}...</h4></div>
         <div v-if="loaded && (typeof(formTitle != 'undefined'))"><h4 v-html="formTitle"></h4></div>
         <form role="form" class="margin-b-20"  v-on:submit.prevent="submitForm">
             <div class="row" v-if="loaded" >
@@ -101,13 +101,13 @@
                         v-on:click="submitForm"
                 >
                     <span v-if="loading" class="button-loading-indicator"><img src="/img/button-loader.gif"></span>
-                    <span>{{ $root.translate("Mentés") }}</span></button>
+                    <span>{{ translate("Mentés") }}</span></button>
             </div>
             <div class="col">
                 <button type="button"
                         class="btn btn-lg btn-default btn-block"
                         v-on:click="cancelEditing"
-                >{{ $root.translate("Mégsem") }}</button>
+                >{{ translate("Mégsem") }}</button>
             </div>
         </div>
     </div>
@@ -148,6 +148,13 @@
             }
         },
         methods: {
+            translate: function(string) {
+                if (typeof(this.$root.translate) != 'undefined') {
+                    return this.$root.translate(string);
+                }
+
+                return string;
+            },
             errorExists: function(fieldname) {
                 return this.errors.hasOwnProperty(fieldname) && Array.isArray(this.errors[fieldname]);
             },
@@ -167,7 +174,6 @@
                         this.subjectData = (response.data);
                         this.loaded = true;
                         this.dirty = false;
-                        this.$root.setupFormElements();
                     })
                     .catch((error) => {
                     });

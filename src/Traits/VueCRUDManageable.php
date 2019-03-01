@@ -58,12 +58,12 @@ trait VueCRUDManageable
 
     public static function getVueCRUDControllerClassname()
     {
-        return class_basename(static::class).'VueCRUDController';
+        return 'App\\Http\\Controllers\\'.class_basename(static::class).'VueCRUDController';
     }
 
     public static function getVueCRUDFormdatabuilderClassname()
     {
-        return class_basename(static::class).'VueCRUDFormdatabuilder';
+        return 'App\\Formdatabuilders\\'.class_basename(static::class).'VueCRUDFormdatabuilder';
     }
 
     public static function getVueCRUDControllerMethod($operation)
@@ -106,18 +106,16 @@ trait VueCRUDManageable
         ];
     }
 
-    public static function getVueCRUDIndexColumns()
-    {
-        // an array of column head labels, keyed by the related field name on the model
-        // e.g ['id' => 'ID']
-        return [];
-    }
+    // an array of column head labels, keyed by the related field name on the model
+    // e.g ['id' => 'ID']
+    abstract public static function getVueCRUDIndexColumns();
 
-    function getVueCRUDDetailsFields()
-    {
-        // an array of description title labels, keyed by the related field name on the model
-        // e.g ['id' => 'ID']
-        return [];
-    }
+    // an array of description title labels, keyed by the related field name on the model
+    // e.g ['id' => 'ID']
+    abstract public function getVueCRUDDetailsFields();
+
+    // a collection of index filters implementing the IVueCRUDIndexfilter interface,
+    // keyed by the property name
+    abstract public static function getVueCRUDIndexFilters();
 
 }

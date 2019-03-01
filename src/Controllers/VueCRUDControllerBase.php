@@ -18,10 +18,9 @@ class VueCRUDControllerBase
         $class = static::SUBJECT_CLASS;
 
         $elementData = static::getElements();
-        $filters = method_exists($class, 'getIndexFilters')
-            ? (object) $class::getIndexFilters()
+        $filters = method_exists($class, 'getVueCRUDIndexFilters')
+            ? (object) $class::getVueCRUDIndexFilters()
             : (object) [];
-
         $viewData = [
             'elements'        => $elementData->elements,
             'counts'          => $elementData->counts,
@@ -35,7 +34,7 @@ class VueCRUDControllerBase
         }
         $viewData = array_merge($viewData, $this->getCRUDUrls());
 
-        return view('vue-crud-manager.modelmanager', $viewData);
+        return view('vendor.vue-crud.model-manager', $viewData);
     }
 
     public function details($subject)
@@ -48,7 +47,7 @@ class VueCRUDControllerBase
             $this->addAdditionalDetails($subject);
         }
 
-        $fields = $this->getDetailsFields();
+        $fields = $subject->getVueCRUDDetailsFields();
 
         return response()->json([
             'model'  => $subject,
@@ -59,7 +58,7 @@ class VueCRUDControllerBase
     public function edit($subject)
     {
         $subject = $this->getSubject($subject);
-        $formdatabuilderClass = static::getFormDataBuilderClass();
+        $formdatabuilderClass = $subject::getVueCRUDFormdatabuilderClassname();
         $formDataBuilder = new $formdatabuilderClass($subject);
         if (request()->isXmlHttpRequest()) {
             return response($formDataBuilder->buildJson());
@@ -75,13 +74,14 @@ class VueCRUDControllerBase
 
     public function create()
     {
-        $formdatabuilderClass = static::SUBJECT_FORMDATABUILDER_CLASS;
+        $class = static::SUBJECT_CLASS;
+        $formdatabuilderClass = $class::getVueCRUDFormdatabuilderClassname();
         $formDataBuilder = new $formdatabuilderClass();
         if (request()->isXmlHttpRequest()) {
             return response($formDataBuilder->buildJson());
         }
 
-        return view('layouts.modelform', [
+        return view('vue-crud-manager', [
             'editDataUrl' => route($this->getRouteName('create')),
             'storeUrl'    => route($this->getRouteName('store')),
             'indexUrl'    => route($this->getRouteName('index')),
@@ -113,7 +113,7 @@ class VueCRUDControllerBase
 
     protected function validateRoute($routeName, $parameters = [])
     {
-        return Route::has($routeName)
+        return \Route::has($routeName)
             ? route($routeName, $parameters)
             : '';
     }
