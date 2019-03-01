@@ -9,9 +9,14 @@ use OlahTamas\VueCRUD\Formdatabuilders\VueCRUDFormdatabuilder;
 
 class DummyClassVueCRUDFormdatabuilder extends VueCRUDFormdatabuilder
 {
+    /**
+     * @return Illuminate\Support\Collection;
+     * returns a collection of VueCRUDFormfield descendants that
+     * define what the edit/create forms will contain
+     */
     protected static function getFields()
     {
-        return [];
+        return collect([]);
     }
 
     public function __construct(DummyClass $subject = null, $defaults = [])

@@ -30,11 +30,11 @@
                           v-bind="JSON.parse(data.props)"
                     ></number-field>
 
-                    <textarea v-if="data.kind == 'text' && data.type != 'richtext'"
+                    <textarea v-if="data.kind == 'text' && data.type == 'simple'"
                               v-model="subjectData[fieldname].value"
                               v-bind:class="data.class"
                     ></textarea>
-                    <div v-if="data.kind == 'text' && data.type == 'richtext'" v-bind:class="data.class" style="min-height:250px">
+                    <div v-if="data.kind == 'text' && data.type == 'richtext-trix'" v-bind:class="data.class" style="min-height:250px">
                         <trix-wrapper v-model="subjectData[fieldname].value"
                                       v-bind:fieldname="fieldname"
 

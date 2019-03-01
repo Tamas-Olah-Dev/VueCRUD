@@ -14,6 +14,6 @@ class TextareaVueCRUDFormfield extends VueCRUDFormfield
     {
         parent::__construct($properties);
         $this->kind = 'text';
-        $this->type = null;
+        $this->type = 'simple';
     }
 }

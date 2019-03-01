@@ -17,7 +17,7 @@ class SaveDummyClassVueCRUDRequest extends VueCRUDRequestBase
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     public function save(DummyClass $subject = null)
@@ -35,7 +35,7 @@ class SaveDummyClassVueCRUDRequest extends VueCRUDRequestBase
 
     public function getDataset()
     {
-        $result = $this->getBaseDatasetFromRequest();
+        $result = $this->getBaseDatasetFromRequest(DummyClass::class);
         // this is very basic, and will probably not suffice except for very simple models
         return $result;
     }
