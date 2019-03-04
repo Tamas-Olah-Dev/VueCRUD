@@ -6,7 +6,7 @@
  * Time: 10:45 AM
  */
 
-namespace OlahTamas\VueCRUD\Indexfilters;
+namespace Datalytix\VueCRUD\Indexfilters;
 
 
 use Illuminate\Database\Eloquent\Builder;

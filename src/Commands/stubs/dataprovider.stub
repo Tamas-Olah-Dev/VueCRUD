@@ -4,8 +4,8 @@ namespace App\Dataproviders;
 
 use App\DummyClass;
 use Illuminate\Support\Collection;
-use OlahTamas\VueCRUD\Dataproviders\VueCRUDDataproviderBase;
-use OlahTamas\VueCRUD\Dataproviders\IVueCRUDDataprovider;
+use Datalytix\VueCRUD\Dataproviders\VueCRUDDataproviderBase;
+use Datalytix\VueCRUD\Dataproviders\IVueCRUDDataprovider;
 
 class DummyClassVueCRUDDataprovider extends VueCRUDDataproviderBase implements IVueCRUDDataprovider
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace OlahTamas\VueCRUD\Formdatabuilders;
+namespace Datalytix\VueCRUD\Formdatabuilders;
 
 use Illuminate\Validation\Rule;
 

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace OlahTamas\VueCRUD\Interfaces;
+namespace Datalytix\VueCRUD\Interfaces;
 
 
 interface ICRUDController

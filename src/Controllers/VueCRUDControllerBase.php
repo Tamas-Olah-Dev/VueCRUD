@@ -1,6 +1,6 @@
 <?php
 
-namespace OlahTamas\VueCRUD\Controllers;
+namespace Datalytix\VueCRUD\Controllers;
 
 use Illuminate\Routing\Route;
 

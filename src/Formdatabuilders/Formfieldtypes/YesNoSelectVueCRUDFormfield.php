@@ -1,6 +1,6 @@
 <?php
 
-namespace OlahTamas\VueCRUD\Formdatabuilders;
+namespace Datalytix\VueCRUD\Formdatabuilders;
 
 
 class YesNoSelectVueCRUDFormfield extends VueCRUDFormfield

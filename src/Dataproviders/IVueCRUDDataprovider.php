@@ -1,6 +1,6 @@
 <?php
 
-namespace OlahTamas\VueCRUD\Dataproviders;
+namespace Datalytix\VueCRUD\Dataproviders;
 
 
 interface IVueCRUDDataprovider

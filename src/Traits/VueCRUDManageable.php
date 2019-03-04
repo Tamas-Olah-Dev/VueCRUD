@@ -6,7 +6,7 @@
  * Time: 11:49 AM
  */
 
-namespace OlahTamas\VueCRUD\Traits;
+namespace Datalytix\VueCRUD\Traits;
 
 use Illuminate\Support\Str;
 

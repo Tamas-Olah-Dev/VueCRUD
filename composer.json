@@ -1,5 +1,5 @@
 {
-    "name": "olahtamas/vuecrud",
+    "name": "datalytix/vuecrud",
     "description": "A Laravel/Vue CRUD model manager",
     "authors": [
         {
@@ -15,7 +15,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "OlahTamas\\VueCRUD\\": "src"
+            "Datalytix\\VueCRUD\\": "src"
         }
     },
     "require": {
@@ -24,7 +24,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "OlahTamas\\VueCRUD\\VueCRUDServiceProvider"
+                "Datalytix\\VueCRUD\\VueCRUDServiceProvider"
             ]
         }
     }

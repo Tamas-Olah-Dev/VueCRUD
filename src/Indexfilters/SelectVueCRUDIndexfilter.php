@@ -1,6 +1,6 @@
 <?php
 
-namespace OlahTamas\VueCRUD\Indexfilters;
+namespace Datalytix\VueCRUD\Indexfilters;
 
 
 use Illuminate\Database\Eloquent\Builder;

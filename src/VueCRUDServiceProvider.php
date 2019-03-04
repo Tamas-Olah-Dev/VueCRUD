@@ -1,6 +1,6 @@
 <?php
 
-namespace OlahTamas\VueCRUD;
+namespace Datalytix\VueCRUD;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -32,7 +32,7 @@ class VueCRUDServiceProvider extends ServiceProvider
         ]);
 
         $this->commands([
-            \OlahTamas\VueCRUD\Commands\VueCRUDGenerate::class,
+            \Datalytix\VueCRUD\Commands\VueCRUDGenerate::class,
         ]);
     }
 }

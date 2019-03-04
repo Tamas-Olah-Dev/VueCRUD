@@ -6,7 +6,7 @@
  * Time: 3:31 PM
  */
 
-namespace OlahTamas\VueCRUD\Dataproviders;
+namespace Datalytix\VueCRUD\Dataproviders;
 
 
 use Illuminate\Support\Collection;

@@ -1,8 +1,8 @@
 <?php
 
-namespace OlahTamas\VueCRUD\Requests;
+namespace Datalytix\VueCRUD\Requests;
 
-use OlahTamas\VueCRUD\Formdatabuilders\VueCRUDFormdatabuilder;
+use Datalytix\VueCRUD\Formdatabuilders\VueCRUDFormdatabuilder;
 use Illuminate\Foundation\Http\FormRequest;
 
 class VueCRUDRequestBase extends FormRequest

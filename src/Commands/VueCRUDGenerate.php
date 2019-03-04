@@ -1,6 +1,6 @@
 <?php
 
-namespace OlahTamas\VueCRUD\Commands;
+namespace Datalytix\VueCRUD\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Console\GeneratorCommand;

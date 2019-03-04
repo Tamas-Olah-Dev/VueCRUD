@@ -6,7 +6,7 @@
  * Time: 11:20 AM
  */
 
-namespace OlahTamas\VueCRUD\Indexfilters;
+namespace Datalytix\VueCRUD\Indexfilters;
 
 
 abstract class VueCRUDIndexfilterBase
