@@ -132,8 +132,8 @@ abstract class VueCRUDFormdatabuilder
                 $fieldDataRules = $fieldData->getRules();
                 if (\Route::getCurrentRoute()->hasParameter('subject')) {
                     $fieldDataRules = collect($fieldDataRules)->transform(function($fieldDataRule, $key) {
-                        if (str_contains($fieldDataRule, 'unique:')) {
-                            $table = str_after($fieldDataRule, ':');
+                        if (\Illuminate\Support\Str::contains($fieldDataRule, 'unique:')) {
+                            $table = \Illuminate\Support\Str::after($fieldDataRule, ':');
                             return Rule::unique($table)->ignore(\Route::getCurrentRoute()->parameters()['subject']->id);
                         }
                         return $fieldDataRule;
@@ -154,7 +154,7 @@ abstract class VueCRUDFormdatabuilder
         foreach ($rules as $fieldId => $ruleset) {
             foreach ($ruleset as $rule) {
                 $label = __(static::getFields()->get($fieldId)->getLabel());
-                $rulename = str_before($rule, ':');
+                $rulename = \Illuminate\Support\Str::before($rule, ':');
                 switch ($rulename) {
                     case 'required':
                         $messages[$fieldId.'.required'] = __('Hiányzó mező').': '.$label;

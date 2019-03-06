@@ -12,7 +12,7 @@
                     <div v-if="JSON.stringify(filters) != '{}'" class="portlet full-width-div model-manager-filter-container">
                         <div class="portlet-heading  bg-inverse d-flex justify-content-between">
                             <div>
-                                <span class="ti-filter"></span>
+                                <span v-bind:class="iconClasses.filter"></span>
                                 {{ translate('Filters') }}
                             </div>
                             <button class="btn btn-outline-light"
@@ -46,7 +46,7 @@
                     <div class="portlet full-width-div">
                         <div class="portlet-heading bg-primary d-flex justify-content-between">
                             <div class="portlet-title">
-                                <span class="ti-list"></span>
+                                <span v-bind:class="iconClasses.list"></span>
                                 <span v-html="totalLabel"></span>
                             </div>
                             <div class="model-manager-paging-controls d-flex align-items-center"
@@ -55,7 +55,7 @@
                                 <span>{{ counts['filtered'] }}&nbsp;/&nbsp;{{ counts['total'] }}&nbsp;&nbsp;</span>
                                 <button class="btn btn-outline-secondary"
                                         v-on:click="previousPage"
-                                ><span class="ti-angle-double-left"></span></button>
+                                ><span v-bind:class="iconClasses.leftArrow"></span></button>
                                 <select class="form-control" v-model="currentPage">
                                     <option v-for="p in pageOptions"
                                             v-bind:value="p"
@@ -64,7 +64,7 @@
                                 </select>
                                 <button class="btn btn-outline-secondary"
                                         v-on:click="nextPage"
-                                ><span class="ti-angle-double-right"></span></button>
+                                ><span v-bind:class="iconClasses.rightArrow"></span></button>
                             </div>
                         </div>
                         <div class="portlet-body">
@@ -194,6 +194,14 @@
                     },
                 }
             }},
+            iconClasses: {type: Object, default: function() {
+                return {
+                    "filter": "ti-filter",
+                    "list": "ti-list",
+                    "leftArrow": "ti-angle-double-left",
+                    "rightArrow": "ti-angle-double-right"
+                }
+            }}
         },
         data: function() {
             return {

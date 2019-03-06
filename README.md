@@ -5,7 +5,7 @@ This is a Vue.js-based CRUD model manager for Eloquent models. With a little set
 # Installation:
 
 The package needs the project to have vue.js set up
-##### composer require olahtamas/vuecrud
+##### composer require datalytix/vuecrud
 ##### artisan vendor:publish
 If you don't have the Vue component auto-discovery enabled in app.js, add the modules published in resources/js/components.
 ##### npm run dev
