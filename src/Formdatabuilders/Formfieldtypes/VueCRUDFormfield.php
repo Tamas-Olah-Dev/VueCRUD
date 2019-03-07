@@ -6,7 +6,7 @@
  * Time: 12:56 PM
  */
 
-namespace Datalytix\VueCRUD\Formdatabuilders;
+namespace Datalytix\VueCRUD\Formdatabuilders\Formfieldtypes;
 
 
 class VueCRUDFormfield

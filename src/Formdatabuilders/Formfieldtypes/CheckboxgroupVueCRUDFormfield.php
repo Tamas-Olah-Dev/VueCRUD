@@ -1,6 +1,6 @@
 <?php
 
-namespace Datalytix\VueCRUD\Formdatabuilders;
+namespace Datalytix\VueCRUD\Formdatabuilders\Formfieldtypes;
 
 
 class CheckboxgroupVueCRUDFormfield extends VueCRUDFormfield

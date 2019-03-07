@@ -1,6 +1,6 @@
 <?php
 
-namespace Datalytix\VueCRUD\Formdatabuilders;
+namespace Datalytix\VueCRUD\Formdatabuilders\Formfieldtypes;
 
 
 class DatepickerVueCRUDFormfield extends VueCRUDFormfield
@@ -15,4 +15,16 @@ class DatepickerVueCRUDFormfield extends VueCRUDFormfield
         parent::__construct($properties);
         $this->kind = 'datepicker';
     }
+
+
+    /**
+     * @param mixed $default
+     * @return VueCRUDFormfield
+     */
+    public function setDefault($default)
+    {
+        $this->default = $default;
+        return $this;
+    }
+
 }
