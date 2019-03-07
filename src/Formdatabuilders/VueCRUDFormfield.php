@@ -305,11 +305,18 @@ class VueCRUDFormfield
 
     /**
      * @param mixed $props
+     * @param bool $merge
      * @return VueCRUDFormfield
+     * @internal param bool $add
      */
-    public function setProps($props)
+    public function setProps($props, $merge = true)
     {
-        $this->props = $props;
+        if ($merge) {
+            $this->props = array_merge($this->props, $props);
+        } else {
+            $this->props = $props;
+        }
+
         return $this;
     }
 
