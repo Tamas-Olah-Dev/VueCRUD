@@ -10,7 +10,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/OlahTamas/keyvalue"
+            "url": "https://github.com/ipeterfulop/keyvalues.package"
         }
     ],
     "autoload": {
@@ -19,7 +19,7 @@
         }
     },
     "require": {
-        "olahtamas/keyvalue": "^0.1"
+        "datalytix/keyvalue": "dev-master"
     },
     "extra": {
         "laravel": {

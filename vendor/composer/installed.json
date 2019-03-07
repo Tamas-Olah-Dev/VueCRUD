@@ -1,0 +1,37 @@
+[
+    {
+        "name": "datalytix/keyvalue",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
+        "source": {
+            "type": "git",
+            "url": "git@github.com:ipeterfulop/keyvalues.package.git",
+            "reference": "7aa258309e547fc40d6f6f0bbb46482ca5d16150"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/ipeterfulop/keyvalues.package/zipball/7aa258309e547fc40d6f6f0bbb46482ca5d16150",
+            "reference": "7aa258309e547fc40d6f6f0bbb46482ca5d16150",
+            "shasum": ""
+        },
+        "time": "2019-03-05T15:57:19+00:00",
+        "type": "library",
+        "installation-source": "source",
+        "autoload": {
+            "psr-4": {
+                "Datalytix\\KeyValue\\": "src/"
+            }
+        },
+        "authors": [
+            {
+                "name": "Oláh Tamás",
+                "email": "olah.tamas@caleb.hu"
+            }
+        ],
+        "description": "A trait that allows for making key=>value collections of models or classes with constants",
+        "support": {
+            "source": "https://github.com/ipeterfulop/keyvalues.package/tree/master",
+            "issues": "https://github.com/ipeterfulop/keyvalues.package/issues"
+        }
+    }
+]
