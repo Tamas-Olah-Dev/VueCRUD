@@ -5,12 +5,19 @@
             <div class="input-group-append vue-datepicker-inputgroup-append">
                 <input v-model="dateLabel"
                        class="form-control vuedatepicker-input"
-                       v-bind:class="datepickerInputClass"
+                       v-bind:class="inputClass"
                        @click="toggleDatepickerDropdown"
                        readonly
                 >
                 <span v-show="dateValue == null" class="input-group-text" v-on:click="toggleDatepickerDropdown"><i class="fa fa-calendar"></i></span>
-                <span v-show="dateValue != null" class="input-group-text" v-on:click="resetDate"><i class="fa fa-times vuedatepicker-clear-button"></i></span>
+                <span v-if="showTimeInputs == 'true'" class="vue-datepicker-time-inputs-container">
+                    <input type="text" v-model="hour" style="width: 2em">
+                    <span>:</span>
+                    <input type="text" v-model="minute" style="width: 2em">
+                    <span>:</span>
+                    <input type="text" v-model="second" style="width: 2em">
+                </span>
+                <span v-show="dateValue != null" class="input-group-text" v-on:click="resetDate"><span class="vuedatepicker-clear-button">X</span></span>
             </div>
         </div>
         <div>
@@ -50,12 +57,13 @@
 
 <script>
     export default {
-        props: [
-            'formElementLabel',
-            'value',
-            'locale',
-            'inputClass'
-        ],
+        props: {
+            formElementLabel: {type: String, default: ''},
+            value: {},
+            locale: {type: String, default: 'hu'},
+            inputClass: {type: String, default: ''},
+            showTimeInputs: {type: String, default: 'false'}
+        },
         data: function() {
             return {
                 dateValue: null,
@@ -63,6 +71,9 @@
                 year: null,
                 month:null,
                 day:null,
+                hour: null,
+                minute: null,
+                second: null,
                 allmonths: {
                     "hu": ['január', 'február', 'március', 'április', 'május', 'június', 'július', 'augusztus', 'szeptember', 'október', 'november', 'december'],
                     "en": ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -75,29 +86,52 @@
                     "hu": ['H', 'K', 'Sz', 'Cs', 'P', 'Sz', 'V'],
                     "en": ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
                 },
-                dateRegex: new RegExp('^[0-9]{4}\-[0-9]{2}\-[0-9]{2}$'),
+                dateRegex: new RegExp('^[0-9]{4}\-[0-9]{2}\-[0-9]{2}(.[0-9]{1,2}\:[0-9]{1,2}\:[0-9]{1,2}){0,1}$'),
                 showDropdownFlag: false,
-                todaysDate: null
+                todaysDate: null,
+                valueIsObject: false,
             }
         },
         mounted() {
             this.todaysDate = new Date();
             if (typeof(this.value) != 'undefined') {
                 if (this.dateRegex.test(this.value)) {
-                    var dateparts = this.value.split('-');
+                    var datetimeparts = this.value.split(' ');
+                    var dateparts = datetimeparts[0].split('-');
                     this.year = parseInt(dateparts[0]);
                     this.month = parseInt(dateparts[1]) - 1;
                     this.day = parseInt(dateparts[2]);
-                    this.dateValue = new Date(this.year, this.month, this.day);
+                    if (datetimeparts.length == 2) {
+                        var timeparts = datetimeparts[1].split(':');
+                        this.hour = parseInt(timeparts[0]);
+                        this.minute = parseInt(timeparts[1]);
+                        this.second = parseInt(timeparts[2]);
+                    } else {
+                        this.hour = 0;
+                        this.minute = 0;
+                        this.second = 0;
+                    }
+                    this.dateValue = new Date(this.year, this.month, this.day, this.hour, this.minute, this.second);
+                } else {
+                    if ((typeof(this.value) == 'object') && (this.value instanceof Date)) {
+                        this.year = this.value.getFullYear();
+                        this.month = this.value.getMonth();
+                        this.day = this.value.getDate();
+                        this.hour = this.value.getHours();
+                        this.minute = this.value.getMinutes();
+                        this.second = this.value.getSeconds();
+                        this.dateValue = this.value;
+                        //this.$emit('input', this.year+'-'+(this.month+1)+'-'+this.day)
+                        this.valueIsObject = true;
+                    } else {
+                        this.gotoToday();
+                    }
                 }
             } else {
                 this.gotoToday();
             }
         },
         computed: {
-            datepickerInputClass: function() {
-                return typeof(this.inputClass) == 'undefined' ? '' : this.inputClass;
-            },
             daysInCurrentMonth: function() {
                 return new Date(this.year, this.month + 1, 0).getDate();
             },
@@ -124,6 +158,9 @@
                 this.year = this.dateValue.getFullYear();
                 this.month = this.dateValue.getMonth();
                 this.day = this.dateValue.getDate();
+                this.hour = 0;
+                this.minute = 0;
+                this.second = 0;
             },
             getCompactDatestringFromDate: function(date) {
                 if (date != null) {
@@ -169,9 +206,17 @@
                 this.showDropdownFlag = true;
             },
             calculateDateValue: function() {
-                this.dateValue = new Date(this.year, this.month, this.day);
+                this.dateValue = new Date(this.year, this.month, this.day, this.hour, this.minute, this.second);
                 this.dateLabel = this.year + '-' + (this.month + 1).toString().padStart(2, 0) + '-' + this.day.toString().padStart(2, 0);
-                this.$emit('input', this.dateLabel)
+                if (this.valueIsObject) {
+                    this.$emit('input', this.dateValue)
+                } else {
+                    if (this.showTimeInputs == 'true') {
+                        this.$emit('input', this.dateLabel+' '+this.hour+':'+this.minute+':'+this.second);
+                    } else {
+                        this.$emit('input', this.dateLabel)
+                    }
+                }
             },
             setDayByWeekAndDayIndex: function(weekIndex, dayIndex) {
                 var selectedDate = this.dateByWeekAndDayIndex(weekIndex, dayIndex);
@@ -213,9 +258,113 @@
             day: function() {
                 this.calculateDateValue();
             },
+            hour: function() {
+                if ((this.hour < 0) || (this.hour > 23)) {
+                    this.hour = 0;
+                }
+                this.calculateDateValue();
+            },
+            minute: function() {
+                if ((this.minute < 0) || (this.minute > 59)) {
+                    this.minute = 0;
+                }
+                this.calculateDateValue();
+            },
+            second: function() {
+                if ((this.second < 0) || (this.second > 59)) {
+                    this.second = 0;
+                }
+                this.calculateDateValue();
+            },
         }
     }
 </script>
 <style>
+    .vuedatepicker-dropdown {
+        z-index:1500;
+        border: 1px solid lightgrey;
+        padding:1px;
+        background-color:white;
+        box-shadow: 10px 5px rgba(64,64,64,0.2);
+    }
 
+    @media only screen and (max-width: 600px) {
+        .vuedatepicker-dropdown {
+            position:fixed;
+            width:90%;
+            max-width:90%;
+            left:5%;
+            top:30%;
+        }
+    }
+
+    @media only screen and (min-width: 601px) {
+        .vuedatepicker-dropdown {
+            position:absolute;
+            width:300px;
+            max-width:300px;
+            left: 15px;
+        }
+    }
+
+    .vuedatepicker-days-table {
+        width:100%;
+    }
+    .vuedatepicker-days-table td {
+        cursor:pointer;
+        border:1px dotted lightgrey;
+        padding:2px;
+        height:2.6em;
+    }
+    .vuedatepicker-days-table td:hover{
+        border: 1px solid black
+    }
+    .vuedatepicker-current-month {
+        background-color:white;
+    }
+    .vuedatepicker-other-month {
+        background-color:#E6E6E6;
+        color:darkgray;
+    }
+    .vuedatepicker-current-day {
+        font-weight:bold;
+    }
+    .vuedatepicker-today {
+        color: blue;
+    }
+
+    .vuedatepicker-inputs-container {
+        display:flex;
+        justify-content: space-between;
+    }
+    .vuedatepicker-year-input {
+        width:30% !important;
+        flex-grow:0;
+    }
+
+    .vuedatepicker-month-select {
+        flex-grow:1
+    }
+    .vuedatepicker-today-button {
+        flex-grow:0;
+        flex-shrink:1;
+        max-width:2em;
+        padding:4px;
+        opacity:.8;
+    }
+    .vuedatepicker-today-button:hover {
+        opacity:1;
+    }
+    .vue-datepicker-time-inputs-container {
+        display: flex;
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+    .vue-datepicker-time-inputs-container > span {
+        padding-left: 3px;
+        padding-right: 3px;
+    }
+    .vue-datepicker-time-inputs-container > input {
+        text-align: center;
+    }
 </style>
