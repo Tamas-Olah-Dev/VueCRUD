@@ -1,15 +1,30 @@
 <template>
-    <div class="trix-container" style="min-height:210px">
+    <div class="trix-wrapper-container">
         <input v-bind:id="fieldname+'-richtext'"
                type="hidden"
-               v-bind:value="value"
                :ref="fieldname+'-content'"
         >
-        <trix-editor v-bind:input="fieldname+'-richtext'"
-                     class="editform-richtext-editor"
-                     :ref="fieldname+'-editor'"
-                     style="min-height:200px;"
-        ></trix-editor>
+        <div class="trix-wrapper-custom-buttons-container">
+            <span class="trix-wrapper-button-group" style="width: 3em;">
+                <button class="trix-button"
+                        v-on:click="toggleViewMode"
+                        v-html="viewModeLabel"
+                ></button>
+            </span>
+        </div>
+        <div v-show="viewMode == 'normal'">
+            <trix-editor v-bind:input="fieldname+'-richtext'"
+                         class="editform-richtext-editor"
+                         :ref="fieldname+'-editor'"
+                         style="min-height:200px;"
+            ></trix-editor>
+        </div>
+        <div v-show="viewMode == 'code'">
+            <textarea style="width: 100%; height: 100%"
+                      v-model="codeValue"
+            >
+            </textarea>
+        </div>
     </div>
 </template>
 
@@ -17,7 +32,7 @@
     export default {
         props: {
             fieldname: {type: String},
-            value: {type: String},
+            value: {type: String, default: ''},
             trixCSSUrl: {type: String, default: '/js/plugins/trix/trix.css'},
             trixJSUrl: {type: String, default: '/js/plugins/trix/trix.hu.js'},
         },
@@ -25,10 +40,24 @@
             return {
                 latestValue: '',
                 valueInitialized: false,
+                viewMode: 'normal',
+                codeValue: '',
+                updatingCodeValue: false
+            }
+        },
+        computed: {
+            viewModeLabel: function() {
+                if (this.viewMode == 'code') {
+                    return 'Szöveg';
+                }
+                if (this.viewMode == 'normal') {
+                    return 'Kód';
+                }
             }
         },
         mounted: function() {
             this.latestValue = this.value;
+            this.codeValue = this.value;
             var csstag = document.createElement('link');
             csstag.setAttribute('href', this.trixCSSUrl);
             csstag.setAttribute('rel', 'stylesheet');
@@ -38,16 +67,37 @@
             document.head.appendChild(scripttag);
             window.trixIntervals = []
             window.trixIntervals[this.fieldname] = window.setInterval(this.updateValue, 1000);
+            window.addEventListener("trix-attachment-add", (event) => {
+                console.log(event);
+            });
+            this.$refs[this.fieldname+'-content'].value = this.value;
+            if (this.value == '') {
+                this.valueInitialized = true;
+            }
         },
         methods: {
             updateValue: function() {
+
                 if (typeof(this.$refs[this.fieldname+'-content']) == 'undefined') {
                     window.clearInterval(window.trixIntervals[this.fieldname]);
                 } else {
                     if (this.$refs[this.fieldname+'-content'].value != this.latestValue) {
-                        this.$emit('input', this.$refs[this.fieldname+'-content'].value);
-                        this.latestValue = this.$refs[this.fieldname+'-content'].value;
+                        let value = this.$refs[this.fieldname+'-content'].value;
+                        this.$emit('input', value);
+                        this.latestValue = value;
                     }
+                }
+            },
+            toggleViewMode: function() {
+                if (this.viewMode == 'normal') {
+                    this.codeValue = this.$refs[this.fieldname+'-content'].value;
+                    this.viewMode = 'code';
+                    return;
+                }
+                if (this.viewMode == 'code') {
+                    this.viewMode = 'normal';
+                    this.$refs[this.fieldname+'-editor'].editor.loadHTML(this.codeValue);
+                    return;
                 }
             }
         },
@@ -55,10 +105,43 @@
             value: function() {
                 if (!this.valueInitialized) {
                     this.$refs[this.fieldname+'-editor'].editor.loadHTML(this.value);
-                    this.valueInitialized = true;
                 }
-            }
+                this.valueInitialized = true;
+            },
         }
 
     }
 </script>
+<style>
+    .trix-wrapper-container {
+        min-height:210px;
+        height: 100%
+    }
+    .trix-wrapper-custom-buttons-container {
+        height: 2.2em;
+    }
+    .trix-wrapper-button-group {
+        display: flex;
+        margin-bottom: 10px;
+        border: 1px solid #bbb;
+        border-top-color: #ccc;
+        border-bottom-color: #888;
+        border-radius: 3px;
+    }
+    .trix-wrapper-custom-buttons-container > .trix-wrapper-button-group > button {
+        position: relative;
+        float: left;
+        color: rgba(0, 0, 0, 0.6);
+        font-size: 0.75em;
+        font-weight: 600;
+        white-space: nowrap;
+        padding: 0 0.5em;
+        margin: 0;
+        outline: none;
+        border: none;
+        border-bottom: 1px solid #ddd;
+        border-radius: 0;
+        background: transparent;
+    }
+
+</style>
