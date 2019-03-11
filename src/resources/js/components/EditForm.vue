@@ -37,6 +37,7 @@
                     <div v-if="data.kind == 'text' && data.type == 'richtext-trix'" v-bind:class="data.class" style="min-height:250px">
                         <trix-wrapper v-model="subjectData[fieldname].value"
                                       v-bind:fieldname="fieldname"
+                                      v-bind:ajax-operations-url="ajaxOperationsUrl"
 
                         ></trix-wrapper>
                     </div>
@@ -114,8 +115,19 @@
 </template>
 
 <script>
+    import {translateMixin} from './mixins/translateMixin.js'
     export default {
-        props: ['dataUrl', 'saveUrl', 'successCallback', 'formTitle', 'redirectToResponseOnSuccess', 'redirectToOnCancel'],
+        mixins: [translateMixin],
+        props: {
+            dataUrl: {type: String},
+            saveUrl: {type: String},
+            ajaxOperationsUrl: {type: String, default: ''},
+            successCallback: {type: String},
+            formTitle: {type: String},
+            redirectToResponseOnSuccess: {type: String},
+            redirectToOnCancel: {type: String}
+
+        },
         data: function() {
             return {
                 subjectData: {},
@@ -149,6 +161,12 @@
         },
         methods: {
             translate: function(string) {
+                if ((typeof(window.laravelLocale) != 'undefined')
+                    && (typeof(window.laravelLocales[window.laravelLocale]) != 'undefined')) {
+                    if (typeof(window.laravelLocales[window.laravelLocale][string]) != 'undefined') {
+                        return window.laravelLocales[window.laravelLocale][string];
+                    }
+                }
                 if (typeof(this.$root.translate) != 'undefined') {
                     return this.$root.translate(string);
                 }

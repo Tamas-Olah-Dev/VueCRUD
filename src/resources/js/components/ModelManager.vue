@@ -30,7 +30,7 @@
                                 <input v-if="filterData['type'] == 'text'"
                                        type="text"
                                        class="form-control"
-                                        v-model="filterData['value']"
+                                       v-model="filterData['value']"
                                 >
                                 <select v-if="filterData['type'] == 'select'"
                                         class="form-control"
@@ -133,6 +133,7 @@
                             <edit-form
                                     v-bind:data-url="currentEditUrl"
                                     v-bind:save-url="currentUpdateUrl"
+                                    v-bind:ajax-operations-url="currentAjaxOperationsUrl"
                                     v-on:submit-success="fetchElements"
                                     v-on:editing-canceled="fetchElements"
                                     redirect-to-response-on-success="false"
@@ -162,7 +163,9 @@
 </template>
 
 <script>
+    import {translateMixin} from './mixins/translateMixin.js'
     export default {
+        mixins: [translateMixin],
         props: {
             indexUrl: {type: String, required: true},
             detailsUrl: {type: String, required: true},
@@ -171,6 +174,7 @@
             storeUrl: {type: String, required: true},
             updateUrl: {type: String, required: true},
             deleteUrl: {type: String, required: true},
+            ajaxOperationsUrl: {type: String, required: true},
             allowOperations: {type: String, default: 'true'},
             nameProperty: {type: String, default: 'name'},
             idProperty: {type: String, default: 'id'},
@@ -215,6 +219,7 @@
                 currentStoreUrl: '',
                 currentUpdateUrl: '',
                 currentDeleteUrl: '',
+                currentAjaxOperationsUrl: '',
                 currentSubjectName: '',
                 fetchTimeout: -1,
                 watches: {},
@@ -245,13 +250,6 @@
             }
         },
         methods: {
-            translate: function(string) {
-                if (typeof(this.$root.translate) != 'undefined') {
-                    return this.$root.translate(string);
-                }
-
-                return string;
-            },
             showButton: function(button) {
                 return this.buttons.hasOwnProperty(button)
                     && (this.userIsAdmin || !this.buttons[button]['adminNeeded']);
@@ -335,6 +333,7 @@
                 this.mode = 'loading';
                 this.currentEditUrl = this.replaceIdParameterWithElementIdInUrl(this.editUrl, elementId);
                 this.currentUpdateUrl = this.replaceIdParameterWithElementIdInUrl(this.updateUrl, elementId);
+                this.currentAjaxOperationsUrl = this.replaceIdParameterWithElementIdInUrl(this.ajaxOperationsUrl, elementId);
                 this.mode = 'edit';
             },
             confirmElementDeletion: function(elementId, elementName) {
@@ -379,3 +378,8 @@
         }
     }
 </script>
+<style>
+    .full-width-div {
+        width: 100%
+    }
+</style>

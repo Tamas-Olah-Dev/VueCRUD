@@ -60,7 +60,7 @@
         props: {
             formElementLabel: {type: String, default: ''},
             value: {},
-            locale: {type: String, default: 'hu'},
+            locale: {type: String, default: () => {return typeof(window.laravelLocale) != 'undefined' ? window.laravelLocale : 'hu'}},
             inputClass: {type: String, default: ''},
             showTimeInputs: {type: String, default: 'false'}
         },

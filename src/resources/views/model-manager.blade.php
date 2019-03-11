@@ -7,6 +7,7 @@
                    store-url="{!! $storeUrl !!}"
                    update-url="{!! $updateUrl !!}"
                    delete-url="{!! $deleteUrl !!}"
+                   ajax-operations-url="{!! $ajaxOperationsUrl !!}"
                    allow-operations="{{ $allowOperations ? 'true' : 'false' }}"
                    :buttons="{{ json_encode($buttons) }}"
                    :icon-classes="{{ json_encode([

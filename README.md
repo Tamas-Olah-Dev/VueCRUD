@@ -19,3 +19,14 @@ If you don't have the Vue component auto-discovery enabled in app.js, add the mo
 - set up the abstract methods required by the trait
 - set up form fields in formdatabuilder (_modelname_VueCRUDFormdatabuilder)
 - add Model::setVueCRUDRoutes() to routes
+
+For translations to work, there are three things needed:
+1) Translations should be in the JSON format in Laravel
+2) The main Blade view layout should have somewhere a script containing this: window.laravelLocale = '{{ app()->getLocale() }}'
+3) The JS bootstrapper (typically app.js in resources/js) needs to have this code: 
+###### window.laravelLocales = {}; 
+###### window.laravelLocales['hu'] = require('../lang/hu.json')
+
+with the second row repeated for every language the app has. 
+
+

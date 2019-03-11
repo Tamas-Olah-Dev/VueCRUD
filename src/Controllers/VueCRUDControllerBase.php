@@ -3,6 +3,7 @@
 namespace Datalytix\VueCRUD\Controllers;
 
 use Illuminate\Routing\Route;
+use Illuminate\Support\Str;
 
 class VueCRUDControllerBase
 {
@@ -128,6 +129,7 @@ class VueCRUDControllerBase
             'editUrl'    => $this->validateRoute($this->getRouteName('edit'), ['subject' => '___id___']),
             'deleteUrl'  => $this->validateRoute($this->getRouteName('delete'), ['subject' => '___id___']),
             'updateUrl'  => $this->validateRoute($this->getRouteName('update'), ['subject' => '___id___']),
+            'ajaxOperationsUrl'  => $this->validateRoute($this->getRouteName('ajax_operations'), ['subject' => '___id___']),
         ];
 
         return $result;
@@ -148,4 +150,58 @@ class VueCRUDControllerBase
         session()->put('popupMessage', $message);
         session()->put('popupMessageClass', 'alert-'.$class);
     }
+
+    protected function getAllowedAjaxOperations()
+    {
+        return [
+            'trixStoreAttachment',
+            'trixRemoveAttachment'
+        ];
+    }
+
+    public function ajaxOperations($subject)
+    {
+        $allowedActions = $this->getAllowedAjaxOperations();
+        if (array_search(request()->get('action'), $allowedActions) === false) {
+            abort(404);
+        }
+
+        return $this->{request()->get('action')}();
+
+    }
+
+    protected function trixStoreAttachment()
+    {
+
+        $originalFileInfo = pathinfo(request()->get('fileName'));
+        $filename = $this->generateTrixAttachmentFilename($originalFileInfo['extension']);
+        \Storage::disk('public')->put(
+            $filename,
+            base64_decode(Str::after(request()->get('fileData'), ';base64,'))
+        );
+
+        return response()->json(['url' => asset('storage/'.$filename)]);
+    }
+
+    protected function trixRemoveAttachment()
+    {
+        $file = basename(request()->get('url'));
+        if (\Storage::disk('public')->exists('attachments'.DIRECTORY_SEPARATOR.$file)) {
+            \Storage::disk('public')->delete('attachments'.DIRECTORY_SEPARATOR.$file);
+        }
+
+        return response('OK');
+    }
+
+    protected function generateTrixAttachmentFilename($extension)
+    {
+        $basePath = 'attachments'.DIRECTORY_SEPARATOR;
+        $filename = $basePath.Str::random(32).'.'.$extension;
+        while (\Storage::disk('public')->exists($filename)) {
+            $filename = $basePath.Str::random(32).'.'.$extension;
+        }
+
+        return $filename;
+    }
+
 }

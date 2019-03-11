@@ -54,6 +54,11 @@ trait VueCRUDManageable
             $urlBase.$subjectSlug.'/{subject}',
             self::getVueCRUDControllerMethod('delete')
         )->name(self::getVueCRUDRouteName('delete', $subjectSlug));
+        \Route::post(
+            $urlBase.$subjectSlug.'/{subject}/ajax',
+            self::getVueCRUDControllerMethod('ajaxOperations')
+        )->name(self::getVueCRUDRouteName('ajax_operations', $subjectSlug));
+
     }
 
     public static function getVueCRUDControllerClassname()
@@ -92,7 +97,7 @@ trait VueCRUDManageable
     {
         return [
             'details' => [
-                'class'       => 'btn btn-primary btn-block',
+                'class'       => 'btn btn-outline-primary',
                 'html'        => __('Details'),
             ],
             'edit'   => [

@@ -5,8 +5,9 @@
                :ref="fieldname+'-content'"
         >
         <div class="trix-wrapper-custom-buttons-container">
-            <span class="trix-wrapper-button-group" style="width: 3em;">
+            <span class="trix-wrapper-button-group" style="width: 4em;">
                 <button class="trix-button"
+                        type="button"
                         v-on:click="toggleViewMode"
                         v-html="viewModeLabel"
                 ></button>
@@ -20,7 +21,7 @@
             ></trix-editor>
         </div>
         <div v-show="viewMode == 'code'">
-            <textarea style="width: 100%; height: 100%"
+            <textarea style="width: 100%; height: 100%; min-height: 210px"
                       v-model="codeValue"
             >
             </textarea>
@@ -35,6 +36,7 @@
             value: {type: String, default: ''},
             trixCSSUrl: {type: String, default: '/js/plugins/trix/trix.css'},
             trixJSUrl: {type: String, default: '/js/plugins/trix/trix.hu.js'},
+            ajaxOperationsUrl: {type: String, default: ''}
         },
         data: function() {
             return {
@@ -67,9 +69,14 @@
             document.head.appendChild(scripttag);
             window.trixIntervals = []
             window.trixIntervals[this.fieldname] = window.setInterval(this.updateValue, 1000);
-            window.addEventListener("trix-attachment-add", (event) => {
-                console.log(event);
-            });
+            if (this.ajaxOperationsUrl != '') {
+                window.addEventListener("trix-attachment-add", (event) => {
+                    this.uploadAttachment(event);
+                });
+                window.addEventListener("trix-attachment-remove", (event) => {
+                    this.removeAttachment(event);
+                });
+            };
             this.$refs[this.fieldname+'-content'].value = this.value;
             if (this.value == '') {
                 this.valueInitialized = true;
@@ -99,6 +106,30 @@
                     this.$refs[this.fieldname+'-editor'].editor.loadHTML(this.codeValue);
                     return;
                 }
+            },
+            uploadAttachment: function(event) {
+                let fileReader = new FileReader();
+                fileReader.readAsDataURL(event.attachment.getFile());
+                fileReader.onloadend = (readerEvent) => {
+                    let uploadData = {
+                        "fileName": event.attachment.getFile().name,
+                        "fileData": readerEvent.target.result,
+                        "fileType": event.attachment.getFile().type,
+                        "action": "trixStoreAttachment"
+                    }
+                    window.axios.post(this.ajaxOperationsUrl, uploadData)
+                        .then((response) => {
+                            event.attachment.setAttributes({url: response.data.url});
+                        });
+                }
+            },
+            removeAttachment: function(event) {
+                let uploadData = {
+                    "action": "trixRemoveAttachment",
+                    "url": event.attachment.getAttribute('url')
+                };
+                window.axios.post(this.ajaxOperationsUrl, uploadData)
+                    .then((response) => {});
             }
         },
         watch: {
@@ -127,6 +158,7 @@
         border-top-color: #ccc;
         border-bottom-color: #888;
         border-radius: 3px;
+        height: 1.6em;
     }
     .trix-wrapper-custom-buttons-container > .trix-wrapper-button-group > button {
         position: relative;
