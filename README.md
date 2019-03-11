@@ -29,4 +29,7 @@ For translations to work, there are three things needed:
 
 with the second row repeated for every language the app has. 
 
+# Noteworthy
 
+When using the Trix rich text editor, attachments are saved and removed in the public drive automatically as they are added to and removed from the rich text component.
+ https://laravel.com/docs/5.8/filesystem#the-public-disk
