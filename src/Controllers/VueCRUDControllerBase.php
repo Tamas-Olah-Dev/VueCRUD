@@ -219,7 +219,7 @@ class VueCRUDControllerBase
     {
         return defined('static::CUSTOM_VIEW_PATH')
             ? static::CUSTOM_VIEW_PATH
-            : 'vendor.vue-crud.model-manager';
+            : config('app.vueCrudDefaultView', 'vendor.vue-crud.model-manager');
     }
 
 }
