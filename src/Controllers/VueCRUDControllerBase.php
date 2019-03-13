@@ -35,7 +35,7 @@ class VueCRUDControllerBase
         }
         $viewData = array_merge($viewData, $this->getCRUDUrls());
 
-        return view('vendor.vue-crud.model-manager', $viewData);
+        return view($this->getModelManagerViewName(), $viewData);
     }
 
     public function details($subject)
@@ -65,7 +65,7 @@ class VueCRUDControllerBase
             return response($formDataBuilder->buildJson());
         }
 
-        return view('vue-crud-manager', [
+        return view($this->getModelManagerViewName(), [
             'editDataUrl' => route($this->getRouteName('edit'), ['subject' => $subject->id]),
             'storeUrl'    => route($this->getRouteName('update'), ['subject' => $subject->id]),
             'indexUrl'    => route($this->getRouteName('index')),
@@ -82,7 +82,7 @@ class VueCRUDControllerBase
             return response($formDataBuilder->buildJson());
         }
 
-        return view('vue-crud-manager', [
+        return view($this->getModelManagerViewName(), [
             'editDataUrl' => route($this->getRouteName('create')),
             'storeUrl'    => route($this->getRouteName('store')),
             'indexUrl'    => route($this->getRouteName('index')),
@@ -213,6 +213,13 @@ class VueCRUDControllerBase
         }
 
         return $filename;
+    }
+
+    protected function getModelManagerViewName()
+    {
+        return defined('static::CUSTOM_VIEW_PATH')
+            ? static::CUSTOM_VIEW_PATH
+            : 'vendor.vue-crud.model-manager';
     }
 
 }
