@@ -25,7 +25,7 @@ class SaveDummyClassVueCRUDRequest extends VueCRUDRequestBase
         // a very basic create/update method, you should probably replace it
         // with something customized
         if ($subject == null) {
-            $subject = DummyClass::create($this-getDataset());
+            $subject = DummyClass::create($this->getDataset());
         } else {
             $subject->update($this->getDataset());
         }
