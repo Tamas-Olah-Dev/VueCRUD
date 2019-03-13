@@ -155,7 +155,9 @@ class VueCRUDControllerBase
     {
         return [
             'trixStoreAttachment',
-            'trixRemoveAttachment'
+            'trixRemoveAttachment',
+            'storePublicPicture',
+            'removePublicPicture',
         ];
     }
 
@@ -172,9 +174,18 @@ class VueCRUDControllerBase
 
     protected function trixStoreAttachment()
     {
+        return $this->storePublicPicture();
+    }
 
+    protected function trixRemoveAttachment()
+    {
+        return $this->removePublicPicture();
+    }
+
+    protected function storePublicPicture()
+    {
         $originalFileInfo = pathinfo(request()->get('fileName'));
-        $filename = $this->generateTrixAttachmentFilename($originalFileInfo['extension']);
+        $filename = $this->generatePublicFilename($originalFileInfo['extension']);
         \Storage::disk('public')->put(
             $filename,
             base64_decode(Str::after(request()->get('fileData'), ';base64,'))
@@ -183,7 +194,7 @@ class VueCRUDControllerBase
         return response()->json(['url' => asset('storage/'.$filename)]);
     }
 
-    protected function trixRemoveAttachment()
+    protected function removePublicPicture()
     {
         $file = basename(request()->get('url'));
         if (\Storage::disk('public')->exists('attachments'.DIRECTORY_SEPARATOR.$file)) {
@@ -193,7 +204,7 @@ class VueCRUDControllerBase
         return response('OK');
     }
 
-    protected function generateTrixAttachmentFilename($extension)
+    protected function generatePublicFilename($extension)
     {
         $basePath = 'attachments'.DIRECTORY_SEPARATOR;
         $filename = $basePath.Str::random(32).'.'.$extension;

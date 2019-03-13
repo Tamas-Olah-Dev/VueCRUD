@@ -30,7 +30,9 @@
 </template>
 
 <script>
+    import {fileUploadMixin} from './mixins/fileUploadMixin.js'
     export default {
+        mixins: [fileUploadMixin],
         props: {
             fieldname: {type: String},
             value: {type: String, default: ''},
@@ -108,28 +110,20 @@
                 }
             },
             uploadAttachment: function(event) {
-                let fileReader = new FileReader();
-                fileReader.readAsDataURL(event.attachment.getFile());
-                fileReader.onloadend = (readerEvent) => {
-                    let uploadData = {
-                        "fileName": event.attachment.getFile().name,
-                        "fileData": readerEvent.target.result,
-                        "fileType": event.attachment.getFile().type,
-                        "action": "trixStoreAttachment"
-                    }
-                    window.axios.post(this.ajaxOperationsUrl, uploadData)
-                        .then((response) => {
-                            event.attachment.setAttributes({url: response.data.url});
-                        });
-                }
+                this.uploadPublicFileToVueCRUDController(
+                    this.ajaxOperationsUrl,
+                    event.attachment.getFile(),
+                    "trixStoreAttachment"
+                ).then((response) => {
+                    event.attachment.setAttributes({url: response.data.url});
+                })
             },
             removeAttachment: function(event) {
-                let uploadData = {
-                    "action": "trixRemoveAttachment",
-                    "url": event.attachment.getAttribute('url')
-                };
-                window.axios.post(this.ajaxOperationsUrl, uploadData)
-                    .then((response) => {});
+                this.removeUploadedPublicFile(
+                    this.ajaxOperationsUrl,
+                    event.attachment.getAttribute('url'),
+                    "trixRemoveAttachment"
+                );
             }
         },
         watch: {
