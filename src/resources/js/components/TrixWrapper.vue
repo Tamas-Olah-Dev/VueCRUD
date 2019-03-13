@@ -83,6 +83,7 @@
             if (this.value == '') {
                 this.valueInitialized = true;
             }
+            this.$refs[this.fieldname+'-editor'].editor.loadHTML(this.value);
         },
         methods: {
             updateValue: function() {

@@ -49,6 +49,7 @@
             this.uploadedFileUrl = typeof(this.defaultUploadedFileUrl) != 'undefined'
                 ? this.defaultUploadedFileUrl
                 : '';
+            this.selectedFileLabel = this.value;
         },
         methods: {
             fileSelected: function(event) {
