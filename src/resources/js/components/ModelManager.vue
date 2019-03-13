@@ -145,6 +145,7 @@
                     <edit-form
                             v-bind:data-url="createUrl"
                             v-bind:save-url="storeUrl"
+                            v-bind:ajax-operations-url="currentAjaxOperationsUrl"
                             v-on:submit-success="fetchElements"
                             v-on:editing-canceled="fetchElements"
                             redirect-to-response-on-success="false"
