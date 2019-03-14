@@ -15,5 +15,6 @@ class RichtextTrixVueCRUDFormfield extends VueCRUDFormfield
         parent::__construct($properties);
         $this->kind = 'text';
         $this->type = 'richtext-trix';
+        $this->setCustomOptions(['cssHeight' => '600px']);
     }
 }

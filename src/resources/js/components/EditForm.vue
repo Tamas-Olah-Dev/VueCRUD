@@ -5,7 +5,9 @@
         <form role="form" class="margin-b-20"  v-on:submit.prevent="submitForm">
             <div class="row" v-if="loaded" >
                 <div v-for="data, fieldname in subjectData"
-                     v-bind:class="data.containerClass">
+                     v-bind:class="data.containerClass"
+                     v-bind:style="{'height': typeof(data.customOptions['cssHeight']) == 'undefined' ? 'auto' : data.customOptions['cssHeight']}"
+                >
                     <label>
                         {{ data.label }}
                         <span v-if="data.mandatory"> *</span>
@@ -42,7 +44,7 @@
                               v-model="subjectData[fieldname].value"
                               v-bind:class="data.class"
                     ></textarea>
-                    <div v-if="data.kind == 'text' && data.type == 'richtext-trix'" v-bind:class="data.class" style="min-height:250px">
+                    <div v-if="data.kind == 'text' && data.type == 'richtext-trix'" v-bind:class="data.class" style="min-height:90%; max-height:90%">
                         <trix-wrapper v-model="subjectData[fieldname].value"
                                       v-bind:fieldname="fieldname"
                                       v-bind:ajax-operations-url="ajaxOperationsUrl"
@@ -237,8 +239,8 @@
             },
             slugify: function(string) {
                 //credit to https://medium.com/@mhagemann/the-ultimate-way-to-slugify-a-url-string-in-javascript-b8e4a0d849e1
-                const a = 'àáäâãåăæçèéëêǵḧìíïîḿńǹñòóöôőœṕŕßśșțùúüûǘűẃẍÿź·/_,:;'
-                const b = 'aaaaaaaaceeeeghiiiimnnnooooooprssstuuuuuuwxyz------'
+                const a = 'àáäâãåăæçèéëêǵḧìíïîḿńǹñòóöôœṕŕßśșțùúüûǘẃẍÿź·/_,:;'
+                const b = 'aaaaaaaaceeeeghiiiimnnnoooooprssstuuuuuwxyz------'
                 const p = new RegExp(a.split('').join('|'), 'g')
                 return string.toString().toLowerCase()
                     .replace(/\s+/g, '-') // Replace spaces with -

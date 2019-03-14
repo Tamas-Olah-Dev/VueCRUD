@@ -359,13 +359,14 @@ class VueCRUDFormfield
         return $this->onlyWhenCreating;
     }
 
-    /**
-     * @param array $customOptions
-     * @return VueCRUDFormfield
-     */
-    public function setCustomOptions(array $customOptions)
+    public function setCustomOptions($customOptions, $merge = true)
     {
-        $this->customOptions = $customOptions;
+        if ($merge) {
+            $this->customOptions = array_merge($this->customOptions, $customOptions);
+        } else {
+            $this->customOptions = $customOptions;
+        }
+
         return $this;
     }
 

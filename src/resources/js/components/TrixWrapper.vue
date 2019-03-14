@@ -13,14 +13,15 @@
                 ></button>
             </span>
         </div>
-        <div v-show="viewMode == 'normal'">
+        <div v-show="viewMode == 'normal'" style="height: 85%">
             <trix-editor v-bind:input="fieldname+'-richtext'"
                          class="editform-richtext-editor"
+                         v-bind:id="fieldname+'-richtext-trixeditor'"
                          :ref="fieldname+'-editor'"
-                         style="min-height:200px;"
+                         style="min-height:300px; height: 100%"
             ></trix-editor>
         </div>
-        <div v-show="viewMode == 'code'">
+        <div v-show="viewMode == 'code'"  style="height: 85%">
             <textarea style="width: 100%; height: 100%; min-height: 210px"
                       v-model="codeValue"
             >
@@ -83,7 +84,6 @@
             if (this.value == '') {
                 this.valueInitialized = true;
             }
-            this.$refs[this.fieldname+'-editor'].editor.loadHTML(this.value);
         },
         methods: {
             updateValue: function() {
@@ -134,13 +134,16 @@
                 }
                 this.valueInitialized = true;
             },
+            fieldname: function() {
+                this.$refs[this.fieldname+'-editor'].editor.loadHTML(this.value);
+            }
         }
 
     }
 </script>
 <style>
     .trix-wrapper-container {
-        min-height:210px;
+        min-height:310px;
         height: 100%
     }
     .trix-wrapper-custom-buttons-container {
