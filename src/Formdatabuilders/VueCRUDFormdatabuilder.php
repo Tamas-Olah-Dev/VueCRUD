@@ -13,7 +13,7 @@ abstract class VueCRUDFormdatabuilder
     public $subject;
     public $defaults;
 
-    protected $defaultContainerClass = 'form-group';
+    protected $defaultContainerClass = 'form-group col';
     protected $defaultInputClass = 'form-control';
 
     public function getValue($fieldId)
@@ -92,6 +92,7 @@ abstract class VueCRUDFormdatabuilder
                     'mandatory'      => $fieldData->getMandatory(),
                     'props'          => json_encode($fieldData->getProps(), JSON_FORCE_OBJECT),
                     'helpTooltip'    => $fieldData->getHelpTooltip(),
+                    'customOptions'    => $fieldData->getCustomOptions()
                 ];
                 $this->formdata[$fieldId] = $element;
             }

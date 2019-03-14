@@ -16,6 +16,14 @@
                            v-model="subjectData[fieldname].value"
                            v-bind:class="data.class"
                     >
+                    <div v-if="data.kind == 'slug'">
+                        <input v-model="subjectData[fieldname].value"
+                               v-bind:class="data.class"
+                               style="padding-right: 1.5em; display: inline-block; width: 90%">
+                        <span style="margin-left: -1.5em; cursor:pointer"
+                              v-on:click="generateSlug(data.customOptions['source'], fieldname)"
+                        >↺</span>
+                    </div>
                     <input v-if="data.kind == 'input' && data.type == 'password'"
                            v-model="subjectData[fieldname].value"
                            v-bind:class="data.class"
@@ -226,6 +234,25 @@
                 if (typeof(this.redirectToOnCancel) != 'undefined') {
                     window.location.href = this.redirectToOnCancel;
                 }
+            },
+            slugify: function(string) {
+                //credit to https://medium.com/@mhagemann/the-ultimate-way-to-slugify-a-url-string-in-javascript-b8e4a0d849e1
+                const a = 'àáäâãåăæçèéëêǵḧìíïîḿńǹñòóöôœṕŕßśșțùúüûǘẃẍÿź·/_,:;'
+                const b = 'aaaaaaaaceeeeghiiiimnnnoooooprssstuuuuuwxyz------'
+                const p = new RegExp(a.split('').join('|'), 'g')
+                return string.toString().toLowerCase()
+                    .replace(/\s+/g, '-') // Replace spaces with -
+                    .replace(p, c => b.charAt(a.indexOf(c))) // Replace special characters
+                    .replace(/&/g, '-and-') // Replace & with ‘and’
+                    .replace(/[^\w\-]+/g, '') // Remove all non-word characters
+                    .replace(/\-\-+/g, '-') // Replace multiple - with single -
+                    .replace(/^-+/, '') // Trim - from start of text
+                    .replace(/-+$/, '') // Trim - from end of text
+            },
+            generateSlug: function(field, fieldname) {
+                let sourceText = this.subjectData[field].value;
+                this.subjectData[fieldname].value = this.slugify(sourceText);
+
             }
         },
         watch: {

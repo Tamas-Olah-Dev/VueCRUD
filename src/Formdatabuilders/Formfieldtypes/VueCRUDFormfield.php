@@ -26,6 +26,7 @@ class VueCRUDFormfield
     protected $props;
     protected $helpTooltip;
     protected $onlyWhenCreating;
+    protected $customOptions;
 
     /**
      * VueCRUDFormfield constructor.
@@ -46,6 +47,7 @@ class VueCRUDFormfield
         $this->messages = [];
         $this->addChooseMessage = false;
         $this->props = [];
+        $this->customOptions = [];
         $this->helpTooltip = '';
         $this->onlyWhenCreating = false;
         $allowedKeys = array_keys($this->toArray());
@@ -74,6 +76,7 @@ class VueCRUDFormfield
             'props' => $this->props,
             'helpTooltip' => $this->helpTooltip,
             'onlyWhenCreating' => $this->onlyWhenCreating,
+            'customOptions' => $this->customOptions,
         ];
 
         return $result;
@@ -354,6 +357,24 @@ class VueCRUDFormfield
     public function getOnlyWhenCreating()
     {
         return $this->onlyWhenCreating;
+    }
+
+    /**
+     * @param array $customOptions
+     * @return VueCRUDFormfield
+     */
+    public function setCustomOptions(array $customOptions)
+    {
+        $this->customOptions = $customOptions;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCustomOptions()
+    {
+        return $this->customOptions;
     }
 
 
