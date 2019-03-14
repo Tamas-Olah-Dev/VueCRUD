@@ -13,10 +13,11 @@
                 ></button>
             </span>
         </div>
-        <div v-show="viewMode == 'normal'" style="height: 85%">
+        <div v-show="viewMode == 'normal'" style="height: 85%" v-bind:id="fieldname+'-richtext-trixeditor-container'">
             <trix-editor v-bind:input="fieldname+'-richtext'"
                          class="editform-richtext-editor"
                          v-bind:id="fieldname+'-richtext-trixeditor'"
+                         v-bind:trix-id="fieldname+'-richtext-trixeditor'"
                          :ref="fieldname+'-editor'"
                          style="min-height:300px; height: 100%"
             ></trix-editor>
