@@ -153,33 +153,38 @@ abstract class VueCRUDFormdatabuilder
         $messages = [];
         foreach ($rules as $fieldId => $ruleset) {
             foreach ($ruleset as $rule) {
-                $label = __(static::getFields()->get($fieldId)->getLabel());
+                $field = static::getFields()->get($fieldId);
+                $label = __($field->getLabel());
                 $rulename = \Illuminate\Support\Str::before($rule, ':');
-                switch ($rulename) {
-                    case 'required':
-                        $messages[$fieldId.'.required'] = __('Hiányzó mező').': '.$label;
-                        break;
-                    case 'not_in':
-                        $messages[$fieldId.'.not_in'] = __('Hiányzó mező').': '.$label;
-                        break;
-                    case 'string':
-                        $messages[$fieldId.'.string'] = __('Nem szöveges tartalom').': '.$label;
-                        break;
-                    case 'numeric':
-                        $messages[$fieldId.'.numeric'] = __('Nem numerikus').': '.$label;
-                        break;
-                    case 'email':
-                        $messages[$fieldId.'.email'] = __('Nem megfelelő e-mailcím').': '.$label;
-                        break;
-                    case 'date':
-                        $messages[$fieldId.'.date'] = __('Nem megfelelő dátum').': '.$label;
-                        break;
-                    case 'confirmed':
-                        $messages[$fieldId.'.confirmed'] = __('A két jelszómező tartalma nem egyezik').': '.$label;
-                        break;
-                    case 'same':
-                        $messages[$fieldId.'.same'] = __('A két mező tartalma nem egyezik').': '.$label;
-                        break;
+                if (isset($field->getMessages()[$rulename])) {
+                    $messages[$fieldId.'.'.$rulename] = $field->getMessages()[$rulename];
+                } else {
+                    switch ($rulename) {
+                        case 'required':
+                            $messages[$fieldId.'.required'] = __('Hiányzó mező').': '.$label;
+                            break;
+                        case 'not_in':
+                            $messages[$fieldId.'.not_in'] = __('Hiányzó mező').': '.$label;
+                            break;
+                        case 'string':
+                            $messages[$fieldId.'.string'] = __('Nem szöveges tartalom').': '.$label;
+                            break;
+                        case 'numeric':
+                            $messages[$fieldId.'.numeric'] = __('Nem numerikus').': '.$label;
+                            break;
+                        case 'email':
+                            $messages[$fieldId.'.email'] = __('Nem megfelelő e-mailcím').': '.$label;
+                            break;
+                        case 'date':
+                            $messages[$fieldId.'.date'] = __('Nem megfelelő dátum').': '.$label;
+                            break;
+                        case 'confirmed':
+                            $messages[$fieldId.'.confirmed'] = __('A két jelszómező tartalma nem egyezik').': '.$label;
+                            break;
+                        case 'same':
+                            $messages[$fieldId.'.same'] = __('A két mező tartalma nem egyezik').': '.$label;
+                            break;
+                    }
                 }
             }
         }
