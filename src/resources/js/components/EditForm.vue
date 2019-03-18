@@ -23,6 +23,7 @@
                                v-bind:class="data.class"
                                style="padding-right: 1.5em; display: inline-block; width: 90%">
                         <span style="margin-left: -1.5em; cursor:pointer"
+                              v-bind:title="translate('Generate slug')"
                               v-on:click="generateSlug(data.customOptions['source'], fieldname)"
                         >↺</span>
                     </div>
@@ -108,15 +109,15 @@
         <div class="row">
             <div class="col">
                 <button type="button"
-                        class="btn btn-lg btn-primary btn-block"
+                        class="btn btn-lg btn-outline-primary btn-block"
                         v-on:click="submitForm"
                 >
-                    <span v-if="loading" class="button-loading-indicator"><img src="/img/button-loader.gif"></span>
+                    <span v-if="loading" class="button-loading-indicator" v-html="spinnerSrc"></span>
                     <span>{{ translate("Mentés") }}</span></button>
             </div>
             <div class="col">
                 <button type="button"
-                        class="btn btn-lg btn-default btn-block"
+                        class="btn btn-lg btn-outline-secondary btn-block"
                         v-on:click="cancelEditing"
                 >{{ translate("Mégsem") }}</button>
             </div>
@@ -126,8 +127,9 @@
 
 <script>
     import {translateMixin} from './mixins/translateMixin.js'
+    import {spinner} from './mixins/spinner.js'
     export default {
-        mixins: [translateMixin],
+        mixins: [translateMixin, spinner],
         props: {
             dataUrl: {type: String},
             saveUrl: {type: String},
@@ -239,8 +241,8 @@
             },
             slugify: function(string) {
                 //credit to https://medium.com/@mhagemann/the-ultimate-way-to-slugify-a-url-string-in-javascript-b8e4a0d849e1
-                const a = 'àáäâãåăæçèéëêǵḧìíïîḿńǹñòóöôœṕŕßśșțùúüûǘẃẍÿź·/_,:;'
-                const b = 'aaaaaaaaceeeeghiiiimnnnoooooprssstuuuuuwxyz------'
+                const a = 'àáäâãåăæçèéëêǵḧìíïîḿńǹñòőóöôœṕŕßśșțùúüűûǘẃẍÿź·/_,:;'
+                const b = 'aaaaaaaaceeeeghiiiimnnnooooooprssstuuuuuuwxyz------'
                 const p = new RegExp(a.split('').join('|'), 'g')
                 return string.toString().toLowerCase()
                     .replace(/\s+/g, '-') // Replace spaces with -

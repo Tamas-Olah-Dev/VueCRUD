@@ -2,12 +2,12 @@
     <div class="container-fluid model-manager-container">
         <div class="row">
             <div class="col-12">
-                <div v-if="mode == 'loading'">{{ translate('Loading') }}...</div>
+                <div v-if="mode == 'loading'" v-html="spinnerSrc"></div>
                 <div v-if="mode == 'list'" class="row">
                     <div class="col-12"
                          style="margin-bottom: 5px"
                     >
-                        <button class="btn btn-primary float-right" v-on:click="createElement">{{ translate('New') }}...</button>
+                        <button class="btn btn-outline-primary float-right" v-on:click="createElement">{{ translate('New') }}...</button>
                     </div>
                     <div v-if="JSON.stringify(filters) != '{}'" class="portlet full-width-div model-manager-filter-container">
                         <div class="portlet-heading  bg-inverse d-flex justify-content-between">
@@ -126,8 +126,13 @@
                 </div>
                 <div  v-if="mode == 'edit'">
                     <div class="portlet full-width-div">
-                        <div class="portlet-heading bg-primary">
+                        <div class="portlet-heading bg-primary"
+                             style="display:flex; justify-content: space-between; align-items: baseline"
+                        >
                             {{ translate('Edit element') }}
+                            <button v-on:click="fetchElements"
+                                  class="btn btn-outline-secondary"
+                            >X</button>
                         </div>
                         <div class="portlet-body">
                             <edit-form
@@ -165,8 +170,9 @@
 
 <script>
     import {translateMixin} from './mixins/translateMixin.js'
+    import {spinner} from './mixins/spinner.js'
     export default {
-        mixins: [translateMixin],
+        mixins: [translateMixin, spinner],
         props: {
             indexUrl: {type: String, required: true},
             detailsUrl: {type: String, required: true},

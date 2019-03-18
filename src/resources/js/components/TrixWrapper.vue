@@ -4,37 +4,41 @@
                type="hidden"
                :ref="fieldname+'-content'"
         >
-        <div class="trix-wrapper-custom-buttons-container">
-            <span class="trix-wrapper-button-group" style="width: 4em;">
-                <button class="trix-button"
-                        type="button"
-                        v-on:click="toggleViewMode"
-                        v-html="viewModeLabel"
-                ></button>
-            </span>
-        </div>
-        <div v-show="viewMode == 'normal'" style="height: 85%" v-bind:id="fieldname+'-richtext-trixeditor-container'">
-            <trix-editor v-bind:input="fieldname+'-richtext'"
-                         class="editform-richtext-editor"
-                         v-bind:id="fieldname+'-richtext-trixeditor'"
-                         v-bind:trix-id="fieldname+'-richtext-trixeditor'"
-                         :ref="fieldname+'-editor'"
-                         style="min-height:300px; height: 100%"
-            ></trix-editor>
-        </div>
-        <div v-show="viewMode == 'code'"  style="height: 85%">
-            <textarea style="width: 100%; height: 100%; min-height: 210px"
-                      v-model="codeValue"
-            >
-            </textarea>
-        </div>
+        <div v-if="!trixReady" v-html="spinnerSrc"></div>
+        <template  v-if="trixReady">
+            <div class="trix-wrapper-custom-buttons-container">
+                <span class="trix-wrapper-button-group" style="width: 4em;">
+                    <button class="trix-button"
+                            type="button"
+                            v-on:click="toggleViewMode"
+                            v-html="viewModeLabel"
+                    ></button>
+                </span>
+            </div>
+            <div v-show="viewMode == 'normal'" style="height: 85%" v-bind:id="fieldname+'-richtext-trixeditor-container'">
+                <trix-editor v-bind:input="fieldname+'-richtext'"
+                             class="editform-richtext-editor"
+                             v-bind:id="fieldname+'-richtext-trixeditor'"
+                             v-bind:trix-id="fieldname+'-richtext-trixeditor'"
+                             :ref="fieldname+'-editor'"
+                             style="min-height:300px; height: 100%"
+                ></trix-editor>
+            </div>
+            <div v-show="viewMode == 'code'"  style="height: 85%">
+                <textarea style="width: 100%; height: 100%; min-height: 210px"
+                          v-model="codeValue"
+                >
+                </textarea>
+            </div>
+        </template>
     </div>
 </template>
 
 <script>
     import {fileUploadMixin} from './mixins/fileUploadMixin.js'
+    import {spinner} from './mixins/spinner.js'
     export default {
-        mixins: [fileUploadMixin],
+        mixins: [fileUploadMixin, spinner],
         props: {
             fieldname: {type: String},
             value: {type: String, default: ''},
@@ -48,7 +52,8 @@
                 valueInitialized: false,
                 viewMode: 'normal',
                 codeValue: '',
-                updatingCodeValue: false
+                updatingCodeValue: false,
+                trixReady: false,
             }
         },
         computed: {
@@ -59,32 +64,37 @@
                 if (this.viewMode == 'normal') {
                     return 'Kód';
                 }
-            }
+            },
         },
         mounted: function() {
+            this.$refs[this.fieldname+'-content'].value = this.value;
             this.latestValue = this.value;
             this.codeValue = this.value;
-            var csstag = document.createElement('link');
-            csstag.setAttribute('href', this.trixCSSUrl);
-            csstag.setAttribute('rel', 'stylesheet');
-            var scripttag = document.createElement('script');
-            scripttag.setAttribute('src', this.trixJSUrl);
-            document.head.appendChild(csstag);
-            document.head.appendChild(scripttag);
-            window.trixIntervals = []
+            if (typeof(window.trixInitialized) == 'undefined') {
+                window.trixInitialized = true;
+                var csstag = document.createElement('link');
+                csstag.setAttribute('href', this.trixCSSUrl);
+                csstag.setAttribute('rel', 'stylesheet');
+                var scripttag = document.createElement('script');
+                scripttag.setAttribute('src', this.trixJSUrl);
+                document.head.appendChild(csstag);
+                document.head.appendChild(scripttag);
+                window.trixIntervals = []
+            }
             window.trixIntervals[this.fieldname] = window.setInterval(this.updateValue, 1000);
             if (this.ajaxOperationsUrl != '') {
                 window.addEventListener("trix-attachment-add", (event) => {
-                    this.uploadAttachment(event);
+                    if (event.srcElement.id == this.fieldname+'-richtext-trixeditor') {
+                        this.uploadAttachment(event);
+                    }
                 });
                 window.addEventListener("trix-attachment-remove", (event) => {
-                    this.removeAttachment(event);
+                    if (event.srcElement.id == this.fieldname+'-richtext-trixeditor') {
+                        this.removeAttachment(event);
+                    }
                 });
             };
-            this.$refs[this.fieldname+'-content'].value = this.value;
-            if (this.value == '') {
-                this.valueInitialized = true;
-            }
+            window.setTimeout(() => {this.trixReady = true}, 1000);
         },
         methods: {
             updateValue: function() {
@@ -118,14 +128,14 @@
                     "trixStoreAttachment"
                 ).then((response) => {
                     event.attachment.setAttributes({url: response.data.url});
-                })
+                }, (error) => {})
             },
             removeAttachment: function(event) {
                 this.removeUploadedPublicFile(
                     this.ajaxOperationsUrl,
                     event.attachment.getAttribute('url'),
                     "trixRemoveAttachment"
-                );
+                ).then((response) => {}, (error) => {});
             }
         },
         watch: {
