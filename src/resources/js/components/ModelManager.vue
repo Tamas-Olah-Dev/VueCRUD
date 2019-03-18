@@ -244,6 +244,7 @@
                 watches: {},
                 currentPage: 1,
                 counts: {},
+                disablePageWatch: false,
             }
         },
         mounted() {
@@ -289,6 +290,9 @@
                         this.currentSortingColumn = field;
                         this.currentSortingDirection = 'asc';
                     }
+                    this.disablePageWatch = true;
+                    this.currentPage = 1;
+                    this.disablePageWatch = false;
                     this.fetchElements(true);
                 }
             },
@@ -311,7 +315,7 @@
                     token: Math.random().toString(36),
                     page: this.currentPage,
                     items_per_page: this.itemsPerPage,
-                    sorting_field: this.currentSortingColumn,
+                    sorting_field: this.sortingColumns[this.currentSortingColumn],
                     sorting_direction: this.currentSortingDirection
                 };
                 for (var filterName in this.filters) {
@@ -339,7 +343,17 @@
                             }, {deep: true});
                     }
                 }
+            },
+            findSortingColumnKey: function(column) {
+                for (var i in this.sortingColumns) {
+                    if (this.sortingColumns.hasOwnProperty(i)) {
+                        if (this.sortingColumns[i] == column) {
+                            return i;
+                        }
+                    }
+                }
 
+                return null;
             },
             fetchElements: function(onlyElements) {
                 if (typeof(onlyElements) == 'undefined') {
@@ -353,7 +367,7 @@
                         this.elements = response.data.elements;
                         this.counts = response.data.counts;
                         this.sortingColumns = response.data.sortingColumns;
-                        this.currentSortingColumn = response.data.sortingField;
+                        this.currentSortingColumn = this.findSortingColumnKey(response.data.sortingField);
                         this.currentSortingDirection = response.data.sortingDirection;
                         if (!onlyElements) {
                             this.columns = response.data.columns;
@@ -416,11 +430,14 @@
                         Vue.set(this.filters[filter], 'value', this.filters[filter].default);
                     }
                 }
+                this.fetchElements(true)
             }
         },
         watch: {
             currentPage: function() {
-                this.fetchElements(true);
+                if (!this.disablePageWatch) {
+                    this.fetchElements(true);
+                }
             }
         }
     }
