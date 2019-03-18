@@ -71,14 +71,16 @@
                             <table class="table table-striped">
                                 <thead>
                                 <tr>
-                                    <th v-if="columnIsSorting(columnField)" style="white-space: nowrap; cursor:pointer" v-on:click="setSorting(columnField)">
+                                    <th v-for="columnName, columnField in columns"
+                                        v-bind:class="{'sorting-column': columnIsSorting(columnField)}"
+                                        v-on:click="setSorting(columnField)">
                                         <span v-html="columnName"></span>
                                         <span style="margin-left: 3px"
-                                              v-bind:style="{color: currentSortingColumn == columnField ? black : darkgrey"
+                                              v-if="columnIsSorting(columnField)"
+                                              v-bind:style="{color: currentSortingColumn == columnField ? 'black': 'darkgrey'}"
                                               v-html="currentSortingColumn == columnField ? sortingChevron : '⇵'"
                                         ></span>
                                     </th>
-                                    <th v-if="!columnIsSorting(columnField)" v-for="columnName, columnField in columns" v-html="columnName"></th>
                                     <th v-if="allowOperations == 'true'">{{ translate('Operations') }}</th>
                                 </tr>
                                 </thead>
@@ -138,7 +140,7 @@
                         >
                             {{ translate('Edit element') }}
                             <button v-on:click="fetchElements"
-                                  class="btn btn-outline-secondary"
+                                    class="btn btn-outline-secondary"
                             >X</button>
                         </div>
                         <div class="portlet-body">
@@ -276,15 +278,18 @@
                 return typeof(this.sortingColumns[columnField]) != 'undefined';
             },
             setSorting: function(field) {
-                if (this.currentSortingColumn == field) {
-                    if (this.currentSortingDirection == 'asc') {
-                        this.currentSortingDirection = 'desc'
+                if (this.columnIsSorting(field)) {
+                    if (this.currentSortingColumn == field) {
+                        if (this.currentSortingDirection == 'asc') {
+                            this.currentSortingDirection = 'desc'
+                        } else {
+                            this.currentSortingDirection = 'asc';
+                        }
                     } else {
+                        this.currentSortingColumn = field;
                         this.currentSortingDirection = 'asc';
                     }
-                } else {
-                    this.currentSortingColumn = field;
-                    this.currentSortingDirection = 'asc';
+                    this.fetchElements(true);
                 }
             },
             showButton: function(button) {
@@ -306,8 +311,8 @@
                     token: Math.random().toString(36),
                     page: this.currentPage,
                     items_per_page: this.itemsPerPage,
-                    order_by: this.currentSortingColumn,
-                    order_direction: this.currentSortingDirection
+                    sorting_field: this.currentSortingColumn,
+                    sorting_direction: this.currentSortingDirection
                 };
                 for (var filterName in this.filters) {
                     if (this.filters.hasOwnProperty(filterName)) {
@@ -347,6 +352,9 @@
                     .then((response) => {
                         this.elements = response.data.elements;
                         this.counts = response.data.counts;
+                        this.sortingColumns = response.data.sortingColumns;
+                        this.currentSortingColumn = response.data.sortingField;
+                        this.currentSortingDirection = response.data.sortingDirection;
                         if (!onlyElements) {
                             this.columns = response.data.columns;
                             if (JSON.stringify(this.filters) == '{}') {
@@ -420,5 +428,9 @@
 <style>
     .full-width-div {
         width: 100%
+    }
+    .sorting-column {
+        white-space: nowrap;
+        cursor:pointer
     }
 </style>
