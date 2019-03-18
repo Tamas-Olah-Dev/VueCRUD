@@ -38,6 +38,21 @@ class VueCRUDDataproviderBase
         return $query->skip(($page - 1) * $itemsPerPage )->take($itemsPerPage);
     }
 
+    protected function addSortingToQuery($query)
+    {
+        return $query->orderBy($this->getSortingField(), $this->getSortingDirection());
+    }
+
+    protected function getSortingField($default = 'id')
+    {
+        return request()->get('sorting_field', $default);
+    }
+
+    protected function getSortingDirection($default = 'asc')
+    {
+        return request()->get('sorting_direction', $default);
+    }
+
     protected function getItemsPerPage($default = 20)
     {
         return request()->get('items_per_page', $default);
@@ -64,7 +79,10 @@ class VueCRUDDataproviderBase
 
     function getElements()
     {
-        return $this->addPaginationToQuery($this->getQuery())->get();
+        $query = $this->addPaginationToQuery($this->getQuery());
+        $query = $this->addSortingToQuery($query);
+
+        return $query->get();
     }
 
     public function getElementsAndCounts()
@@ -72,6 +90,8 @@ class VueCRUDDataproviderBase
         return (object) [
             'counts'   => $this->getCounts(),
             'elements' => $this->getElements(),
+            'sortingField' => $this->getSortingField(),
+            'sortingDirection' => $this->getSortingDirection()
         ];
     }
 

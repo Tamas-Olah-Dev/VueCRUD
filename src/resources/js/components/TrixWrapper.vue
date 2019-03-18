@@ -140,13 +140,17 @@
         },
         watch: {
             value: function() {
-                if (!this.valueInitialized) {
-                    this.$refs[this.fieldname+'-editor'].editor.loadHTML(this.value);
+                if (typeof(this.$refs[this.fieldname+'-editor']) != 'undefined') {
+                    if (!this.valueInitialized) {
+                        this.$refs[this.fieldname+'-editor'].editor.loadHTML(this.value);
+                        this.valueInitialized = true;
+                    }
                 }
-                this.valueInitialized = true;
             },
             fieldname: function() {
-                this.$refs[this.fieldname+'-editor'].editor.loadHTML(this.value);
+                if (typeof(this.$refs[this.fieldname+'-editor']) != 'undefined') {
+                    this.$refs[this.fieldname+'-editor'].editor.loadHTML(this.value);
+                }
             }
         }
 

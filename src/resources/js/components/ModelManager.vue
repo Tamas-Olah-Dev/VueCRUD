@@ -71,7 +71,14 @@
                             <table class="table table-striped">
                                 <thead>
                                 <tr>
-                                    <th v-for="columnName, columnField in columns" v-html="columnName"></th>
+                                    <th v-if="columnIsSorting(columnField)" style="white-space: nowrap; cursor:pointer" v-on:click="setSorting(columnField)">
+                                        <span v-html="columnName"></span>
+                                        <span style="margin-left: 3px"
+                                              v-bind:style="{color: currentSortingColumn == columnField ? black : darkgrey"
+                                              v-html="currentSortingColumn == columnField ? sortingChevron : '⇵'"
+                                        ></span>
+                                    </th>
+                                    <th v-if="!columnIsSorting(columnField)" v-for="columnName, columnField in columns" v-html="columnName"></th>
                                     <th v-if="allowOperations == 'true'">{{ translate('Operations') }}</th>
                                 </tr>
                                 </thead>
@@ -219,6 +226,9 @@
                 mode: 'loading',
                 elements: {},
                 columns: {},
+                sortingColumns: {},
+                currentSortingColumn: null,
+                currentSortingDirection: 'asc',
                 fields: {},
                 model: {},
                 filters: {},
@@ -254,9 +264,29 @@
                 }
 
                 return this.translate('Results')+'&nbsp;('+this.counts.filtered+')';
+            },
+            sortingChevron: function() {
+                return this.currentSortingDirection == 'asc'
+                    ? '⬆'
+                    : '⬇';
             }
         },
         methods: {
+            columnIsSorting: function(columnField) {
+                return typeof(this.sortingColumns[columnField]) != 'undefined';
+            },
+            setSorting: function(field) {
+                if (this.currentSortingColumn == field) {
+                    if (this.currentSortingDirection == 'asc') {
+                        this.currentSortingDirection = 'desc'
+                    } else {
+                        this.currentSortingDirection = 'asc';
+                    }
+                } else {
+                    this.currentSortingColumn = field;
+                    this.currentSortingDirection = 'asc';
+                }
+            },
             showButton: function(button) {
                 return this.buttons.hasOwnProperty(button)
                     && (this.userIsAdmin || !this.buttons[button]['adminNeeded']);
@@ -276,6 +306,8 @@
                     token: Math.random().toString(36),
                     page: this.currentPage,
                     items_per_page: this.itemsPerPage,
+                    order_by: this.currentSortingColumn,
+                    order_direction: this.currentSortingDirection
                 };
                 for (var filterName in this.filters) {
                     if (this.filters.hasOwnProperty(filterName)) {

@@ -115,6 +115,10 @@ trait VueCRUDManageable
     // e.g ['id' => 'ID']
     abstract public static function getVueCRUDIndexColumns();
 
+    // an array of property names the query can be sorted by, keyed by the related field name on the model
+    // e.g ['id' => 'ID']
+    abstract public static function getVueCRUDSortingIndexColumns();
+
     // an array of description title labels, keyed by the related field name on the model
     // e.g ['id' => 'ID']
     abstract public function getVueCRUDDetailsFields();

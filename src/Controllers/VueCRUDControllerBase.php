@@ -23,12 +23,15 @@ class VueCRUDControllerBase
             ? (object) $class::getVueCRUDIndexFilters()
             : (object) [];
         $viewData = [
-            'elements'        => $elementData->elements,
-            'counts'          => $elementData->counts,
-            'columns'         => $class::getVueCRUDIndexColumns(),
-            'filters'         => $filters,
-            'buttons'         => $class::getVueCRUDModellistButtons(),
-            'allowOperations' => $class::shouldVueCRUDOperationsBeDisplayed(),
+            'elements'         => $elementData->elements,
+            'counts'           => $elementData->counts,
+            'columns'          => $class::getVueCRUDIndexColumns(),
+            'sortingColumns'   => $class::getVueCRUDSortingIndexColumns(),
+            'sortingField'     => $elementData->sortingField,
+            'sortingDirection' => $elementData->sortingDirection,
+            'filters'          => $filters,
+            'buttons'          => $class::getVueCRUDModellistButtons(),
+            'allowOperations'  => $class::shouldVueCRUDOperationsBeDisplayed(),
         ];
         if (request()->isXmlHttpRequest()) {
             return response()->json($viewData);
@@ -122,14 +125,15 @@ class VueCRUDControllerBase
     protected function getCRUDUrls()
     {
         $result = [
-            'indexUrl'   => $this->validateRoute($this->getRouteName('index')),
-            'detailsUrl' => $this->validateRoute($this->getRouteName('details'), ['subject' => '___id___']),
-            'storeUrl'   => $this->validateRoute($this->getRouteName('store')),
-            'createUrl'  => $this->validateRoute($this->getRouteName('create')),
-            'editUrl'    => $this->validateRoute($this->getRouteName('edit'), ['subject' => '___id___']),
-            'deleteUrl'  => $this->validateRoute($this->getRouteName('delete'), ['subject' => '___id___']),
-            'updateUrl'  => $this->validateRoute($this->getRouteName('update'), ['subject' => '___id___']),
-            'ajaxOperationsUrl'  => $this->validateRoute($this->getRouteName('ajax_operations'), ['subject' => '___id___']),
+            'indexUrl'          => $this->validateRoute($this->getRouteName('index')),
+            'detailsUrl'        => $this->validateRoute($this->getRouteName('details'), ['subject' => '___id___']),
+            'storeUrl'          => $this->validateRoute($this->getRouteName('store')),
+            'createUrl'         => $this->validateRoute($this->getRouteName('create')),
+            'editUrl'           => $this->validateRoute($this->getRouteName('edit'), ['subject' => '___id___']),
+            'deleteUrl'         => $this->validateRoute($this->getRouteName('delete'), ['subject' => '___id___']),
+            'updateUrl'         => $this->validateRoute($this->getRouteName('update'), ['subject' => '___id___']),
+            'ajaxOperationsUrl' => $this->validateRoute($this->getRouteName('ajax_operations'),
+                ['subject' => '___id___']),
         ];
 
         return $result;
@@ -169,7 +173,6 @@ class VueCRUDControllerBase
         }
 
         return $this->{request()->get('action')}();
-
     }
 
     protected function trixStoreAttachment()
