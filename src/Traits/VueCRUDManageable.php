@@ -95,6 +95,15 @@ trait VueCRUDManageable
 
     public static function getVueCRUDModellistButtons()
     {
+        /**
+         * details, edit and delete are built-in functions in the ModelManager component
+         * we can also use special buttons that activate Vue.js components if we add them this way:
+         *  'datepicker' => [
+         *      'class'       => 'btn btn-outline-danger',
+         *      'html'        => __('Datepicker')',
+         *      'componentName' => 'datePicker',
+         *   ]
+         */
         return [
             'details' => [
                 'class'       => 'btn btn-outline-primary',

@@ -103,6 +103,11 @@
                                                 v-on:click="confirmElementDeletion(element[idProperty], element[nameProperty])"
                                                 v-html="buttons['delete']['html']"
                                         ></button>
+                                        <button v-for="customComponentButton, customComponentButtonKey in customComponentButtons"
+                                                v-bind:class="customComponentButton['class']"
+                                                v-on:click="activateCustomComponent(customComponentButtonKey)"
+                                                v-html="customComponentButton['html']">
+                                        </button>
                                     </td>
                                 </tr>
                                 </tbody>
@@ -172,6 +177,15 @@
                         <button class="btn btn-default" v-on:click="fetchElements">{{ translate('Cancel') }}</button>
                     </div>
                 </div>
+                <div  v-if="mode == 'custom-component'">
+                    <component
+                            v-bind:is="activeCustomComponent.componentName"
+                            v-bind="activeCustomComponent.props"
+                            v-on:submit-success="fetchElements"
+                            v-on:component-canceled="fetchElements"
+                    ></component>
+                </div>
+
             </div>
         </div>
     </div>
@@ -200,17 +214,14 @@
                     details: {
                         class: 'btn btn-primary btn-block',
                         html: 'Részletek',
-                        adminNeeded: false,
                     },
                     edit: {
                         class: 'btn btn-info btn-block',
                         html: 'Szerkesztés',
-                        adminNeeded: true,
                     },
                     delete: {
                         class: 'btn btn-danger btn-block',
                         html: 'Törlés',
-                        adminNeeded: true,
                     },
                 }
             }},
@@ -245,6 +256,7 @@
                 currentPage: 1,
                 counts: {},
                 disablePageWatch: false,
+                activeCustomComponent: {}
             }
         },
         mounted() {
@@ -272,6 +284,16 @@
                 return this.currentSortingDirection == 'asc'
                     ? '⬆'
                     : '⬇';
+            },
+            customComponentButtons: function() {
+                let result = {};
+                for (var i in this.buttons) {
+                    if ((this.buttons.hasOwnProperty(i)) && (typeof(this.buttons[i].componentName) != 'undefined')) {
+                        result[i] = this.buttons[i];
+                    }
+                }
+
+                return result;
             }
         },
         methods: {
@@ -297,8 +319,11 @@
                 }
             },
             showButton: function(button) {
-                return this.buttons.hasOwnProperty(button)
-                    && (this.userIsAdmin || !this.buttons[button]['adminNeeded']);
+                return this.buttons.hasOwnProperty(button);
+            },
+            activateCustomComponent: function(key) {
+                this.activeCustomComponent = this.customComponentButtons[key];
+                this.mode = 'custom-component';
             },
             getFilterTimeoutByType: function(type) {
                 if (type == 'datepicker') {

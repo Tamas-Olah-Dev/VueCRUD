@@ -1,36 +1,55 @@
 <template>
-    <div class="trix-wrapper-container">
-        <input v-bind:id="fieldname+'-richtext'"
-               type="hidden"
-               :ref="fieldname+'-content'"
-        >
-        <div v-if="!trixReady" v-html="spinnerSrc"></div>
-        <template  v-if="trixReady">
-            <div class="trix-wrapper-custom-buttons-container">
-                <span class="trix-wrapper-button-group" style="width: 4em;">
-                    <button class="trix-button"
-                            type="button"
-                            v-on:click="toggleViewMode"
-                            v-html="viewModeLabel"
-                    ></button>
-                </span>
+    <div>
+        <div class="trix-wrapper-container">
+            <input v-bind:id="fieldname+'-richtext'"
+                   type="hidden"
+                   :ref="fieldname+'-content'"
+            >
+            <div v-if="!trixReady" v-html="spinnerSrc"></div>
+            <template  v-if="trixReady">
+                <div class="trix-wrapper-custom-buttons-container">
+                    <span class="trix-wrapper-button-group" style="width: 4em;">
+                        <button class="trix-button"
+                                type="button"
+                                v-on:click="toggleViewMode"
+                                v-html="viewModeLabel"
+                        ></button>
+                    </span>
+                    <span class="trix-wrapper-button-group" style="width: 8em" v-show="viewMode == 'normal'">
+                        <button class="trix-button"
+                                type="button"
+                                v-on:click="insertTable"
+                        >Táblázat beszúrása</button>
+                    </span>
+                    <span class="trix-wrapper-button-group" style="width: 10em" v-show="viewMode == 'normal'">
+                        <button class="trix-button"
+                                type="button"
+                                v-on:click="editTable"
+                        >Táblázat szerkesztése</button>
+                    </span>
+                </div>
+                <div v-show="viewMode == 'normal'" style="height: 85%" v-bind:id="fieldname+'-richtext-trixeditor-container'">
+                    <trix-editor v-bind:input="fieldname+'-richtext'"
+                                 class="editform-richtext-editor"
+                                 v-bind:id="fieldname+'-richtext-trixeditor'"
+                                 v-bind:trix-id="fieldname+'-richtext-trixeditor'"
+                                 :ref="fieldname+'-editor'"
+                                 style="min-height:300px; height: 100%"
+                    ></trix-editor>
+                </div>
+                <div v-show="viewMode == 'code'"  style="height: 85%">
+                    <textarea style="width: 100%; height: 100%; min-height: 210px"
+                              v-model="codeValue"
+                    >
+                    </textarea>
+                </div>
+            </template>
+        </div>
+        <div class="trix-wrapper-modal-overlay" v-show="showPopup">
+            <div class="trix-wrapper-modal">
+
             </div>
-            <div v-show="viewMode == 'normal'" style="height: 85%" v-bind:id="fieldname+'-richtext-trixeditor-container'">
-                <trix-editor v-bind:input="fieldname+'-richtext'"
-                             class="editform-richtext-editor"
-                             v-bind:id="fieldname+'-richtext-trixeditor'"
-                             v-bind:trix-id="fieldname+'-richtext-trixeditor'"
-                             :ref="fieldname+'-editor'"
-                             style="min-height:300px; height: 100%"
-                ></trix-editor>
-            </div>
-            <div v-show="viewMode == 'code'"  style="height: 85%">
-                <textarea style="width: 100%; height: 100%; min-height: 210px"
-                          v-model="codeValue"
-                >
-                </textarea>
-            </div>
-        </template>
+        </div>
     </div>
 </template>
 
@@ -54,6 +73,7 @@
                 codeValue: '',
                 updatingCodeValue: false,
                 trixReady: false,
+                showPopup: false,
             }
         },
         computed: {
@@ -85,14 +105,14 @@
             if (this.ajaxOperationsUrl != '') {
                 window.addEventListener("trix-attachment-add", (event) => {
                     if (event.srcElement.id == this.fieldname+'-richtext-trixeditor') {
-                        this.uploadAttachment(event);
-                    }
-                });
+                    this.uploadAttachment(event);
+                }
+            });
                 window.addEventListener("trix-attachment-remove", (event) => {
                     if (event.srcElement.id == this.fieldname+'-richtext-trixeditor') {
-                        this.removeAttachment(event);
-                    }
-                });
+                    this.removeAttachment(event);
+                }
+            });
             };
             window.setTimeout(() => {this.trixReady = true}, 1000);
         },
@@ -128,7 +148,7 @@
                     "trixStoreAttachment"
                 ).then((response) => {
                     event.attachment.setAttributes({url: response.data.url});
-                }, (error) => {})
+            }, (error) => {})
             },
             removeAttachment: function(event) {
                 this.removeUploadedPublicFile(
@@ -136,7 +156,9 @@
                     event.attachment.getAttribute('url'),
                     "trixRemoveAttachment"
                 ).then((response) => {}, (error) => {});
-            }
+            },
+            insertTable: function() {},
+            editTable: function() {},
         },
         watch: {
             value: function() {
@@ -159,10 +181,13 @@
 <style>
     .trix-wrapper-container {
         min-height:310px;
-        height: 100%
+        height: 100%;
+        max-width: 100%;
     }
     .trix-wrapper-custom-buttons-container {
         height: 2.2em;
+        display: flex;
+        justify-content: space-between;
     }
     .trix-wrapper-button-group {
         display: flex;
@@ -187,6 +212,31 @@
         border-bottom: 1px solid #ddd;
         border-radius: 0;
         background: transparent;
+    }
+    .trix-wrapper-modal-overlay {
+        z-index:1000;
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        background-color: rgba(192,192,192,.5);
+    }
+    .trix-wrapper-modal {
+        width: 85%;
+        max-width: 85%;
+        min-width: 85%;
+        height: 80vh;
+        max-height: 80vh;
+        min-height: 80vh;
+        left: 7%;
+        top: 10vh;
+        padding: 1em;
+        background-color: white;
+        box-shadow: 5px 5px darkgrey;
+        position:absolute;
+        display: flex;
+        flex-direction: column;
     }
 
 </style>
