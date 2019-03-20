@@ -54,10 +54,10 @@ abstract class VueCRUDIndexfilterBase
      */
     public function setValue($value = null)
     {
-        if ($value === null) {
+        if ($value !== null) {
             $this->value = $value;
         } else {
-            $this->value = request()->get($this->property);
+            $this->value = request()->get($this->getPropertyName());
         }
     }
 
@@ -100,4 +100,17 @@ abstract class VueCRUDIndexfilterBase
     {
         $this->property = $property;
     }
+
+    public function getPropertyName()
+    {
+        return self::buildPropertyName($this->property);
+    }
+
+    public static function buildPropertyName($property)
+    {
+        return is_array($property)
+            ? implode("_", $property)
+            : $property;
+    }
+
 }

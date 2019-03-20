@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class SelectVueCRUDIndexfilter extends VueCRUDIndexfilterBase implements IVueCRUDIndexfilter
 {
-    protected $valueset;
+    public $valueset;
 
     public function __construct($property, $label, $default, $value = null)
     {
@@ -21,7 +21,7 @@ class SelectVueCRUDIndexfilter extends VueCRUDIndexfilterBase implements IVueCRU
         if ($requestField != null) {
             $this->value = request()->get($requestField);
         }
-        return $query->when((string) $this->value != '', function($query) {
+        return $query->when((string) $this->value != '' && (string) $this->value != '-1', function($query) {
             return $query->where(
                 $this->property,
                 '=',
@@ -44,7 +44,12 @@ class SelectVueCRUDIndexfilter extends VueCRUDIndexfilterBase implements IVueCRU
      */
     public function setValueSet($valueset)
     {
-        $this->valueset = $valueset;
+        foreach ($valueset as $value => $label) {
+            $this->valueset[] = [
+                'value' => $value,
+                'label' => $label
+            ];
+        }
     }
 
 }

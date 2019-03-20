@@ -35,9 +35,9 @@
                                 <select v-if="filterData['type'] == 'select'"
                                         class="form-control"
                                         v-model="filterData['value']">
-                                    <option v-for="name, id in filterData['valueset']"
-                                            v-bind:value="id"
-                                            v-html="name"
+                                    <option v-for="data in filterData['valueset']"
+                                            v-bind:value="data.value"
+                                            v-html="data.label"
                                     ></option>
                                 </select>
                             </div>
