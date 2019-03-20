@@ -2,8 +2,8 @@
     <div class="container-fluid model-manager-container">
         <div class="row">
             <div class="col-12">
-                <div v-if="mode == 'loading'" v-html="spinnerSrc"></div>
-                <div v-if="mode == 'list'" class="row">
+                <div v-if="mode == 'loading'" v-html="spinnerSrc" style="width:100%; display:flex; justify-content: center"></div>
+                <div v-if="mode == 'list' || mode == 'elements-loading'" class="row">
                     <div class="col-12"
                          style="margin-bottom: 5px"
                     >
@@ -68,7 +68,8 @@
                             </div>
                         </div>
                         <div class="portlet-body">
-                            <table class="table table-striped">
+                            <div v-show="mode == 'elements-loading'" v-html="spinnerSrc" style="width:100%; display:flex; justify-content: center"></div>
+                            <table v-show="mode != 'elements-loading'" class="table table-striped">
                                 <thead>
                                 <tr>
                                     <th v-for="columnName, columnField in columns"
@@ -386,6 +387,8 @@
                 }
                 if (!onlyElements) {
                     this.mode = 'loading';
+                } else {
+                    this.mode = 'elements-loading';
                 }
                 window.axios.get(this.indexUrl, {params: this.getFilterData()})
                     .then((response) => {
