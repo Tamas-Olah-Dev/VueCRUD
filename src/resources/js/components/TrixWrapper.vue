@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div style="height:100%; min-height:100%">
         <div class="trix-wrapper-container">
             <input v-bind:id="fieldname+'-richtext'"
                    type="hidden"
