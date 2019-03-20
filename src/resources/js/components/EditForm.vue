@@ -1,13 +1,11 @@
 <template>
     <div class="container-fluid vue-editform-container">
-        <div v-if="!loaded"><h4>{{ translate('Betöltés') }}...</h4></div>
+        <div v-if="!loaded" v-html="spinnerSrc" style="width:100%; display:flex; justify-content: center"></div>
         <div v-if="loaded && (typeof(formTitle != 'undefined'))"><h4 v-html="formTitle"></h4></div>
         <form role="form" class="margin-b-20"  v-on:submit.prevent="submitForm">
             <div class="row" v-if="loaded" >
                 <div v-for="data, fieldname in subjectData"
-                     v-bind:class="data.containerClass"
-                     v-bind:style="{'height': typeof(data.customOptions['cssHeight']) == 'undefined' ? 'auto' : data.customOptions['cssHeight']}"
-                >
+                     v-bind:class="data.containerClass">
                     <label>
                         {{ data.label }}
                         <span v-if="data.mandatory"> *</span>
@@ -23,7 +21,6 @@
                                v-bind:class="data.class"
                                style="padding-right: 1.5em; display: inline-block; width: 90%">
                         <span style="margin-left: -1.5em; cursor:pointer"
-                              v-bind:title="translate('Generate slug')"
                               v-on:click="generateSlug(data.customOptions['source'], fieldname)"
                         >↺</span>
                     </div>
@@ -45,7 +42,7 @@
                               v-model="subjectData[fieldname].value"
                               v-bind:class="data.class"
                     ></textarea>
-                    <div v-if="data.kind == 'text' && data.type == 'richtext-trix'" v-bind:class="data.class" style="min-height:90%; max-height:90%">
+                    <div v-if="data.kind == 'text' && data.type == 'richtext-trix'" v-bind:class="data.class" style="min-height:100%">
                         <trix-wrapper v-model="subjectData[fieldname].value"
                                       v-bind:fieldname="fieldname"
                                       v-bind:ajax-operations-url="ajaxOperationsUrl"
@@ -109,15 +106,15 @@
         <div class="row">
             <div class="col">
                 <button type="button"
-                        class="btn btn-lg btn-outline-primary btn-block"
+                        class="btn btn-lg btn-primary btn-block"
                         v-on:click="submitForm"
                 >
-                    <span v-if="loading" class="button-loading-indicator" v-html="spinnerSrc"></span>
+                    <span v-if="loading" class="button-loading-indicator"><img src="/img/button-loader.gif"></span>
                     <span>{{ translate("Mentés") }}</span></button>
             </div>
             <div class="col">
                 <button type="button"
-                        class="btn btn-lg btn-outline-secondary btn-block"
+                        class="btn btn-lg btn-default btn-block"
                         v-on:click="cancelEditing"
                 >{{ translate("Mégsem") }}</button>
             </div>
@@ -241,13 +238,13 @@
             },
             slugify: function(string) {
                 //credit to https://medium.com/@mhagemann/the-ultimate-way-to-slugify-a-url-string-in-javascript-b8e4a0d849e1
-                const a = 'àáäâãåăæçèéëêǵḧìíïîḿńǹñòőóöôœṕŕßśșțùúüűûǘẃẍÿź·/_,:;'
-                const b = 'aaaaaaaaceeeeghiiiimnnnooooooprssstuuuuuuwxyz------'
+                const a = 'àáäâãåăæçèéëêǵḧìíïîḿńǹñòóöôœṕŕßśșțùúüûǘẃẍÿź·/_,:;'
+                const b = 'aaaaaaaaceeeeghiiiimnnnoooooprssstuuuuuwxyz------'
                 const p = new RegExp(a.split('').join('|'), 'g')
                 return string.toString().toLowerCase()
-                    .replace(/\s+/g, '-') // Replace spaces with -
-                    .replace(p, c => b.charAt(a.indexOf(c))) // Replace special characters
-                    .replace(/&/g, '-and-') // Replace & with ‘and’
+                        .replace(/\s+/g, '-') // Replace spaces with -
+                        .replace(p, c => b.charAt(a.indexOf(c))) // Replace special characters
+                .replace(/&/g, '-and-') // Replace & with ‘and’
                     .replace(/[^\w\-]+/g, '') // Remove all non-word characters
                     .replace(/\-\-+/g, '-') // Replace multiple - with single -
                     .replace(/^-+/, '') // Trim - from start of text

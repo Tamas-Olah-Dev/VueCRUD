@@ -162,6 +162,7 @@ class VueCRUDControllerBase
             'trixRemoveAttachment',
             'storePublicPicture',
             'removePublicPicture',
+            'trixGeneratePreview'
         ];
     }
 
@@ -225,4 +226,15 @@ class VueCRUDControllerBase
             : config('app.vueCrudDefaultView', 'vendor.vue-crud.model-manager');
     }
 
+    public function trixGeneratePreview()
+    {
+        return method_exists($this, 'renderPreview')
+            ? $this->renderPreview()
+            : $this->defaultPreview();
+    }
+
+    public function defaultPreview()
+    {
+        return response(request()->get('content'));
+    }
 }

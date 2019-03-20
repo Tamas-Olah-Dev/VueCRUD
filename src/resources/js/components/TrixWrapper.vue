@@ -15,17 +15,23 @@
                                 v-html="viewModeLabel"
                         ></button>
                     </span>
-                    <span class="trix-wrapper-button-group" style="width: 8em" v-show="viewMode == 'normal'">
+                    <span class="trix-wrapper-button-group" style="width: 8em" v-show="viewMode == 'normal' && allowTableOperations == 'true'">
                         <button class="trix-button"
                                 type="button"
                                 v-on:click="insertTable"
                         >Táblázat beszúrása</button>
                     </span>
-                    <span class="trix-wrapper-button-group" style="width: 10em" v-show="viewMode == 'normal'">
+                    <span class="trix-wrapper-button-group" style="width: 10em" v-show="viewMode == 'normal' && allowTableOperations == 'true'">
                         <button class="trix-button"
                                 type="button"
                                 v-on:click="editTable"
                         >Táblázat szerkesztése</button>
+                    </span>
+                    <span class="trix-wrapper-button-group" style="width: 10em" v-show="viewMode == 'normal' && allowPreview == 'true'">
+                        <button class="trix-button"
+                                type="button"
+                                v-on:click="openPreview"
+                        >Előnézet</button>
                     </span>
                 </div>
                 <div v-show="viewMode == 'normal'" style="height: 85%" v-bind:id="fieldname+'-richtext-trixeditor-container'">
@@ -45,9 +51,13 @@
                 </div>
             </template>
         </div>
-        <div class="trix-wrapper-modal-overlay" v-show="showPopup">
+        <div class="trix-wrapper-modal-overlay" v-if="showPopup && allowTableOperations == 'true'">
             <div class="trix-wrapper-modal">
-
+                <trix-table-editor v-on:input="saveAttachment($event);showPopup=false;"
+                                   v-on:cancel="showPopup=false"
+                                   v-bind:value="currentTable"
+                                   v-if="popupMode == 'table'"
+                ></trix-table-editor>
             </div>
         </div>
     </div>
@@ -63,7 +73,9 @@
             value: {type: String, default: ''},
             trixCSSUrl: {type: String, default: '/js/plugins/trix/trix.css'},
             trixJSUrl: {type: String, default: '/js/plugins/trix/trix.hu.js'},
-            ajaxOperationsUrl: {type: String, default: ''}
+            ajaxOperationsUrl: {type: String, default: ''},
+            allowPreview: {type: String, default: 'false'},
+            allowTableOperations: {type: String, default: 'true'}
         },
         data: function() {
             return {
@@ -74,6 +86,9 @@
                 updatingCodeValue: false,
                 trixReady: false,
                 showPopup: false,
+                popupMode: '',
+                currentTable: [['']],
+                currentSelection: [],
             }
         },
         computed: {
@@ -115,8 +130,24 @@
             });
             };
             window.setTimeout(() => {this.trixReady = true}, 1000);
+            if (this.value = '') {
+                this.valueInitialized = true;
+            }
         },
         methods: {
+            openPreview: function() {
+                window.axios.post(this.ajaxOperationsUrl, {
+                    action: 'trixGeneratePreview',
+                    fieldName: this.fieldname,
+                    content: this.$refs[this.fieldname+'-content'].value
+                }).then((response) => {
+                    let features = "menubar=no,location=no,resizable=yes,scrollbars=yes,status=yes";
+                let previewWindow = window.open('', '_blank', features);
+                let doc = previewWindow.document.open();
+                doc.write(response.data);
+                doc.close;
+            })
+            },
             updateValue: function() {
 
                 if (typeof(this.$refs[this.fieldname+'-content']) == 'undefined') {
@@ -157,8 +188,42 @@
                     "trixRemoveAttachment"
                 ).then((response) => {}, (error) => {});
             },
-            insertTable: function() {},
-            editTable: function() {},
+            insertTable: function() {
+                this.currentTable = [['']];
+                this.popupMode = 'table';
+                this.showPopup = true;
+            },
+            editTable: function() {
+                if (this.$refs[this.fieldname+'-editor'].editor.composition.editingAttachment != null) {
+                    this.currentTable = this.parseTableStringToTabledata(this.$refs[this.fieldname+'-editor'].editor.composition.editingAttachment.getAttribute('content'));
+                    this.popupMode = 'table';
+                    this.showPopup = true;
+                }
+            },
+            saveAttachment: function(attachment) {
+                let editor = this.$refs[this.fieldname+'-editor'].editor;
+                if (editor.composition.editingAttachment != null) {
+                    this.currentSelection = editor.getSelectedRange();
+                    editor.deleteInDirection("backward")
+                }
+                editor.insertAttachment(attachment);
+            },
+            parseTableStringToTabledata: function(tableString) {
+                let result = [];
+                let tempString = tableString.replace('<table>', '').replace('</table>', '');
+                let rows = tempString.split('</tr><tr>');
+                for (var rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+                    let newRow = [];
+                    let columns = rows[rowIndex].replace('<tr>', '').replace('</tr>', '').split('</td><td>');
+                    for (var columnIndex = 0; columnIndex < columns.length; columnIndex++) {
+                        newRow.push(columns[columnIndex].replace('<td>', '').replace('</td>', ''));
+                    }
+                    result.push(newRow);
+                }
+
+                return result;
+            }
+
         },
         watch: {
             value: function() {
