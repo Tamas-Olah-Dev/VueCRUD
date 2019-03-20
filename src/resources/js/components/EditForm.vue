@@ -5,6 +5,7 @@
         <form role="form" class="margin-b-20"  v-on:submit.prevent="submitForm">
             <div class="row" v-if="loaded" >
                 <div v-for="data, fieldname in subjectData"
+                     v-bind:style="{height: typeof(data.customOptions['cssHeight']) == 'undefined' ? 'auto' : data.customOptions['cssHeight']}"
                      v-bind:class="data.containerClass">
                     <label>
                         {{ data.label }}
@@ -42,9 +43,10 @@
                               v-model="subjectData[fieldname].value"
                               v-bind:class="data.class"
                     ></textarea>
-                    <div v-if="data.kind == 'text' && data.type == 'richtext-trix'" v-bind:class="data.class" style="min-height:100%">
+                    <div v-if="data.kind == 'text' && data.type == 'richtext-trix'" v-bind:class="data.class" style="min-height:95%; height:95%; margin-bottom: 2em">
                         <trix-wrapper v-model="subjectData[fieldname].value"
                                       v-bind:fieldname="fieldname"
+                                      v-bind="JSON.parse(data.props)"
                                       v-bind:ajax-operations-url="ajaxOperationsUrl"
                         ></trix-wrapper>
                     </div>
@@ -242,9 +244,9 @@
                 const b = 'aaaaaaaaceeeeghiiiimnnnoooooprssstuuuuuwxyz------'
                 const p = new RegExp(a.split('').join('|'), 'g')
                 return string.toString().toLowerCase()
-                        .replace(/\s+/g, '-') // Replace spaces with -
-                        .replace(p, c => b.charAt(a.indexOf(c))) // Replace special characters
-                .replace(/&/g, '-and-') // Replace & with ‘and’
+                    .replace(/\s+/g, '-') // Replace spaces with -
+                    .replace(p, c => b.charAt(a.indexOf(c))) // Replace special characters
+                    .replace(/&/g, '-and-') // Replace & with ‘and’
                     .replace(/[^\w\-]+/g, '') // Remove all non-word characters
                     .replace(/\-\-+/g, '-') // Replace multiple - with single -
                     .replace(/^-+/, '') // Trim - from start of text
