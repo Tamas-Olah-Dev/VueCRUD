@@ -1,12 +1,12 @@
 <template>
     <div class="trix-table-editor-container">
         <div class="trix-table-editor-buttons-row">
-            <button v-on:click="addRow">Új sor</button>
-            <button v-on:click="deleteRow">Sor törlése</button>
-            <button v-on:click="addColumn">Új oszlop</button>
-            <button v-on:click="deleteColumn">Oszlop törlése</button>
-            <button v-on:click="saveTable" style="margin-left:auto">Mentés és bezárás</button>
-            <button v-on:click="$emit('cancel')">Mégsem</button>
+            <button type="button" v-on:click="addRow">Új sor</button>
+            <button type="button" v-on:click="deleteRow">Sor törlése</button>
+            <button type="button" v-on:click="addColumn">Új oszlop</button>
+            <button type="button" v-on:click="deleteColumn">Oszlop törlése</button>
+            <button type="button" v-on:click="saveTable" style="margin-left:auto">Mentés és bezárás</button>
+            <button type="button" v-on:click="$emit('cancel')">Mégsem</button>
         </div>
         <table style="width: 100%; border: 1px solid darkgrey;" class="trix-table-editor-table">
             <tr v-for="row, rowIndex in table">
