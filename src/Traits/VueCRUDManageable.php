@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: caleb
- * Date: 2/21/19
- * Time: 11:49 AM
- */
 
 namespace Datalytix\VueCRUD\Traits;
 

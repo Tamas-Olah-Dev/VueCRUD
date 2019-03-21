@@ -162,7 +162,9 @@ class VueCRUDControllerBase
             'trixRemoveAttachment',
             'storePublicPicture',
             'removePublicPicture',
-            'trixGeneratePreview'
+            'trixGeneratePreview',
+            'move',
+            'moveTo',
         ];
     }
 
@@ -237,4 +239,21 @@ class VueCRUDControllerBase
     {
         return response(request()->get('content'));
     }
+
+
+    public function move()
+    {
+        $current = $this->getSubject(request()->get('id'));
+        $newPosition = intval($current->position) + intval(request('direction'));
+        $transactionResult = \DB::transaction(function () use ($current, $newPosition) {
+            $other = $this->getElementByPosition($newPosition, $current);
+            if ($other !== null) {
+                $other->update(['position' => $current->position]);
+                $current->update(['position' => $newPosition]);
+            }
+        });
+
+        return $this->returnSuccessfulMoveResponse();
+    }
+
 }
