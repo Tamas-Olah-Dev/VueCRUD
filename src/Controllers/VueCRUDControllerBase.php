@@ -18,6 +18,11 @@ class VueCRUDControllerBase
     {
         $class = static::SUBJECT_CLASS;
 
+        $positionedView = $class::hasPositioningEnabled()
+            && $this->filtersRequirePositionedView();
+        if ($positionedView) {
+            request()->merge(['sorting_field' => $class::getPositionField()]);
+        }
         $elementData = static::getElements();
         $filters = method_exists($class, 'getVueCRUDIndexFilters')
             ? (object) $class::getVueCRUDIndexFilters()
@@ -25,13 +30,14 @@ class VueCRUDControllerBase
         $viewData = [
             'elements'         => $elementData->elements,
             'counts'           => $elementData->counts,
-            'columns'          => $class::getVueCRUDIndexColumns(),
-            'sortingColumns'   => $class::getVueCRUDSortingIndexColumns(),
+            'columns'          => $this->getIndexColumns($positionedView),
+            'sortingColumns'   => $this->getSortingColumns($positionedView),
             'sortingField'     => $elementData->sortingField,
             'sortingDirection' => $elementData->sortingDirection,
             'filters'          => $filters,
-            'buttons'          => $class::getVueCRUDModellistButtons(),
+            'buttons'          => $this->getModellistButtons($positionedView),
             'allowOperations'  => $class::shouldVueCRUDOperationsBeDisplayed(),
+            'positionedView' => $positionedView,
         ];
         if (request()->isXmlHttpRequest()) {
             return response()->json($viewData);
@@ -39,6 +45,46 @@ class VueCRUDControllerBase
         $viewData = array_merge($viewData, $this->getCRUDUrls());
 
         return view($this->getModelManagerViewName(), $viewData);
+    }
+
+    protected function getModellistButtons($positionedView)
+    {
+        $class = static::SUBJECT_CLASS;
+        if ($positionedView) {
+            $base = $class::getVueCRUDModellistButtons();
+            $base['moveUp'] = [
+                'class'       => $class::getMiscButtonClass(),
+                'html'        => '↑',
+            ];
+            $base['moveDown'] = [
+                'class'       => $class::getMiscButtonClass(),
+                'html'        => '↓',
+            ];
+            return $base;
+        } else {
+            return $class::getVueCRUDModellistButtons();
+        }
+
+    }
+
+    protected function getIndexColumns($positionedView)
+    {
+        $class = static::SUBJECT_CLASS;
+        if ($positionedView) {
+            return array_merge([$class::getPositionField() => __('Position')], $class::getVueCRUDIndexColumns());
+        } else {
+            return $class::getVueCRUDIndexColumns();
+        }
+    }
+
+    protected function getSortingColumns($positionedView)
+    {
+        $class = static::SUBJECT_CLASS;
+        if ($positionedView) {
+            return [];
+        } else {
+            return $class::getVueCRUDSortingIndexColumns();
+        }
     }
 
     public function details($subject)
@@ -243,17 +289,40 @@ class VueCRUDControllerBase
 
     public function move()
     {
+        $result = false;
         $current = $this->getSubject(request()->get('id'));
-        $newPosition = intval($current->position) + intval(request('direction'));
-        $transactionResult = \DB::transaction(function () use ($current, $newPosition) {
-            $other = $this->getElementByPosition($newPosition, $current);
-            if ($other !== null) {
-                $other->update(['position' => $current->position]);
-                $current->update(['position' => $newPosition]);
+        if (request()->has('direction')) {
+            if (request()->get('direction') == 1) {
+                $result = $current->moveDown();
+            } else {
+                $result = $current->moveUp();
             }
-        });
+        } else {
+            if (request()->has('position')) {
+                $result = $current->moveToPosition(request()->get('position'));
+            }
+        }
 
-        return $this->returnSuccessfulMoveResponse();
+        return $result ? response('OK') : response('Hiba történt', 422);
+    }
+
+    protected function filtersRequirePositionedView()
+    {
+        $class = static::SUBJECT_CLASS;
+        if (!$class::hasPositioningEnabled()) {
+            return false;
+        }
+        $filters = $class::getVueCRUDIndexFilters();
+        foreach ($class::getRestrictingFields() as $restrictingField) {
+            if (!isset($filters[$restrictingField])) {
+                return false;
+            }
+            if ($filters[$restrictingField]->value == null) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }

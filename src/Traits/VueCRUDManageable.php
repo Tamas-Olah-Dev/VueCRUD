@@ -77,6 +77,11 @@ trait VueCRUDManageable
         return 'vuecrud_'.$subjectSlug.'_'.$operation;
     }
 
+    public static function hasPositioningEnabled()
+    {
+        return method_exists(static::class, 'getRestrictingFields');
+    }
+
     /** The following methods provide sensible defaults,
      * but they are to be overridden as needed.
      * */
@@ -112,6 +117,13 @@ trait VueCRUDManageable
                 'html'        => __('Delete'),
             ],
         ];
+    }
+
+    // this function is used when special buttons (like for positioning) are added to the list
+    // by default this provides a nice Bootstrap 4 class but can be overridden
+    public static function getMiscButtonClass()
+    {
+        return 'btn btn-outline-info';
     }
 
     // an array of column head labels, keyed by the related field name on the model

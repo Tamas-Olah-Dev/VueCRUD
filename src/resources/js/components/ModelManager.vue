@@ -69,7 +69,7 @@
                         </div>
                         <div class="portlet-body">
                             <div v-show="mode == 'elements-loading'" v-html="spinnerSrc" style="width:100%; display:flex; justify-content: center"></div>
-                            <table v-show="mode != 'elements-loading'" class="table table-striped">
+                            <table v-show="mode != 'elements-loading'" class="table table-striped" v-bind:class="elementTableClass">
                                 <thead>
                                 <tr>
                                     <th v-for="columnName, columnField in columns"
@@ -86,25 +86,35 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                <tr v-for="element in elements">
+                                <tr v-for="element, elementIndex in elements">
                                     <td v-for="columnName, columnField in columns" v-html="element[columnField]"></td>
                                     <td v-if="allowOperations == 'true'">
-                                        <button v-if="showButton('details')"
+                                        <button type="button" v-if="showButton('details')"
                                                 v-bind:class="buttons['details']['class']"
                                                 v-on:click="showDetails(element[idProperty])"
                                                 v-html="buttons['details']['html']"
                                         ></button>
-                                        <button v-if="showButton('edit')"
+                                        <button type="button" v-if="showButton('edit')"
                                                 v-bind:class="buttons['edit']['class']"
                                                 v-on:click="editElement(element[idProperty])"
                                                 v-html="buttons['edit']['html']"
                                         ></button>
-                                        <button v-if="showButton('delete')"
+                                        <button type="button" v-if="showButton('delete')"
                                                 v-bind:class="buttons['delete']['class']"
                                                 v-on:click="confirmElementDeletion(element[idProperty], element[nameProperty])"
                                                 v-html="buttons['delete']['html']"
                                         ></button>
-                                        <button v-for="customComponentButton, customComponentButtonKey in customComponentButtons"
+                                        <button type="button" v-if="showButton('moveUp') && elementIndex > 0"
+                                                v-bind:class="buttons['moveUp']['class']"
+                                                v-on:click="moveElementUp(element[idProperty])"
+                                                v-html="buttons['moveUp']['html']"
+                                        ></button>
+                                        <button type="button" v-if="showButton('moveDown') && elementIndex < elements.length - 1"
+                                                v-bind:class="buttons['moveDown']['class']"
+                                                v-on:click="moveElementDown(element[idProperty])"
+                                                v-html="buttons['moveDown']['html']"
+                                        ></button>
+                                        <button type="button" v-for="customComponentButton, customComponentButtonKey in customComponentButtons"
                                                 v-bind:class="customComponentButton['class']"
                                                 v-on:click="activateCustomComponent(customComponentButtonKey)"
                                                 v-html="customComponentButton['html']">
@@ -119,7 +129,7 @@
                 <div  v-if="mode == 'details'">
                     <div class="row">
                         <div class="col">
-                            <button class="btn btn-info float-right" v-on:click="fetchElements">{{ translate('Back to the list') }}</button>
+                            <button type="button" class="btn btn-info float-right" v-on:click="fetchElements">{{ translate('Back to the list') }}</button>
                         </div>
                     </div>
                     <div class="row">
@@ -210,22 +220,23 @@
             nameProperty: {type: String, default: 'name'},
             idProperty: {type: String, default: 'id'},
             itemsPerPage: {type: Number, default: 20},
-            buttons: {type:Object, default: function() {
-                return {
-                    details: {
-                        class: 'btn btn-primary btn-block',
-                        html: 'Részletek',
-                    },
-                    edit: {
-                        class: 'btn btn-info btn-block',
-                        html: 'Szerkesztés',
-                    },
-                    delete: {
-                        class: 'btn btn-danger btn-block',
-                        html: 'Törlés',
-                    },
-                }
-            }},
+//            buttons: {type:Object, default: function() {
+//                return {
+//                    details: {
+//                        class: 'btn btn-primary btn-block',
+//                        html: 'Részletek',
+//                    },
+//                    edit: {
+//                        class: 'btn btn-info btn-block',
+//                        html: 'Szerkesztés',
+//                    },
+//                    delete: {
+//                        class: 'btn btn-danger btn-block',
+//                        html: 'Törlés',
+//                    },
+//                }
+//            }},
+
             iconClasses: {type: Object, default: function() {
                 return {
                     "filter": "ti-filter",
@@ -257,7 +268,10 @@
                 currentPage: 1,
                 counts: {},
                 disablePageWatch: false,
-                activeCustomComponent: {}
+                activeCustomComponent: {},
+                positionedView: false,
+                buttons: {},
+                elementTableClass: ''
             }
         },
         mounted() {
@@ -381,14 +395,19 @@
 
                 return null;
             },
-            fetchElements: function(onlyElements) {
+            fetchElements: function(onlyElements, suppressLoading) {
                 if (typeof(onlyElements) == 'undefined') {
                     onlyElements = false;
                 }
-                if (!onlyElements) {
-                    this.mode = 'loading';
-                } else {
-                    this.mode = 'elements-loading';
+                if (typeof(suppressLoading) == 'undefined') {
+                    suppressLoading = false;
+                }
+                if (!suppressLoading) {
+                    if (!onlyElements) {
+                        this.mode = 'loading';
+                    } else {
+                        this.mode = 'elements-loading';
+                    }
                 }
                 window.axios.get(this.indexUrl, {params: this.getFilterData()})
                     .then((response) => {
@@ -397,6 +416,10 @@
                         this.sortingColumns = response.data.sortingColumns;
                         this.currentSortingColumn = this.findSortingColumnKey(response.data.sortingField);
                         this.currentSortingDirection = response.data.sortingDirection;
+                        this.buttons = response.data.buttons;
+                        if (this.positionedView != response.data.positionedView) {
+                            this.columns = response.data.columns;
+                        }
                         if (!onlyElements) {
                             this.columns = response.data.columns;
                             if (JSON.stringify(this.filters) == '{}') {
@@ -404,6 +427,7 @@
                             }
                         }
                         this.mode = 'list';
+                        this.positionedView = response.data.positionedView;
                     });
             },
             showDetails: function(elementId) {
@@ -459,7 +483,23 @@
                     }
                 }
                 this.fetchElements(true)
-            }
+            },
+            moveElementUp: function(id) {
+                this.elementTableClass = 'element-table-muted';
+                window.axios.post(this.ajaxOperationsUrl, {id: id, action: 'move', direction: -1})
+                    .then((response) => {
+                        this.fetchElements(true, true);
+                        this.elementTableClass = '';
+                    }).catch((error) => {this.elementTableClass = '';});
+            },
+            moveElementDown: function(id) {
+                this.elementTableClass = 'element-table-muted';
+                window.axios.post(this.ajaxOperationsUrl, {id: id, action: 'move', direction: 1})
+                    .then((response) => {
+                        this.fetchElements(true, true);
+                        this.elementTableClass = '';
+                    }).catch((error) => {this.elementTableClass = '';});
+            },
         },
         watch: {
             currentPage: function() {
@@ -477,5 +517,8 @@
     .sorting-column {
         white-space: nowrap;
         cursor:pointer
+    }
+    .element-table-muted {
+        opacity: .7;
     }
 </style>
