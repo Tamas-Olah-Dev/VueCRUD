@@ -81,4 +81,26 @@ class VueCRUDRequestBase extends FormRequest
 
         return $result;
     }
+
+    protected function addPositionToDatasetIfNecessary($subject, $subjectClass, $dataset)
+    {
+        if ($subject != null) {
+            return $dataset;
+        }
+        if (!$subjectClass::hasPositioningEnabled()) {
+            return $dataset;
+        }
+        $positioningRestrictions = [];
+        foreach ($subjectClass::getRestrictingFields() as $field) {
+            $positioningRestrictions[$field] = null;
+        }
+        foreach ($dataset as $key => $value) {
+            if (array_key_exists($key, $positioningRestrictions)) {
+                $positioningRestrictions[$key] = $value;
+            }
+        }
+        $dataset[$subjectClass::getPositionField()] = $subjectClass::getFirstAvailablePosition($positioningRestrictions);
+
+        return $dataset;
+    }
 }

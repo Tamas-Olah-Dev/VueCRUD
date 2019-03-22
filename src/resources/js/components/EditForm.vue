@@ -252,8 +252,8 @@
             },
             slugify: function(string) {
                 //credit to https://medium.com/@mhagemann/the-ultimate-way-to-slugify-a-url-string-in-javascript-b8e4a0d849e1
-                const a = 'àáäâãåăæçèéëêǵḧìíïîḿńǹñòóöôœṕŕßśșțùúüûǘẃẍÿź·/_,:;'
-                const b = 'aaaaaaaaceeeeghiiiimnnnoooooprssstuuuuuwxyz------'
+                const a = 'àáäâãåăæçèéëêǵḧìíïîḿńǹñòóöôőœṕŕßśșțùúüûǘűẃẍÿź·/_,:;'
+                const b = 'aaaaaaaaceeeeghiiiimnnnooooooprssstuuuuuuwxyz------'
                 const p = new RegExp(a.split('').join('|'), 'g')
                 return string.toString().toLowerCase()
                     .replace(/\s+/g, '-') // Replace spaces with -

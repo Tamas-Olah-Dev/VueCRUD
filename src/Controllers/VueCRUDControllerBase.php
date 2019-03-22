@@ -21,7 +21,10 @@ class VueCRUDControllerBase
         $positionedView = $class::hasPositioningEnabled()
             && $this->filtersRequirePositionedView();
         if ($positionedView) {
-            request()->merge(['sorting_field' => $class::getPositionField()]);
+            request()->merge([
+                'sorting_field' => $class::getPositionField(),
+                'sorting_direction' => 'asc'
+            ]);
         }
         $elementData = static::getElements();
         $filters = method_exists($class, 'getVueCRUDIndexFilters')
@@ -306,12 +309,13 @@ class VueCRUDControllerBase
         if (!$class::hasPositioningEnabled()) {
             return false;
         }
+        $validNullResponses = [null, 0, -1, ''];
         $filters = $class::getVueCRUDIndexFilters();
         foreach ($class::getRestrictingFields() as $restrictingField) {
             if (!isset($filters[$restrictingField])) {
                 return false;
             }
-            if ($filters[$restrictingField]->value == null) {
+            if (array_search(request()->get($restrictingField), $validNullResponses) !== false) {
                 return false;
             }
         }
