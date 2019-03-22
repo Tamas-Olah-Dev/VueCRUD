@@ -104,10 +104,20 @@ trait VueCRUDManageable
          *   ]
          */
         return [
-            'details' => config('vuecrud.buttons.details'),
-            'edit'   => config('vuecrud.buttons.edit'),
-            'delete' => config('vuecrud.buttons.delete'),
+            'details' => self::buildButtonFromConfigData('vuecrud.buttons.details'),
+            'edit'   => self::buildButtonFromConfigData('vuecrud.buttons.edit'),
+            'delete' => self::buildButtonFromConfigData('vuecrud.buttons.delete'),
         ];
+    }
+
+    public static function buildButtonFromConfigData($configPath)
+    {
+        $data = config($configPath);
+        if (isset($data['translationLabel'])) {
+            $data['html'] = str_replace('__label__', __($data['translationLabel']), $data['html']);
+        }
+
+        return $data;
     }
 
     // an array of column head labels, keyed by the related field name on the model

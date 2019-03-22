@@ -52,8 +52,8 @@ class VueCRUDControllerBase
         $class = static::SUBJECT_CLASS;
         if ($positionedView) {
             $base = $class::getVueCRUDModellistButtons();
-            $base['moveUp'] = config('vuecrud.buttons.moveUp');
-            $base['moveDown'] = config('vuecrud.buttons.moveDown');
+            $base['moveUp'] = $class::buildButtonFromConfigData('vuecrud.buttons.moveUp');
+            $base['moveDown'] = $class::buildButtonFromConfigData('vuecrud.buttons.moveDown');
             return $base;
         } else {
             return $class::getVueCRUDModellistButtons();
