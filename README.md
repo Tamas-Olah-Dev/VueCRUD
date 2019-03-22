@@ -19,6 +19,7 @@ If you don't have the Vue component auto-discovery enabled in app.js, add the mo
 - set up the abstract methods required by the trait
 - set up form fields in formdatabuilder (_modelname_VueCRUDFormdatabuilder)
 - add Model::setVueCRUDRoutes() to routes
+- edit vuecrud.php in app/config for customization
 
 For translations to work, there are three things needed:
 1) Translations should be in the JSON format in Laravel

@@ -20,7 +20,7 @@ class DummyClassVueCRUDController extends VueCRUDControllerBase implements ICRUD
     // just like in vendor.vue-crud.model-manager, but this way a package
     // update & publish won't overwrite customizations
     //
-    // an app-wide default can also be set in config.app.vueCrudDefaultView
+    // an app-wide default can also be set in config.vuecrud.vueCrudDefaultView
     //const CUSTOM_VIEW_PATH = 'blade.view.path'
 
     public function store(SaveDummyClassVueCRUDRequest $request)

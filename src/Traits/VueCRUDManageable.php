@@ -104,26 +104,10 @@ trait VueCRUDManageable
          *   ]
          */
         return [
-            'details' => [
-                'class'       => 'btn btn-outline-primary',
-                'html'        => __('Details'),
-            ],
-            'edit'   => [
-                'class'       => 'btn btn-outline-secondary',
-                'html'        => __('Edit'),
-            ],
-            'delete' => [
-                'class'       => 'btn btn-outline-danger',
-                'html'        => __('Delete'),
-            ],
+            'details' => config('vuecrud.buttons.details'),
+            'edit'   => config('vuecrud.buttons.edit'),
+            'delete' => config('vuecrud.buttons.delete'),
         ];
-    }
-
-    // this function is used when special buttons (like for positioning) are added to the list
-    // by default this provides a nice Bootstrap 4 class but can be overridden
-    public static function getMiscButtonClass()
-    {
-        return 'btn btn-outline-info';
     }
 
     // an array of column head labels, keyed by the related field name on the model

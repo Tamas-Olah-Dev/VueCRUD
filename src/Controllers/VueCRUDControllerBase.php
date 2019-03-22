@@ -52,14 +52,8 @@ class VueCRUDControllerBase
         $class = static::SUBJECT_CLASS;
         if ($positionedView) {
             $base = $class::getVueCRUDModellistButtons();
-            $base['moveUp'] = [
-                'class'       => $class::getMiscButtonClass(),
-                'html'        => '↑',
-            ];
-            $base['moveDown'] = [
-                'class'       => $class::getMiscButtonClass(),
-                'html'        => '↓',
-            ];
+            $base['moveUp'] = config('vuecrud.buttons.moveUp');
+            $base['moveDown'] = config('vuecrud.buttons.moveDown');
             return $base;
         } else {
             return $class::getVueCRUDModellistButtons();
@@ -271,7 +265,7 @@ class VueCRUDControllerBase
     {
         return defined('static::CUSTOM_VIEW_PATH')
             ? static::CUSTOM_VIEW_PATH
-            : config('app.vueCrudDefaultView', 'vendor.vue-crud.model-manager');
+            : config('vuecrud.vueCrudDefaultView', 'vendor.vue-crud.model-manager');
     }
 
     public function trixGeneratePreview()
