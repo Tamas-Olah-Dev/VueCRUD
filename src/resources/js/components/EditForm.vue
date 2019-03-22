@@ -94,6 +94,18 @@
                             </label>
                         </p>
                     </span>
+                    <select v-if="data.kind == 'multiselect'"
+                            style="height: 200px; min-height: 200px"
+                            class="form-control"
+                            v-bind:class="data.class"
+                            multiple="multiple"
+                            v-model="subjectData[fieldname].value"
+                    >
+                        <option v-for="valuesetvalue, valuesetitem in data.valuesetSorted"
+                                v-bind:value="valuesetvalue" v-html="valuesetitem"
+                        ></option>
+                    </select>
+
                 </div>
             </div>
         </form>
