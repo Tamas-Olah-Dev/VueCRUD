@@ -26,11 +26,14 @@ class VueCRUDServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/resources/views/', 'vue-crud');
 
         $this->publishes([
-            __DIR__.'/Config' => base_path('config'),
             __DIR__.'/resources/views' => resource_path('views/vendor/vue-crud'),
+        ], 'vuecrud-views');
+        $this->publishes([
             __DIR__.'/resources/js' => resource_path('js'),
-
-        ]);
+        ], 'vuecrud-scripts');
+        $this->publishes([
+            __DIR__.'/Config' => base_path('config'),
+        ], 'vuecrud-config');
 
         $this->commands([
             \Datalytix\VueCRUD\Commands\VueCRUDGenerate::class,
