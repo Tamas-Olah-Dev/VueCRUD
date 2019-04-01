@@ -110,9 +110,36 @@ trait VueCRUDManageable
         ];
     }
 
-    public static function buildButtonFromConfigData($configPath)
+    public static function getModelManagerMainButtons()
     {
-        $data = config($configPath);
+        return [
+            'add' => self::buildButtonFromConfigData('vuecrud.buttons.add', [
+                'class' => 'btn btn-outline-primary', 'html' => __('New'),
+            ]),
+            'save' => self::buildButtonFromConfigData('vuecrud.buttons.save', [
+                'class' => 'btn btn-outline-primary btn-block', 'html' => __('Save'),
+            ]),
+            'backToList' => self::buildButtonFromConfigData('vuecrud.buttons.backToList', [
+                'class' => 'btn btn-outline-secondary', 'html' => __('Back to the list'),
+            ]),
+            'cancel' => self::buildButtonFromConfigData('vuecrud.buttons.cancel', [
+                'class' => 'btn btn-outline-secondary btn-block', 'html' => __('Cancel'),
+            ]),
+            'resetFilters' => self::buildButtonFromConfigData('vuecrud.buttons.resetFilters', [
+                'class' => 'btn btn-outline-secondary', 'html' => __('Reset'),
+            ]),
+            'prevPage' => self::buildButtonFromConfigData('vuecrud.buttons.prevPage', [
+                'class' => 'btn btn-outline-secondary', 'html' => '←',
+            ]),
+            'nextPage' => self::buildButtonFromConfigData('vuecrud.buttons.nextPage', [
+                'class' => 'btn btn-outline-secondary', 'html' => '→',
+            ]),
+        ];
+    }
+
+    public static function buildButtonFromConfigData($configPath, $default = [])
+    {
+        $data = config($configPath, $default);
         if (isset($data['translationLabel'])) {
             $data['html'] = str_replace('__label__', __($data['translationLabel']), $data['html']);
         }

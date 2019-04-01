@@ -120,17 +120,17 @@
         <div class="row">
             <div class="col">
                 <button type="button"
-                        class="btn btn-lg btn-primary btn-block"
+                        v-bind:class="buttons['save']['class']"
                         v-on:click="submitForm"
                 >
-                    <span v-if="loading" class="button-loading-indicator"><img src="/img/button-loader.gif"></span>
-                    <span>{{ translate("Mentés") }}</span></button>
+                    <span v-if="loading" class="button-loading-indicator" v-html="spinnerSrc"></span>
+                    <span>{{ buttons['save']['html'] }}</span></button>
             </div>
             <div class="col">
                 <button type="button"
-                        class="btn btn-lg btn-default btn-block"
+                        v-bind:class="buttons['cancel']['class']"
                         v-on:click="cancelEditing"
-                >{{ translate("Mégsem") }}</button>
+                >{{ buttons['cancel']['html'] }}</button>
             </div>
         </div>
     </div>
@@ -148,7 +148,13 @@
             successCallback: {type: String},
             formTitle: {type: String},
             redirectToResponseOnSuccess: {type: String},
-            redirectToOnCancel: {type: String}
+            redirectToOnCancel: {type: String},
+            buttons: {type: Object, default: () => {
+                return {
+                    'save': {'class': 'btn-outline-primary', 'html': translate('Save')},
+                    'cancel': {'class': 'btn-outline-secondary', 'html': translate('Cancel')},
+                }
+            }}
 
         },
         data: function() {

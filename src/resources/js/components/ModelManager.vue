@@ -4,10 +4,14 @@
             <div class="col-12">
                 <div v-if="mode == 'loading'" v-html="spinnerSrc" style="width:100%; display:flex; justify-content: center"></div>
                 <div v-if="mode == 'list' || mode == 'elements-loading'" class="row">
-                    <div class="col-12"
-                         style="margin-bottom: 5px"
+                    <div class="col-12 d-flex justify-content-between"
+                         style="margin-bottom: 25px; padding: 0px"
                     >
-                        <button class="btn btn-outline-primary float-right" v-on:click="createElement">{{ translate('New') }}...</button>
+                        <div style="font-size: 1.8em; font-weight: bold" v-if="title != ''" v-html="title"></div>
+                        <button v-bind:class="mainButtons['add']['class']"
+                                v-on:click="createElement"
+                                v-html="mainButtons['add']['html']"
+                        ></button>
                     </div>
                     <div v-if="JSON.stringify(filters) != '{}'" class="portlet full-width-div model-manager-filter-container">
                         <div class="portlet-heading  bg-inverse d-flex justify-content-between">
@@ -15,12 +19,12 @@
                                 <span v-bind:class="iconClasses.filter"></span>
                                 {{ translate('Filters') }}
                             </div>
-                            <button class="btn btn-outline-light"
+                            <button v-bind:class="mainButtons['resetFilters']['class']"
                                     v-on:click="resetFilters"
-                                    v-html="translate('Reset')"
+                                    v-html="mainButtons['resetFilters']['html']"
                             ></button>
                         </div>
-                        <div class="d-flex portlet-body">
+                        <div class="d-flex portlet-body model-manager-filters-list">
                             <div v-for="filterData, filterName in filters" class="form-group m-1 model-manager-filter-block">
                                 <label v-html="filterData['label']"></label>
                                 <datepicker v-if="filterData['type'] == 'datepicker'"
@@ -53,18 +57,20 @@
                                  v-if="typeof(counts['total']) != 'undefined'"
                             >
                                 <span>{{ counts['filtered'] }}&nbsp;/&nbsp;{{ counts['total'] }}&nbsp;&nbsp;</span>
-                                <button class="btn btn-outline-secondary"
+                                <button v-bind:class="mainButtons['prevPage']['class']"
                                         v-on:click="previousPage"
-                                ><span v-bind:class="iconClasses.leftArrow"></span></button>
+                                        v-html="mainButtons['prevPage']['html']"
+                                ></button>
                                 <select class="form-control" v-model="currentPage">
                                     <option v-for="p in pageOptions"
                                             v-bind:value="p"
                                             v-html="p"
                                     ></option>
                                 </select>
-                                <button class="btn btn-outline-secondary"
+                                <button v-bind:class="mainButtons['nextPage']['class']"
                                         v-on:click="nextPage"
-                                ><span v-bind:class="iconClasses.rightArrow"></span></button>
+                                        v-html="mainButtons['nextPage']['html']"
+                                ></button>
                             </div>
                         </div>
                         <div class="portlet-body">
@@ -129,7 +135,11 @@
                 <div  v-if="mode == 'details'">
                     <div class="row">
                         <div class="col">
-                            <button type="button" class="btn btn-info float-right" v-on:click="fetchElements">{{ translate('Back to the list') }}</button>
+                            <button type="button" class="float-right"
+                                    v-bind:class="mainButtons['backToList']['class']"
+                                    v-on:click="fetchElements"
+                                    v-html="mainButtons['backToList']['html']"
+                            ></button>
                         </div>
                     </div>
                     <div class="row">
@@ -156,7 +166,7 @@
                         >
                             {{ translate('Edit element') }}
                             <button v-on:click="fetchElements"
-                                    class="btn btn-outline-secondary"
+                                    v-bind:class="mainButtons['backToList']['class']"
                             >X</button>
                         </div>
                         <div class="portlet-body">
@@ -167,6 +177,7 @@
                                     v-on:submit-success="fetchElements"
                                     v-on:editing-canceled="fetchElements"
                                     redirect-to-response-on-success="false"
+                                    v-bind:buttons="mainButtons"
                             ></edit-form>
                         </div>
                     </div>
@@ -179,6 +190,7 @@
                             v-on:submit-success="fetchElements"
                             v-on:editing-canceled="fetchElements"
                             redirect-to-response-on-success="false"
+                            v-bind:buttons="mainButtons"
                     ></edit-form>
                 </div>
                 <div v-if="mode == 'delete-confirmation'">
@@ -271,7 +283,9 @@
                 activeCustomComponent: {},
                 positionedView: false,
                 buttons: {},
-                elementTableClass: ''
+                elementTableClass: '',
+                title: '',
+                mainButtons: {},
             }
         },
         mounted() {
@@ -411,8 +425,10 @@
                 }
                 window.axios.get(this.indexUrl, {params: this.getFilterData()})
                     .then((response) => {
+                        this.title = response.data.title;
                         this.elements = response.data.elements;
                         this.counts = response.data.counts;
+                        document.getElementsByTagName('title')[0].innerHTML = response.data.pageTitle;
                         this.sortingColumns = response.data.sortingColumns;
                         this.currentSortingColumn = this.findSortingColumnKey(response.data.sortingField);
                         this.currentSortingDirection = response.data.sortingDirection;
@@ -421,6 +437,7 @@
                             this.columns = response.data.columns;
                         }
                         if (!onlyElements) {
+                            this.mainButtons = response.data.mainButtons;
                             this.columns = response.data.columns;
                             if (JSON.stringify(this.filters) == '{}') {
                                 this.loadFilters(response.data.filters);

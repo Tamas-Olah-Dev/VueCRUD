@@ -31,6 +31,9 @@ class VueCRUDControllerBase
             ? (object) $class::getVueCRUDIndexFilters()
             : (object) [];
         $viewData = [
+            'title' => $this->getSubjectNamePlural(),
+            'pageTitleContent' => $this->getSubjectNamePlural(),
+            'pageTitle' => config('app.name').' - '.$this->getSubjectNamePlural(),
             'elements'         => $elementData->elements,
             'counts'           => $elementData->counts,
             'columns'          => $this->getIndexColumns($positionedView),
@@ -39,6 +42,7 @@ class VueCRUDControllerBase
             'sortingDirection' => $elementData->sortingDirection,
             'filters'          => $filters,
             'buttons'          => $this->getModellistButtons($positionedView),
+            'mainButtons' => $class::getModelManagerMainButtons(),
             'allowOperations'  => $class::shouldVueCRUDOperationsBeDisplayed(),
             'positionedView' => $positionedView,
         ];
@@ -115,7 +119,7 @@ class VueCRUDControllerBase
             'editDataUrl' => route($this->getRouteName('edit'), ['subject' => $subject->id]),
             'storeUrl'    => route($this->getRouteName('update'), ['subject' => $subject->id]),
             'indexUrl'    => route($this->getRouteName('index')),
-            'formTitle'   => __(ucfirst(static::SUBJECT_NAME).' szerkesztése'),
+            'formTitle'   => __('Edit').' '.ucfirst($this->getSubjectName()),
         ]);
     }
 
@@ -132,7 +136,7 @@ class VueCRUDControllerBase
             'editDataUrl' => route($this->getRouteName('create')),
             'storeUrl'    => route($this->getRouteName('store')),
             'indexUrl'    => route($this->getRouteName('index')),
-            'formTitle'   => __('Új '.static::SUBJECT_NAME),
+            'formTitle'   => __('New').$this->getSubjectName(),
         ]);
     }
 
@@ -184,12 +188,12 @@ class VueCRUDControllerBase
 
     public function setSuccessfulAddPopupMessageInSession()
     {
-        $this->setPopupMessageInSession(__(ucfirst(static::SUBJECT_NAME).' '.__('added successfully')));
+        $this->setPopupMessageInSession(__(ucfirst($this->getSubjectName()).' '.__('added successfully')));
     }
 
     public function setSuccessfulModificationPopupMessageInSession()
     {
-        $this->setPopupMessageInSession(__(ucfirst(static::SUBJECT_NAME).' '.__('modified successfully')));
+        $this->setPopupMessageInSession(__(ucfirst($this->getSubjectName()).' '.__('modified successfully')));
     }
 
     public function setPopupMessageInSession($message, $class = 'success')
@@ -323,4 +327,21 @@ class VueCRUDControllerBase
         return true;
     }
 
+    protected function getSubjectName()
+    {
+        $class = static::SUBJECT_CLASS;
+        if (defined($class.'::SUBJECT_NAME')) {
+            return $class::SUBJECT_NAME;
+        }
+        return static::SUBJECT_NAME;
+    }
+
+    protected function getSubjectNamePlural()
+    {
+        $class = static::SUBJECT_CLASS;
+        if (defined($class.'::SUBJECT_NAME_PLURAL')) {
+            return $class::SUBJECT_NAME_PLURAL;
+        }
+        return static::SUBJECT_NAME;
+    }
 }
