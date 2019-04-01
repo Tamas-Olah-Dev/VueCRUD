@@ -48,7 +48,7 @@ class SelectVueCRUDIndexfilter extends VueCRUDIndexfilterBase implements IVueCRU
     {
         $this->valueset = [];
         if (($undefinedIndex !== null) && ($undefinedLabel !== null)) {
-            $this->valueset[] = ['value' => $undefinedLabel, 'label' => $undefinedLabel];
+            $this->valueset[] = ['value' => $undefinedIndex, 'label' => $undefinedLabel];
         }
         foreach ($valueset as $value => $label) {
             $this->valueset[] = [
