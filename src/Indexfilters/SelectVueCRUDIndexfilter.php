@@ -41,9 +41,15 @@ class SelectVueCRUDIndexfilter extends VueCRUDIndexfilterBase implements IVueCRU
     /**
      * $valueset needs to be an array of value => label pairs
      * @param mixed $valueset
+     * @param null $undefinedIndex
+     * @param null $undefinedLabel
      */
-    public function setValueSet($valueset)
+    public function setValueSet($valueset, $undefinedIndex = null, $undefinedLabel = null)
     {
+        $this->valueset = [];
+        if (($undefinedIndex !== null) && ($undefinedLabel !== null)) {
+            $this->valueset[$undefinedIndex] = $undefinedLabel;
+        }
         foreach ($valueset as $value => $label) {
             $this->valueset[] = [
                 'value' => $value,
@@ -51,5 +57,4 @@ class SelectVueCRUDIndexfilter extends VueCRUDIndexfilterBase implements IVueCRU
             ];
         }
     }
-
 }
