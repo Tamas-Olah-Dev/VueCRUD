@@ -155,7 +155,7 @@ abstract class VueCRUDFormdatabuilder
         foreach ($rules as $fieldId => $ruleset) {
             foreach ($ruleset as $rule) {
                 $field = static::getFields()->get($fieldId);
-                $label = self::getValidationErrorLabel(__($field->getLabel()));
+                $label = static::getValidationErrorLabel(__($field->getLabel()));
                 $rulename = \Illuminate\Support\Str::before($rule, ':');
                 if (isset($field->getMessages()[$rulename])) {
                     $messages[$fieldId.'.'.$rulename] = $field->getMessages()[$rulename];
