@@ -155,35 +155,35 @@ abstract class VueCRUDFormdatabuilder
         foreach ($rules as $fieldId => $ruleset) {
             foreach ($ruleset as $rule) {
                 $field = static::getFields()->get($fieldId);
-                $label = __($field->getLabel());
+                $label = self::getValidationErrorLabel(__($field->getLabel()));
                 $rulename = \Illuminate\Support\Str::before($rule, ':');
                 if (isset($field->getMessages()[$rulename])) {
                     $messages[$fieldId.'.'.$rulename] = $field->getMessages()[$rulename];
                 } else {
                     switch ($rulename) {
                         case 'required':
-                            $messages[$fieldId.'.required'] = __('Hiányzó mező').': '.$label;
+                            $messages[$fieldId.'.required'] = __('Hiányzó mező').$label;
                             break;
                         case 'not_in':
-                            $messages[$fieldId.'.not_in'] = __('Hiányzó mező').': '.$label;
+                            $messages[$fieldId.'.not_in'] = __('Hiányzó mező').$label;
                             break;
                         case 'string':
-                            $messages[$fieldId.'.string'] = __('Nem szöveges tartalom').': '.$label;
+                            $messages[$fieldId.'.string'] = __('Nem szöveges tartalom').$label;
                             break;
                         case 'numeric':
-                            $messages[$fieldId.'.numeric'] = __('Nem numerikus').': '.$label;
+                            $messages[$fieldId.'.numeric'] = __('Nem numerikus').$label;
                             break;
                         case 'email':
-                            $messages[$fieldId.'.email'] = __('Nem megfelelő e-mailcím').': '.$label;
+                            $messages[$fieldId.'.email'] = __('Nem megfelelő e-mailcím').$label;
                             break;
                         case 'date':
-                            $messages[$fieldId.'.date'] = __('Nem megfelelő dátum').': '.$label;
+                            $messages[$fieldId.'.date'] = __('Nem megfelelő dátum').$label;
                             break;
                         case 'confirmed':
-                            $messages[$fieldId.'.confirmed'] = __('A két jelszómező tartalma nem egyezik').': '.$label;
+                            $messages[$fieldId.'.confirmed'] = __('A két jelszómező tartalma nem egyezik').$label;
                             break;
                         case 'same':
-                            $messages[$fieldId.'.same'] = __('A két mező tartalma nem egyezik').': '.$label;
+                            $messages[$fieldId.'.same'] = __('A két mező tartalma nem egyezik').$label;
                             break;
                     }
                 }
@@ -230,5 +230,13 @@ abstract class VueCRUDFormdatabuilder
         }
 
         return true;
+    }
+
+    protected static function getValidationErrorLabel($label)
+    {
+        //override this in the final formdatabuilder to change the label
+        // or hide it completely by returning '';
+
+        return ': '.$label;
     }
 }
