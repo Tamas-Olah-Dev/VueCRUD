@@ -94,6 +94,10 @@
                             </label>
                         </p>
                     </span>
+                    <multi-select v-if="data.kind == 'vue-multiselect'"
+                                  :valueset="data.valuesetSorted"
+                                  v-model="subjectData[fieldname].value"
+                    ></multi-select>
                     <select v-if="data.kind == 'multiselect'"
                             style="height: 200px; min-height: 200px"
                             class="form-control"
