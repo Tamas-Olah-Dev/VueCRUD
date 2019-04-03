@@ -3,7 +3,7 @@
 namespace Datalytix\VueCRUD\Formdatabuilders\Formfieldtypes;
 
 
-class SelectVueCRUDFormfield extends VueCRUDFormfield
+class VueMultiselectVueCRUDFormfield extends VueCRUDFormfield
 {
 
     /**
@@ -13,7 +13,7 @@ class SelectVueCRUDFormfield extends VueCRUDFormfield
     public function __construct($properties = [])
     {
         parent::__construct($properties);
-        $this->kind = 'select';
+        $this->kind = 'vue-multiselect';
         $this->type = null;
     }
 }

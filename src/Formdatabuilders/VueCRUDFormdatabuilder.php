@@ -58,8 +58,9 @@ abstract class VueCRUDFormdatabuilder
         if ((static::getFields()->get($fieldId)->getAddChooseMessage()) && (! $this->isValidValue($this->getValue($fieldId)))) {
             $result->put(-1, __('Please select:'));
         }
-        if (method_exists($valuesetClass, 'getKeyValueCollection')) {
-            $valueset = call_user_func($valuesetClass.'::getKeyValueCollection');
+        $valuesetGetterMethod = static::getFields()->get($fieldId)->getValuesetGetter();
+        if (method_exists($valuesetClass, $valuesetGetterMethod)) {
+            $valueset = call_user_func($valuesetClass.'::'.$valuesetGetterMethod);
             foreach ($valueset as $index => $value) {
                 $result->put($index, $value);
             }
@@ -70,6 +71,9 @@ abstract class VueCRUDFormdatabuilder
 
     public function getValuesetSorted($fieldId)
     {
+        if (static::getFields()->get($fieldId)->getValuesetGetter() != 'getKeyValueCollection') {
+            return $this->getValueset($fieldId);
+        }
         return $this->getValueset($fieldId)->mapWithKeys(function ($item, $key) {
             return [$item => $key];
         });

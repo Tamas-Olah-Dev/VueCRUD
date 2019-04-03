@@ -34,3 +34,14 @@ with the second row repeated for every language the app has.
 
 When using the Trix rich text editor, attachments are saved and removed in the public drive automatically as they are added to and removed from the rich text component.
  https://laravel.com/docs/5.8/filesystem#the-public-disk
+
+When using a Treeselect component, the library needs to be installed by running npm install --save @riophae/vue-treeselect, and 
+app.js has to import it by adding the following to it:
+
+import Treeselect from '@riophae/vue-treeselect'
+
+import '@riophae/vue-treeselect/dist/vue-treeselect.css'
+
+Vue.component('treeselect', Treeselect);
+
+The valueset model should have a getVueTreeselectCompatibleCollection public static method that provides the node list. It should use the canBeTurnedIntoKeyValueCollection trait's getVueTreeselectCompatibleValueset method.

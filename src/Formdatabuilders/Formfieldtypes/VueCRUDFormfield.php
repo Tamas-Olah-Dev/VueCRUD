@@ -27,6 +27,7 @@ class VueCRUDFormfield
     protected $helpTooltip;
     protected $onlyWhenCreating;
     protected $customOptions;
+    protected $valuesetGetter;
 
     /**
      * VueCRUDFormfield constructor.
@@ -50,6 +51,7 @@ class VueCRUDFormfield
         $this->customOptions = [];
         $this->helpTooltip = '';
         $this->onlyWhenCreating = false;
+        $this->valuesetGetter = null;
         $allowedKeys = array_keys($this->toArray());
         foreach ($properties as $property => $value) {
             if (array_search($property, $allowedKeys) !== false) {
@@ -376,6 +378,26 @@ class VueCRUDFormfield
     public function getCustomOptions()
     {
         return $this->customOptions;
+    }
+
+    /**
+     * @param null $valuesetGetter
+     * @return VueCRUDFormfield
+     */
+    public function setValuesetGetter($valuesetGetter)
+    {
+        $this->valuesetGetter = $valuesetGetter;
+        return $this;
+    }
+
+    /**
+     * @return null
+     */
+    public function getValuesetGetter()
+    {
+        return $this->valuesetGetter == null
+            ? 'getKeyValueCollection'
+            : $this->valuesetGetter;
     }
 
 

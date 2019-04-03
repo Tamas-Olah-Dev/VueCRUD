@@ -95,9 +95,15 @@
                         </p>
                     </span>
                     <multi-select v-if="data.kind == 'vue-multiselect'"
+                                  v-bind="JSON.parse(data.props)"
                                   :valueset="data.valuesetSorted"
                                   v-model="subjectData[fieldname].value"
                     ></multi-select>
+                    <treeselect v-if="data.kind == 'vue-treeselect'"
+                                v-bind="JSON.parse(data.props)"
+                                :options="data.valuesetSorted"
+                                v-model="subjectData[fieldname].value"
+                    ></treeselect>
                     <select v-if="data.kind == 'multiselect'"
                             style="height: 200px; min-height: 200px"
                             class="form-control"
