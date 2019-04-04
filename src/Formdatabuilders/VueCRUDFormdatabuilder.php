@@ -45,7 +45,11 @@ abstract class VueCRUDFormdatabuilder
     public function getValueset($fieldId)
     {
         if (static::getFields()->get($fieldId)->getType() == 'yesno') {
-            return collect([0 => 'Nem', 1 => 'Igen']);
+            $result = collect([0 => 'Nem', 1 => 'Igen']);
+            if ((static::getFields()->get($fieldId)->getAddChooseMessage()) && (! $this->isValidValue($this->getValue($fieldId)))) {
+                $result->put(-1, __('Please select:'));
+            }
+            return $result
         }
         if (static::getFields()->get($fieldId)->getType() == 'custom') {
             return collect(static::getFields()->get($fieldId)->getValuesetClass());
