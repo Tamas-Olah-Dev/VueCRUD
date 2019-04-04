@@ -104,6 +104,11 @@
                                 :options="data.valuesetSorted"
                                 v-model="subjectData[fieldname].value"
                     ></treeselect>
+                    <component v-if="data.kind == 'custom-component'"
+                               v-bind:is="data.type"
+                                v-bind="JSON.parse(data.props)"
+                                v-model="subjectData[fieldname].value"
+                    ></component>
                     <select v-if="data.kind == 'multiselect'"
                             style="height: 200px; min-height: 200px"
                             class="form-control"
