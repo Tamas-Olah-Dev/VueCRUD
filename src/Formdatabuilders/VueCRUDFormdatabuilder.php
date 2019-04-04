@@ -49,7 +49,7 @@ abstract class VueCRUDFormdatabuilder
             if ((static::getFields()->get($fieldId)->getAddChooseMessage()) && (! $this->isValidValue($this->getValue($fieldId)))) {
                 $result->put(-1, __('Please select:'));
             }
-            return $result
+            return $result;
         }
         if (static::getFields()->get($fieldId)->getType() == 'custom') {
             return collect(static::getFields()->get($fieldId)->getValuesetClass());
