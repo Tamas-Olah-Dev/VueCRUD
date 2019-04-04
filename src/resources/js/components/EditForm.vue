@@ -7,7 +7,7 @@
                 <div v-for="data, fieldname in subjectData"
                      v-bind:style="{height: typeof(data.customOptions['cssHeight']) == 'undefined' ? 'auto' : data.customOptions['cssHeight']}"
                      v-bind:class="data.containerClass">
-                    <label>
+                    <label v-if="data.label != null">
                         {{ data.label }}
                         <span v-if="data.mandatory"> *</span>
                         <span class="edit-form-label-tooltip" v-if="typeof(data.helpTooltip) != 'undefined'" v-html="data.helpTooltip"></span>
@@ -106,8 +106,9 @@
                     ></treeselect>
                     <component v-if="data.kind == 'custom-component'"
                                v-bind:is="data.type"
-                                v-bind="JSON.parse(data.props)"
-                                v-model="subjectData[fieldname].value"
+                               v-bind="JSON.parse(data.props)"
+                               v-model="subjectData[fieldname].value"
+                               v-bind:errors="componentError(fieldname)"
                     ></component>
                     <select v-if="data.kind == 'multiselect'"
                             style="height: 200px; min-height: 200px"
@@ -204,6 +205,13 @@
             }
         },
         methods: {
+            componentError: function(fieldId) {
+                if (typeof(this.errors[fieldId]) != 'undefined') {
+                    return this.errors[fieldId];
+                }
+
+                return [];
+            },
             translate: function(string) {
                 if ((typeof(window.laravelLocale) != 'undefined')
                     && (typeof(window.laravelLocales[window.laravelLocale]) != 'undefined')) {
