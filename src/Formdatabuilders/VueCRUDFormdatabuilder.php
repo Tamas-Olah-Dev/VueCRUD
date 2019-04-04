@@ -94,7 +94,7 @@ abstract class VueCRUDFormdatabuilder
                     'label'          => __($fieldData->getLabel()),
                     'value'          => $this->getValue($fieldId),
                     'mandatory'      => $fieldData->getMandatory(),
-                    'props'          => json_encode($fieldData->getProps(), JSON_FORCE_OBJECT),
+                    'props'          => json_encode($fieldData->getProps()),
                     'helpTooltip'    => $fieldData->getHelpTooltip(),
                     'customOptions'    => $fieldData->getCustomOptions()
                 ];
