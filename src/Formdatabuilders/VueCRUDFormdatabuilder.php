@@ -71,8 +71,12 @@ abstract class VueCRUDFormdatabuilder
 
     public function getValuesetSorted($fieldId)
     {
-        if (static::getFields()->get($fieldId)->getValuesetGetter() != 'getKeyValueCollection') {
-            return $this->getValueset($fieldId);
+        if (static::getFields()->get($fieldId)->getValuesetSortedGetter() != null) {
+            $valuesetClass = static::getFields()->get($fieldId)->getValuesetClass();
+            $valuesetGetterMethod = static::getFields()->get($fieldId)->getValuesetSortedGetter();
+            if (method_exists($valuesetClass, $valuesetGetterMethod)) {
+                return call_user_func($valuesetClass.'::'.$valuesetGetterMethod);
+            }
         }
         return $this->getValueset($fieldId)->mapWithKeys(function ($item, $key) {
             return [$item => $key];

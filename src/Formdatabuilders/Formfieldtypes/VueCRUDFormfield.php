@@ -28,6 +28,7 @@ class VueCRUDFormfield
     protected $onlyWhenCreating;
     protected $customOptions;
     protected $valuesetGetter;
+    protected $valuesetSortedGetter;
 
     /**
      * VueCRUDFormfield constructor.
@@ -52,6 +53,7 @@ class VueCRUDFormfield
         $this->helpTooltip = '';
         $this->onlyWhenCreating = false;
         $this->valuesetGetter = null;
+        $this->valuesetSortedGetter = null;
         $allowedKeys = array_keys($this->toArray());
         foreach ($properties as $property => $value) {
             if (array_search($property, $allowedKeys) !== false) {
@@ -400,5 +402,21 @@ class VueCRUDFormfield
             : $this->valuesetGetter;
     }
 
+    /**
+     * @param null $valuesetSortedGetter
+     * @return VueCRUDFormfield
+     */
+    public function setValuesetSortedGetter($valuesetSortedGetter)
+    {
+        $this->valuesetSortedGetter = $valuesetSortedGetter;
+        return $this;
+    }
 
+    /**
+     * @return null
+     */
+    public function getValuesetSortedGetter()
+    {
+        return $this->valuesetSortedGetter;
+    }
 }
