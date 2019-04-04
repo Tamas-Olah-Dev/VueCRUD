@@ -41,11 +41,11 @@ class VueCRUDRequestBase extends FormRequest
         $class = static::FORMDATABUILDER_CLASS;
         $fieldData = $class::getFielddata($fieldId);
         if (($subject != null)
-            && ((isset($fieldData['onlyWhenCreating'])) && ($fieldData['onlyWhenCreating']))) {
+            && ($fieldData->getOnlyWhenCreating())) {
             return false;
         }
-        if ($fieldData['kind'] == 'select') {
-            if (!$fieldData['mandatory']) {
+        if ($fieldData->getKind() == 'select') {
+            if (!$fieldData->getMandatory()) {
                 $results[$fieldId] = $this->nullIfInvalid($this->input($fieldId));
 
                 return;
