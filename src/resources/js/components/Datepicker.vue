@@ -1,5 +1,5 @@
 <template>
-    <div ref="container">
+    <div ref="container" style="position:relative">
         <div class="input-group vue-datepicker-inputgroup">
             <label v-if="formElementLabel != ''">{{ formElementLabel }}</label>
             <div class="input-group-append vue-datepicker-inputgroup-append">
@@ -9,7 +9,22 @@
                        @click="toggleDatepickerDropdown"
                        readonly
                 >
-                <span v-show="dateValue == null" class="input-group-text" v-on:click="toggleDatepickerDropdown"><i class="fa fa-calendar"></i></span>
+                <span v-on:click="resetDate"
+                      v-show="dateValue != null"
+                      class="vuedatepicker-clear-button"
+                >X</span>
+                <span class="input-group-text"
+                      v-on:click="toggleDatepickerDropdown"
+                      style="padding:5px; cursor:pointer"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" style="max-height:1.5em; max-width: 1.5em">
+                        <path
+                                style="fill:darkgrey;fill-opacity:1;stroke:none"
+                                d="M 6 3 C 6 3 5 2.99997 5 4 L 3 4 L 3 7 L 3 18 L 3 19 L 19 19 L 19 18 L 19 7 L 19 4 L 17 4 C 17 2.99997 16 3 16 3 L 13 3 C 13 3 12 2.99997 12 4 L 10 4 C 10 2.99997 9 3 9 3 L 6 3 z M 6 4 L 9 4 L 9 5 L 6 5 L 6 4 z M 13 4 L 16 4 L 16 5 L 13 5 L 13 4 z M 4 7 L 18 7 L 18 18 L 4 18 L 4 7 z M 6 8 L 6 10 L 8 10 L 8 8 L 6 8 z M 10 8 L 10 10 L 12 10 L 12 8 L 10 8 z M 14 8 L 14 10 L 16 10 L 16 8 L 14 8 z M 6 11 L 6 13 L 8 13 L 8 11 L 6 11 z M 10 11 L 10 13 L 12 13 L 12 11 L 10 11 z M 14 11 L 14 13 L 16 13 L 16 11 L 14 11 z M 14 14 L 14 16 L 16 16 L 16 14 L 14 14 z "
+                                class="ColorScheme-Text"
+                        />
+                    </svg>
+                </span>
                 <span v-if="showTimeInputs == 'true'" class="vue-datepicker-time-inputs-container">
                     <input type="text" v-model="hour" style="width: 2em">
                     <span>:</span>
@@ -17,7 +32,6 @@
                     <span>:</span>
                     <input type="text" v-model="second" style="width: 2em">
                 </span>
-                <span v-show="dateValue != null" class="input-group-text" v-on:click="resetDate"><span class="vuedatepicker-clear-button">X</span></span>
             </div>
         </div>
         <div>
@@ -303,7 +317,7 @@
             position:absolute;
             width:300px;
             max-width:300px;
-            left: 15px;
+            left: 0px;
         }
     }
 
@@ -332,13 +346,15 @@
     .vuedatepicker-today {
         color: blue;
     }
+    .vuedatepicker-input {
+        background-color:white !important;
+    }
 
     .vuedatepicker-inputs-container {
         display:flex;
         justify-content: space-between;
     }
     .vuedatepicker-year-input {
-        width:30% !important;
         flex-grow:0;
     }
 
@@ -357,6 +373,7 @@
     }
     .vue-datepicker-time-inputs-container {
         display: flex;
+        align-items: center;
         margin-left: 5px;
         margin-right: 5px;
     }
@@ -366,5 +383,17 @@
     }
     .vue-datepicker-time-inputs-container > input {
         text-align: center;
+        padding-left: 1px;
+        padding-right: 1px;
+        border-radius: 2px;
+    }
+    .vue-datepicker-inputgroup-append {
+        width: 100%;
+    }
+    .vuedatepicker-clear-button {
+        margin-left: -3em;
+        padding-right: 1em;
+        margin-top: .5em;
+        cursor:pointer;
     }
 </style>

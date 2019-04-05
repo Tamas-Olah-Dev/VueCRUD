@@ -167,8 +167,8 @@
             redirectToOnCancel: {type: String},
             buttons: {type: Object, default: () => {
                 return {
-                    'save': {'class': 'btn-outline-primary', 'html': translate('Save')},
-                    'cancel': {'class': 'btn-outline-secondary', 'html': translate('Cancel')},
+                    'save': {'class': 'btn-outline-primary', 'html': 'Save'},
+                    'cancel': {'class': 'btn-outline-secondary', 'html': 'Cancel'},
                 }
             }}
 
