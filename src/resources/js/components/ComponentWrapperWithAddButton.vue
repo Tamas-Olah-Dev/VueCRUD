@@ -27,6 +27,7 @@
                         v-on:submit-success="hideFormAndSelect($event)"
                         v-on:editing-canceled="hideForm"
                         redirect-to-response-on-success="false"
+                        :buttons="buttons"
                 ></edit-form>
             </div>
         </div>
@@ -47,6 +48,7 @@
             formAjaxOperationsUrl: {type: String, default: ''},
             fetchUrl: {type: String},
             value: {},
+            buttons: {type: Object}
         },
         data: function() {
             return {

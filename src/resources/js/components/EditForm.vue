@@ -109,6 +109,7 @@
                                v-bind="JSON.parse(data.props)"
                                v-model="subjectData[fieldname].value"
                                v-bind:errors="componentError(fieldname)"
+                               :buttons="buttons"
                     ></component>
                     <select v-if="data.kind == 'multiselect'"
                             style="height: 200px; min-height: 200px"
