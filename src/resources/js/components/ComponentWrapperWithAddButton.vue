@@ -2,21 +2,30 @@
     <div>
         <div style="display: flex">
             <div style="flex-basis: 80%">
-                <component is="subComponent"
+                <component :is="subComponent"
                            v-bind="subComponentProps"
                            v-on:input="emitInput($event)"
+                           v-bind:value="subComponentValue"
                 ></component>
             </div>
-            <button :class="addButtonClass" v-html="addButtonHTML"></button>
+            <button :class="addButtonClass"
+                    type="button"
+                    v-html="addButtonHTML"
+                    style="flex-basis: 20%"
+                    v-on:click="showForm"
+            ></button>
         </div>
-        <div class="trix-wrapper-modal-overlay" v-if="showPopup">
-            <div class="trix-wrapper-modal">
+        <div class="component-wrapper-modal-overlay"
+             v-if="showPopup"
+             v-on:click.self="hideForm"
+        >
+            <div class="component-wrapper-modal">
                 <edit-form
                         v-bind:data-url="formUrl"
                         v-bind:save-url="storeUrl"
                         v-bind:ajax-operations-url="formAjaxOperationsUrl"
-                        v-on:submit-success="showPopup=false"
-                        v-on:editing-canceled="showPopup=false"
+                        v-on:submit-success="hideFormAndSelect($event)"
+                        v-on:editing-canceled="hideForm"
                         redirect-to-response-on-success="false"
                 ></edit-form>
             </div>
@@ -43,6 +52,7 @@
             return {
                 showPopup: false,
                 subComponentProps: {},
+                subComponentValue: null,
             }
         },
         methods: {
@@ -52,15 +62,29 @@
             fetchValueset: function(callback) {
                 window.axios.get(this.fetchUrl)
                     .then((response) => {
-                        this.subComponentProps[this.subComponentValuesetProp] = response.data.valueset;
-                        if (typeof(callback) != 'undefined') {
-                            this.callback(response.data);
-                        }
-                    })
-            }
+                    Vue.set(this.subComponentProps, this.subComponentValuesetProp, response.data.elements)
+                if (typeof(callback) != 'undefined') {
+                    callback(response.data);
+                }
+            })
+            },
+            showForm: function() {
+                this.showPopup = true;
+            },
+            hideFormAndSelect: function(subject) {
+                this.fetchValueset(() => {
+                    this.subComponentValue = subject.id;
+                });
+                this.hideForm();
+            },
+            hideForm: function() {
+                this.fetchValueset();
+                this.showPopup = false;
+            },
         },
         mounted() {
             this.subComponentProps =  {...this.defaultSubComponentProps};
+            this.fetchValueset();
         }
     }
 </script>

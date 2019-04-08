@@ -344,4 +344,13 @@ class VueCRUDControllerBase
         }
         return static::SUBJECT_NAME;
     }
+
+    protected function getModificationResponse($subject)
+    {
+        if (request('respondWith', 'url') == 'url') {
+            return route($this->getRouteName('index'));
+        }
+
+        return $subject;
+    }
 }

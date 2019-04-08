@@ -25,10 +25,10 @@ class DummyClassVueCRUDController extends VueCRUDControllerBase implements ICRUD
 
     public function store(SaveDummyClassVueCRUDRequest $request)
     {
-        $request->save();
+        $subject = $request->save();
         $this->setSuccessfulAddPopupMessageInSession();
 
-        return route($this->getRouteName('index'));
+        return $this->getModificationResponse($subject);
     }
 
     public function update(SaveDummyClassVueCRUDRequest $request, DummyClass $subject)
@@ -36,7 +36,7 @@ class DummyClassVueCRUDController extends VueCRUDControllerBase implements ICRUD
         $request->save($subject);
         $this->setSuccessfulModificationPopupMessageInSession();
 
-        return route($this->getRouteName('index'));
+        return $this->getModificationResponse($subject);
     }
 
     function getElements()

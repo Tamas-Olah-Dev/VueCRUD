@@ -194,6 +194,9 @@
                         result[key] = this.subjectData[key].value;
                     }
                 }
+                result['respondWith'] = this.redirectToResponseOnSuccess == 'true'
+                    ? 'url'
+                    : 'subject';
 
                 return result;
             },
@@ -252,6 +255,7 @@
             submitForm: function() {
                 this.errors = {};
                 this.loading = true;
+                this.$emit('submit-pending', this.formdata);
                 window.axios.post(this.saveUrl, this.formdata)
                     .then((response) => {
                         if (typeof(this.successCallback) != 'undefined') {
