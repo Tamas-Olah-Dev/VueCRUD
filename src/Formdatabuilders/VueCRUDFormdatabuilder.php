@@ -90,7 +90,12 @@ abstract class VueCRUDFormdatabuilder
     public function buildAllFields()
     {
         $this->formdata = [];
-        foreach (static::getFields() as $fieldId => $fieldData) {
+        if ($this->subject == null) {
+            $fields = self::getFieldsForStep(self::getCurrentStep());
+        } else {
+            $fields = self::getFieldsForStep(self::getLastStep());
+        }
+        foreach ($fields as $fieldId => $fieldData) {
             if ($this->shouldBuildField($fieldId)) {
                 $element = [
                     'kind'           => $fieldData->getKind(),
@@ -118,10 +123,10 @@ abstract class VueCRUDFormdatabuilder
         return json_encode($this->formdata);
     }
 
-    public static function getValidationRules($requestType)
+    public static function getValidationRules($requestType, $step = 1)
     {
         $rules = [];
-        foreach (static::getFields() as $fieldId => $fieldData) {
+        foreach (self::getFieldsForStep($step) as $fieldId => $fieldData) {
             if (($requestType == self::REQUEST_TYPE_CREATING)
                 || (! self::isFieldOnlyNeededWhenCreating($fieldId))
             ) {
@@ -219,6 +224,12 @@ abstract class VueCRUDFormdatabuilder
 
     protected function shouldBuildField($fieldId)
     {
+        if ($this->subject != null) {
+            if (self::getLastStep() != static::getFielddata($fieldId)->getStep()) {
+                return false;
+            }
+        }
+
         if (! self::isFieldOnlyNeededWhenCreating($fieldId)) {
             return true;
         }
@@ -250,5 +261,35 @@ abstract class VueCRUDFormdatabuilder
         // or hide it completely by returning '';
 
         return ': '.$label;
+    }
+
+    public static function getSteps()
+    {
+        return static::getFields()->map(function($item) {
+            return $item->getStep();
+        })->values()->unique()->sort()->values();
+    }
+
+    public static function getLastStep()
+    {
+        return self::getSteps()->last();
+    }
+
+    public static function hasMultipleSteps()
+    {
+        return self::getSteps()->count() > 1;
+    }
+
+    public static function getFieldsForStep($step = 1)
+    {
+        return static::getFields()->filter(function ($item) use ($step) {
+            return $item->getStep() == $step;
+        });
+    }
+
+    protected static function getCurrentStep()
+    {
+        //TODO: find out current step
+        return 1;
     }
 }

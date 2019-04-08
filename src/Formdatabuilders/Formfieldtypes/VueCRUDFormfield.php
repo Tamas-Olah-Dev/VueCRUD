@@ -29,6 +29,7 @@ class VueCRUDFormfield
     protected $customOptions;
     protected $valuesetGetter;
     protected $valuesetSortedGetter;
+    protected $step;
 
     /**
      * VueCRUDFormfield constructor.
@@ -55,6 +56,7 @@ class VueCRUDFormfield
         $this->valuesetGetter = null;
         $this->valuesetSortedGetter = null;
         $allowedKeys = array_keys($this->toArray());
+        $this->step = 1;
         foreach ($properties as $property => $value) {
             if (array_search($property, $allowedKeys) !== false) {
                 $this->$property = $value;
@@ -65,22 +67,22 @@ class VueCRUDFormfield
     public function toArray()
     {
         $result = [
-            'property' => $this->property,
-            'kind' => $this->kind,
-            'type' => $this->type,
-            'containerClass' => $this->containerClass,
-            'additionalClass' => $this->additionalClass,
-            'label' => $this->label,
-            'valuesetClass' => $this->valuesetClass,
-            'mandatory' => $this->mandatory,
-            'default' => $this->default,
-            'rules' => $this->rules,
-            'messages' => $this->messages,
+            'property'         => $this->property,
+            'kind'             => $this->kind,
+            'type'             => $this->type,
+            'containerClass'   => $this->containerClass,
+            'additionalClass'  => $this->additionalClass,
+            'label'            => $this->label,
+            'valuesetClass'    => $this->valuesetClass,
+            'mandatory'        => $this->mandatory,
+            'default'          => $this->default,
+            'rules'            => $this->rules,
+            'messages'         => $this->messages,
             'addChooseMessage' => $this->addChooseMessage,
-            'props' => $this->props,
-            'helpTooltip' => $this->helpTooltip,
+            'props'            => $this->props,
+            'helpTooltip'      => $this->helpTooltip,
             'onlyWhenCreating' => $this->onlyWhenCreating,
-            'customOptions' => $this->customOptions,
+            'customOptions'    => $this->customOptions,
         ];
 
         return $result;
@@ -418,5 +420,23 @@ class VueCRUDFormfield
     public function getValuesetSortedGetter()
     {
         return $this->valuesetSortedGetter;
+    }
+
+    /**
+     * @param int $step
+     * @return VueCRUDFormfield
+     */
+    public function setStep(int $step): VueCRUDFormfield
+    {
+        $this->step = $step;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getStep(): int
+    {
+        return $this->step;
     }
 }

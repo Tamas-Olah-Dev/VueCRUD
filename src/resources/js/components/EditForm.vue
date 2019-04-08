@@ -1,7 +1,8 @@
 <template>
-    <div class="container-fluid vue-editform-container">
+    <div class="container-fluid vue-editform-container" style="position:relative">
         <div v-if="!loaded" v-html="spinnerSrc" style="width:100%; display:flex; justify-content: center"></div>
         <div v-if="loaded && (typeof(formTitle != 'undefined'))"><h4 v-html="formTitle"></h4></div>
+        <div v-if="disabled" style="position: absolute; top: -10px; left: -10px; width: 102%; height: 102%; z-index: 2000; background-color: rgba(32, 32, 32, .1)"></div>
         <form role="form" class="margin-b-20"  v-on:submit.prevent="submitForm">
             <div class="row" v-if="loaded" >
                 <div v-for="data, fieldname in subjectData"
@@ -134,7 +135,7 @@
             <div class="alert alert-success col col-12"
                  v-html="resultMessage"></div>
         </div>
-        <div class="row">
+        <div class="row" v-if="!disabled">
             <div class="col">
                 <button type="button"
                         v-bind:class="buttons['save']['class']"
@@ -171,8 +172,8 @@
                     'save': {'class': 'btn-outline-primary', 'html': 'Save'},
                     'cancel': {'class': 'btn-outline-secondary', 'html': 'Cancel'},
                 }
-            }}
-
+            }},
+            disabled: {type: Boolean, default: false}
         },
         data: function() {
             return {
