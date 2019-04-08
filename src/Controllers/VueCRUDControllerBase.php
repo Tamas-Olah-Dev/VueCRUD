@@ -30,6 +30,7 @@ class VueCRUDControllerBase
         $filters = method_exists($class, 'getVueCRUDIndexFilters')
             ? (object) $class::getVueCRUDIndexFilters()
             : (object) [];
+
         $viewData = [
             'title' => $this->getSubjectNamePlural(),
             'pageTitleContent' => $this->getSubjectNamePlural(),

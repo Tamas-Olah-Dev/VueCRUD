@@ -90,11 +90,7 @@ abstract class VueCRUDFormdatabuilder
     public function buildAllFields()
     {
         $this->formdata = [];
-        if ($this->subject == null) {
-            $fields = self::getFieldsForStep(self::getCurrentStep());
-        } else {
-            $fields = self::getFieldsForStep(self::getLastStep());
-        }
+        $fields = self::getFieldsForStep(self::getCurrentStep());
         foreach ($fields as $fieldId => $fieldData) {
             if ($this->shouldBuildField($fieldId)) {
                 $element = [
@@ -116,6 +112,16 @@ abstract class VueCRUDFormdatabuilder
         }
 
         return $this;
+    }
+
+    protected function buildConfigurationFormdata()
+    {
+        return [
+            'config' => [
+                'currentStep' => self::getCurrentStep(),
+                'steps' => self::getSteps()
+            ]
+        ];
     }
 
     public function getFormdataJson()
@@ -224,12 +230,6 @@ abstract class VueCRUDFormdatabuilder
 
     protected function shouldBuildField($fieldId)
     {
-        if ($this->subject != null) {
-            if (self::getLastStep() != static::getFielddata($fieldId)->getStep()) {
-                return false;
-            }
-        }
-
         if (! self::isFieldOnlyNeededWhenCreating($fieldId)) {
             return true;
         }
@@ -289,7 +289,6 @@ abstract class VueCRUDFormdatabuilder
 
     protected static function getCurrentStep()
     {
-        //TODO: find out current step
-        return 1;
+        return request()->get('formStep', 1);
     }
 }
