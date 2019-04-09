@@ -30,6 +30,7 @@ class VueCRUDFormfield
     protected $valuesetGetter;
     protected $valuesetSortedGetter;
     protected $step;
+    protected $conditions;
 
     /**
      * VueCRUDFormfield constructor.
@@ -55,6 +56,7 @@ class VueCRUDFormfield
         $this->onlyWhenCreating = false;
         $this->valuesetGetter = null;
         $this->valuesetSortedGetter = null;
+        $this->conditions = [];
         $allowedKeys = array_keys($this->toArray());
         $this->step = 1;
         foreach ($properties as $property => $value) {
@@ -83,6 +85,7 @@ class VueCRUDFormfield
             'helpTooltip'      => $this->helpTooltip,
             'onlyWhenCreating' => $this->onlyWhenCreating,
             'customOptions'    => $this->customOptions,
+            'conditions' => $this->conditions,
         ];
 
         return $result;
@@ -438,5 +441,38 @@ class VueCRUDFormfield
     public function getStep(): int
     {
         return $this->step;
+    }
+
+    /**
+     * @param array $conditions
+     * @return VueCRUDFormfield
+     */
+    public function setConditions(array $conditions): VueCRUDFormfield
+    {
+        $this->conditions = $conditions;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getConditions(): array
+    {
+        return $this->conditions;
+    }
+
+    public function meetsConditions($subjectData)
+    {
+        $result = count($this->conditions) == 0;
+        foreach ($this->conditions as $condition) {
+            if (isset($subjectData[$condition['field']])) {
+                if ($subjectData[$condition['field']] == $condition['value']) {
+                    $result = true;
+                }
+            }
+        }
+
+        return $result;
     }
 }

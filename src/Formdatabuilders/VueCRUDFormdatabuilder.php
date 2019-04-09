@@ -115,7 +115,8 @@ abstract class VueCRUDFormdatabuilder
                     'mandatory'      => $fieldData->getMandatory(),
                     'props'          => json_encode($fieldData->getProps()),
                     'helpTooltip'    => $fieldData->getHelpTooltip(),
-                    'customOptions'    => $fieldData->getCustomOptions()
+                    'customOptions'    => $fieldData->getCustomOptions(),
+                    'conditions' => $fieldData->getConditions(),
                 ];
                 $this->formdata[$fieldId] = $element;
             }
@@ -124,13 +125,26 @@ abstract class VueCRUDFormdatabuilder
         return $this;
     }
 
+    public function getConditionFields()
+    {
+        $result = [];
+        foreach (static::getFields() as $field) {
+            foreach ($field->getConditions() as $condition) {
+                $result[$condition['field']] = 1;
+            }
+        }
+
+        return array_keys($result);
+    }
+
     protected function buildConfigurationFormdata()
     {
         return [
             'config' => [
                 'mode' => $this->subject === null ? 'creating' : 'editing',
                 'steps' => self::getSteps(),
-                'stepLabels' => $this->steps
+                'stepLabels' => $this->steps,
+                'conditionFields' => $this->getConditionFields(),
             ]
         ];
     }
@@ -144,9 +158,10 @@ abstract class VueCRUDFormdatabuilder
     {
         $rules = [];
         foreach (self::getFieldsForStep(self::getCurrentStep()) as $fieldId => $fieldData) {
-            if (($requestType == self::REQUEST_TYPE_CREATING)
-                || (! self::isFieldOnlyNeededWhenCreating($fieldId))
-            ) {
+            if ((self::shouldBuildValidationField($fieldId))
+                && (($requestType == self::REQUEST_TYPE_CREATING)
+                || (! self::isFieldOnlyNeededWhenCreating($fieldId))))
+            {
                 $ruleset = [];
                 if ($fieldData->getMandatory()) {
                     $ruleset[] = 'required';
@@ -239,8 +254,43 @@ abstract class VueCRUDFormdatabuilder
         return $value !== null && $value != -1;
     }
 
+    protected static function shouldBuildValidationField($fieldId)
+    {
+        $fieldData = self::getFielddata($fieldId);
+        if (self::getCurrentStep() != $fieldData->getStep()) {
+            return false;
+        }
+        if (request()->has('subjectdata')) {
+            if (!$fieldData->meetsConditions((array)json_decode(request()->get('subjectdata')))) {
+                return false;
+            }
+        }
+        if (!$fieldData->meetsConditions(request()->all())) {
+            return false;
+        }
+
+        return true;
+    }
+
     protected function shouldBuildField($fieldId)
     {
+        $fieldData = self::getFielddata($fieldId);
+        if ($this->subject != null) {
+            $step = self::getLastStep();
+        } else {
+            $step = 1;
+        }
+        if (($this->subject == null) && (self::getCurrentStep($step) != $fieldData->getStep())) {
+            return false;
+        }
+        if (request()->has('subjectdata')) {
+            if (!$fieldData->meetsConditions((array)json_decode(request()->get('subjectdata')))) {
+                return false;
+            }
+        }
+        if (($this->subject != null) && (!$fieldData->meetsConditions($this->subject->toArray()))) {
+            return false;
+        }
         if (! self::isFieldOnlyNeededWhenCreating($fieldId)) {
             return true;
         }
@@ -298,8 +348,8 @@ abstract class VueCRUDFormdatabuilder
         });
     }
 
-    protected static function getCurrentStep()
+    protected static function getCurrentStep($default = 1)
     {
-        return request()->get('currentStep', 1);
+        return request()->get('currentStep', $default);
     }
 }
