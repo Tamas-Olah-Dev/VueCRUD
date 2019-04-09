@@ -148,7 +148,9 @@
                         v-on:click="submitForm"
                 >
                     <span v-if="loading" class="button-loading-indicator" v-html="spinnerSrc"></span>
-                    <span>{{ buttons['save']['html'] }}</span></button>
+                    <span v-if="currentStep != lastStep">{{ buttons['proceed']['html'] }}</span>
+                    <span v-if="currentStep == lastStep">{{ buttons['save']['html'] }}</span>
+                </button>
             </div>
             <div class="col">
                 <button type="button"
@@ -200,13 +202,15 @@
         computed: {
             stepsToRender: function() {
                 return this.config.steps.filter((step) => {
-                        return step <= this.currentStep;
-            })
+                    return step <= this.currentStep;
+                })
             },
             lastStep: function() {
-                return this.config.steps.length > 0
-                    ? this.config.steps[this.config.steps.length - 1]
-                    : -1;
+                if (typeof(this.config['steps']) != 'undefined') {
+                    return this.config.steps.length > 0
+                        ? this.config.steps[this.config.steps.length - 1]
+                        : -1;
+                }
             },
             formdata: function() {
                 let result = {};
@@ -227,6 +231,16 @@
             },
             parentShowInPlaceEditor: function() {
                 return this.$parent.showInPlaceEditor;
+            },
+            stepConditionData: function() {
+                let result = {};
+                for (var i in this.subjectData) {
+                    if ((this.subjectData.hasOwnProperty(i)) && (this.config.conditionFields.indexOf(i) > -1)) {
+                        result[i] = this.subjectData[i].value;
+                    }
+                }
+
+                return result;
             }
         },
         methods: {
@@ -286,15 +300,30 @@
                 this.loaded = false;
                 window.axios.get(this.dataUrl, {params: this.extraUrlParameters})
                     .then((response) => {
-                    this.subjectData = this.removeConfigFromSubjectData(response.data);
-                    this.config = response.data.config;
-                    this.currentStep = this.config.mode == 'creating' ? 1 : this.lastStep;
-                    this.loaded = true;
-                    this.dirty = false;
-                })
-                .catch((error) => {
-                });
-
+                        this.subjectData = this.removeConfigFromSubjectData(response.data);
+                        this.config = response.data.config;
+                        this.currentStep = this.config.mode == 'creating' ? 1 : this.lastStep;
+                        this.loaded = true;
+                        this.dirty = false;
+                    })
+                    .catch((error) => {
+                    });
+            },
+            updateFormData: function() {
+                this.loaded = false;
+                window.axios.get(this.dataUrl, {params: {subjectdata: this.stepConditionData, currentStep: this.currentStep}})
+                    .then((response) => {
+                        let additional = this.removeConfigFromSubjectData(response.data);
+                        for (var i in additional) {
+                            if (additional.hasOwnProperty(i)) {
+                                Vue.set(this.subjectData, i, {...additional[i]});
+                            }
+                        }
+                        this.loaded = true;
+                        this.dirty = false;
+                    })
+                    .catch((error) => {
+                    });
             },
             submitForm: function() {
                 this.errors = {};
@@ -302,27 +331,28 @@
                 this.$emit('submit-pending', this.formdata);
                 window.axios.post(this.saveUrl, this.formdata)
                     .then((response) => {
-                    if (this.currentStep != this.lastStep) {
-                        this.currentStep++;
-                    } else {
-                        if (typeof(this.successCallback) != 'undefined') {
-                            window[this.successCallback]();
+                        if (this.currentStep != this.lastStep) {
+                            this.currentStep++;
+                            this.updateFormData();
+                        } else {
+                            if (typeof(this.successCallback) != 'undefined') {
+                                window[this.successCallback]();
+                            }
+                            this.$emit('submit-success', response.data);
+                            if (this.redirectToResponseOnSuccess == 'true') {
+                                window.location.href = response.data;
+                            }
+                            this.resultMessage = 'Változások elmentve';
+                            setTimeout(() => {this.resultMessage = ''}, 3000);
                         }
-                        this.$emit('submit-success', response.data);
-                        if (this.redirectToResponseOnSuccess == 'true') {
-                            window.location.href = response.data;
+                        this.loading = false;
+                    })
+                    .catch((error) => {
+                        if (error.response.status == 422) {
+                            this.errors = error.response.data.errors;
                         }
-                        this.resultMessage = 'Változások elmentve';
-                        setTimeout(() => {this.resultMessage = ''}, 3000);
-                    }
-                    this.loading = false;
-                })
-                .catch((error) => {
-                    if (error.response.status == 422) {
-                        this.errors = error.response.data.errors;
-                    }
-                    this.loading = false;
-                });
+                        this.loading = false;
+                    });
             },
             cancelEditing: function() {
                 this.subjectData = {};
