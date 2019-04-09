@@ -134,6 +134,10 @@ trait VueCRUDManageable
             'nextPage' => self::buildButtonFromConfigData('vuecrud.buttons.nextPage', [
                 'class' => 'btn btn-outline-secondary', 'html' => '→',
             ]),
+            'fileUpload' => self::buildButtonFromConfigData('vuecrud.buttons.fileUpload', [
+                'class' => 'btn btn-outline-primary', 'html' => '+',
+            ]),
+
         ];
     }
 

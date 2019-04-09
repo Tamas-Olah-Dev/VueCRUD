@@ -1,0 +1,217 @@
+<template>
+    <div>
+        <div v-bind:class="collectorClass"
+             v-if="!uploading"
+             :ref="'collector'"
+             v-on:dragenter.prevent="addDropClass = true"
+             v-on:dragover.prevent="addDropClass = true"
+             v-on:dragexit.prevent="addDropClass = false"
+             v-on:dragleave.prevent="addDropClass = false"
+             v-on:drop.prevent="collect($event)"
+        >
+            {{ collectorLabel }}
+            <div style="display:flex; flex-wrap:wrap">
+        <span v-for="file, index in files"
+              class="file-collector-file-span"
+        >
+            {{ filenameLabel(file) }}
+            <span v-on:click="removeFile(index)"
+                  class="file-collector-remove-button">X</span>
+        </span>
+                <span v-for="pendingFile in pendingFiles" v-html="spinnerSrc">
+                </span>
+            </div>
+            <div class="file-collector-add-button-container">
+                <label for="fileinput">
+                    <input name="fileinput"
+                           :ref="'fileinput'"
+                           id="fileinput"
+                           v-on:change="addFileFromInput"
+                           type="file"
+                           style="position:absolute; opacity: 0; width: 0px">
+                    <span :class="buttons.fileUpload.class"
+                          v-html="buttons.fileUpload.html"></span>
+                </label>
+            </div>
+        </div>
+        <div v-if="uploading">
+            Feltöltés... (hátravan {{ pendingFilesLength }} fájl)
+        </div>
+    </div>
+</template>
+
+<script>
+    import {fileUploadMixin} from './mixins/fileUploadMixin.js'
+    import {spinner} from './mixins/spinner.js'
+    export default {
+        mixins: [fileUploadMixin, spinner],
+        props: {
+            uploadUrl: {type: String, default: ''},
+            value: {type: Array, default: () => {return [];}},
+            buttons: {type: Object, default: () => {
+                return {
+                    fileUpload: {
+                        class: 'btn btn-outline-primary',
+                        html: '+'
+                    }
+                }
+            }}
+        },
+        data: function() {
+            return {
+                files: [],
+                defaultUploadUrl: '',
+                uploading: false,
+                addDropClass: false,
+                pendingFiles: [],
+            }
+        },
+        mounted() {
+            this.files = this.value.slice();
+            this.defaultUploadUrl = this.uploadUrl;
+        },
+        computed: {
+            pendingFilesLength: function() {
+                return this.pendingFiles.length;
+            },
+            collectorLabel: function() {
+                return this.files.length == 0
+                    ? 'Húzzon ide fájlokat vagy kattintson a + gombra megnyitáshoz'
+                    : '';
+            },
+            collectorClass: function() {
+                let result = 'file-collector-container';
+                if (this.addDropClass) {
+                    result = result + ' file-collector-container-focused'
+                }
+
+                return result;
+            }
+        },
+        methods: {
+            uploadFiles: function() {
+                this.uploading = true;
+                this.uploadFirstFile();
+            },
+            uploadFirstFile: function() {
+                this.uploadPublicFileToVueCRUDController(
+                    this.uploadUrl,
+                    this.pendingFiles[0],
+                    'storePublicAttachment'
+                ).then((response) => {
+                    this.files.push(response.data.url);
+                    this.pendingFiles.splice(0, 1);
+                    if (this.pendingFiles.length == 0) {
+                        this.uploading = false;
+                        this.uploadUrl = this.defaultUploadUrl;
+                    } else {
+                        this.uploadFirstFile();
+                    }
+                });
+            },
+            filenameLabel: function(filepath) {
+                let filename = filepath;
+                if (filepath.includes('/')) {
+                    let parts = filepath.split('/');
+                    filename = parts[parts.length - 1];
+                }
+                if (filename.length > 30) {
+                    return filename.substring(0, 12)
+                        +'(...)'
+                        +filename.substring(filename.length - 12, 12);
+                } else {
+                    return filename;
+                }
+            },
+            collectFiles: function(filelist) {
+                for (var i = 0; i < filelist.length; i++) {
+                    this.pendingFiles.push(filelist[i]);
+                }
+                if (!this.uploading) {
+                    this.uploadFiles();
+                }
+                //this.$emit('input', this.files);
+            },
+            collect: function(event) {
+                this.addDropClass = false;
+                this.collectFiles(event.dataTransfer.files);
+            },
+            addFileFromInput: function() {
+                this.collectFiles(this.$refs.fileinput.files);
+            },
+            removeFile: function(index) {
+                this.removeUploadedPublicFile(this.uploadUrl, this.files[index], 'removePublicAttachment')
+                    .then((response) => {
+                        this.files.splice(index, 1);
+                        this.$emit('input', this.files);
+                    });
+            }
+        },
+        watch: {
+            uploadUrl: function(oldvalue, newvalue) {
+                if ((this.uploadUrl != '') && (oldvalue != newvalue)) {
+                    this.uploadFiles();
+                }
+            },
+            value: function() {
+                this.files = this.value.slice();
+            }
+        }
+    }
+</script>
+<style>
+    .file-collector-container {
+        width: 100%;
+        min-height: 3em;
+        border: 1px solid lightblue;
+        text-align:center;
+        padding-right: 2em;
+        position:relative;
+    }
+    .file-collector-add-button-container {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        /*width: 1.8em;*/
+        font-weight: bold;
+        color: lightgrey;
+        height: 100%;
+        border: 1px solid rgba(0,0,0,0);
+    }
+    .file-collector-add-button-container > label {
+        max-width: 100%;
+        text-align:center;
+        height: 100%;
+        padding-top: .4em;
+    }
+    /*.file-collector-add-button-container:hover {*/
+    /*border: 1px dotted lightblue;*/
+    /*}*/
+    .file-collector-container-focused {
+        background-color: lightgrey;
+    }
+    .file-collector-file-span {
+        padding: 2px;
+        padding-left: 5px;
+        padding-right: 5px;
+        border-radius: 5px;
+        box-shadow: 2px 3px lightgrey;
+        background-color: lightcyan;
+        margin: 3px;
+        color: black;
+        font-size: .7em;
+        white-space: nowrap;
+    }
+    .file-collector-remove-button {
+        margin-left: 10px;
+        padding: 3px;
+        cursor: pointer;
+        font-weight: bold;
+        color: darkgrey;
+        user-select: none;
+    }
+    .file-collector-remove-button:hover {
+        color: white;
+    }
+
+</style>

@@ -34,36 +34,38 @@
                 </span>
             </div>
         </div>
-        <div>
-            <div class="vuedatepicker-dropdown" v-if="showDropdownFlag">
-                <div class="vuedatepicker-inputs-container">
-                    <input v-model="year" type="number" class="form-control vuedatepicker-year-input">
-                    <select v-model="month" class="form-control vuedatepicker-month-select">
-                        <option v-for="monthname, monthindex in months"
-                                v-bind:value="monthindex"
-                                v-html="monthname"></option>
-                    </select>
-                    <button type="button" v-on:click="gotoToday" class="vuedatepicker-today-button">&#x2600;</button>
-                </div>
-                <div class="vuedatepicker-inputs-container">
-                    <table class="vuedatepicker-days-table">
-                        <thead>
-                        <tr>
-                            <th v-for="weekday in weekdayInitials" v-html="weekday"></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="weekindex in [0,1,2,3,4]">
-                            <td v-for="dayindex in [0,1,2,3,4,5,6]"
-                                v-html="dateByWeekAndDayIndex(weekindex, dayindex).getDate()"
-                                v-bind:class="getDayTableCellClass(dateByWeekAndDayIndex(weekindex, dayindex))"
-                                v-on:click="setDayByWeekAndDayIndex(weekindex, dayindex)"
-                            ></td>
+        <div class="vuedatepicker-dropdown" v-if="showDropdownFlag">
+            <div class="vuedatepicker-inputs-container">
+                <input v-model="year" type="number" class="form-control vuedatepicker-year-input">
+                <select v-model="month" class="form-control vuedatepicker-month-select">
+                    <option v-for="monthname, monthindex in months"
+                            v-bind:value="monthindex"
+                            v-html="monthname"></option>
+                </select>
+                <button type="button"
+                        v-on:click="gotoToday"
+                        class="vuedatepicker-today-button"
+                        v-if="showTodayButton"
+                >&#x2600;</button>
+            </div>
+            <div class="vuedatepicker-inputs-container">
+                <table class="vuedatepicker-days-table">
+                    <thead>
+                    <tr>
+                        <th v-for="weekday in weekdayInitials" v-html="weekday"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="weekindex in [0,1,2,3,4]">
+                        <td v-for="dayindex in [0,1,2,3,4,5,6]"
+                            v-html="dateByWeekAndDayIndex(weekindex, dayindex).getDate()"
+                            v-bind:class="getDayTableCellClass(dateByWeekAndDayIndex(weekindex, dayindex))"
+                            v-on:click="setDayByWeekAndDayIndex(weekindex, dayindex)"
+                        ></td>
 
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -76,7 +78,8 @@
             value: {},
             locale: {type: String, default: () => {return typeof(window.laravelLocale) != 'undefined' ? window.laravelLocale : 'hu'}},
             inputClass: {type: String, default: ''},
-            showTimeInputs: {type: String, default: 'false'}
+            showTimeInputs: {type: String, default: 'false'},
+            showTodayButton: {type: Boolean, default: true},
         },
         data: function() {
             return {

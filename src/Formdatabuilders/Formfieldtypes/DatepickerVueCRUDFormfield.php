@@ -27,4 +27,9 @@ class DatepickerVueCRUDFormfield extends VueCRUDFormfield
         return $this;
     }
 
+    public function setShowTodayButton(bool $value)
+    {
+        $this->setProps(['showTodayButton' => $value], true);
+        return $this;
+    }
 }

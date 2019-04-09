@@ -208,8 +208,8 @@ class VueCRUDControllerBase
         return [
             'trixStoreAttachment',
             'trixRemoveAttachment',
-            'storePublicPicture',
-            'removePublicPicture',
+            'storePublicAttachment',
+            'removePublicAttachment',
             'trixGeneratePreview',
             'move',
             'moveTo',
@@ -228,34 +228,66 @@ class VueCRUDControllerBase
 
     protected function trixStoreAttachment()
     {
-        return $this->storePublicPicture();
+        $filename = $this->saveUploadedFileToPublic();
+
+        return response()->json(['url' => asset('storage/'.$filename)]);
     }
 
     protected function trixRemoveAttachment()
     {
-        return $this->removePublicPicture();
+        return $this->removePublicAttachment();
     }
 
-    protected function storePublicPicture()
+    protected function storePublicAttachment()
+    {
+        $processedFilename = $this->saveUploadedFileToPublic();
+        if (method_exists($this, 'processUploadedFile')) {
+            return response()->json([
+                'url' => $this->processUploadedFile($processedFilename),
+            ]);
+        } else {
+            return response()->json([
+                'url' => asset('storage'
+                    .DIRECTORY_SEPARATOR
+                    .'attachments'
+                    .DIRECTORY_SEPARATOR
+                    .basename($processedFilename)),
+            ]);
+        }
+    }
+
+    protected function removePublicAttachment()
+    {
+        $file = basename(request()->get('url'));
+        if (method_exists($this, 'processRemovedFile')) {
+            $this->processRemovedFile($file);
+        }
+        if (\Storage::disk('public')->exists('attachments'.DIRECTORY_SEPARATOR.$file)) {
+            \Storage::disk('public')->delete('attachments'.DIRECTORY_SEPARATOR.$file);
+        }
+
+        return response('OK');
+    }
+
+    protected function saveUploadedFileToPublic()
     {
         $originalFileInfo = pathinfo(request()->get('fileName'));
+        if (!isset($originalFileInfo['extension'])) {
+            $originalFileInfo['extension'] = '';
+        }
         $filename = $this->generatePublicFilename($originalFileInfo['extension']);
         \Storage::disk('public')->put(
             $filename,
             base64_decode(Str::after(request()->get('fileData'), ';base64,'))
         );
 
-        return response()->json(['url' => asset('storage/'.$filename)]);
-    }
-
-    protected function removePublicPicture()
-    {
-        $file = basename(request()->get('url'));
-        if (\Storage::disk('public')->exists('attachments'.DIRECTORY_SEPARATOR.$file)) {
-            \Storage::disk('public')->delete('attachments'.DIRECTORY_SEPARATOR.$file);
-        }
-
-        return response('OK');
+        return storage_path('app'
+            .DIRECTORY_SEPARATOR
+            .'public'
+            .DIRECTORY_SEPARATOR
+            .'attachments'
+            .DIRECTORY_SEPARATOR
+            .basename($filename));
     }
 
     protected function generatePublicFilename($extension)

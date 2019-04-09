@@ -64,11 +64,11 @@
             fetchValueset: function(callback) {
                 window.axios.get(this.fetchUrl)
                     .then((response) => {
-                    Vue.set(this.subComponentProps, this.subComponentValuesetProp, response.data.elements)
-                if (typeof(callback) != 'undefined') {
-                    callback(response.data);
-                }
-            })
+                        Vue.set(this.subComponentProps, this.subComponentValuesetProp, response.data.elements)
+                        if (typeof(callback) != 'undefined') {
+                            callback(response.data);
+                        }
+                    })
             },
             showForm: function() {
                 this.showPopup = true;

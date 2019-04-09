@@ -62,3 +62,16 @@ The package supports multi-step (multi-stage?) forms, where the different steps 
  }
  ```
 as the first three lines of the method.
+
+## File uploads
+The FileCollector component allows for uploading files via ajax POST requests. By default it uses the 'public' disk of the built-in Storage service. If you want to add custom handling to uploads and removals, there are two functions you need to define in the controller in question:
+ ```
+ // returns a filename string
+public function processUploadedFile($absolutePathOfFile)
+ ```
+ 
+
+ ```
+ //returns null
+processRemovedFile($publicUrlOfFile) 
+ ```

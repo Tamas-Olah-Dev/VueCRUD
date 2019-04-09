@@ -3,19 +3,18 @@
 namespace Datalytix\VueCRUD\Formdatabuilders\Formfieldtypes;
 
 
-class TreeselectWithAddButtonVueCRUDFormfield extends VueCRUDFormfield
+class FileCollectorVueCRUDFormfield extends VueCRUDFormfield
 {
 
     /**
-     * TreeselectWithAddButtonVueCRUDFormfield constructor.
+     * FileCollectorVueCRUDFormfield constructor.
      * @param array $properties
      */
     public function __construct($properties = [])
     {
         parent::__construct($properties);
         $this->kind = 'custom-component';
-        $this->type = 'component-wrapper-with-add-button';
-        $this->props['subComponent'] = 'treeselect-wrapper';
+        $this->type = 'file-collector';
         $this->props['subComponentValuesetProp'] = 'originalOptions';
     }
 
@@ -34,12 +33,9 @@ class TreeselectWithAddButtonVueCRUDFormfield extends VueCRUDFormfield
     public function addRoutes($slug)
     {
         $id = \Route::getCurrentRoute()->hasParameter('subject')
-            ? \Route::getCurrentRoute()->getParameter('subject')
+            ? \Route::getCurrentRoute()->parameters()['subject']
             : -1;
-        $this->props['fetchUrl'] = route('vuecrud_'.$slug.'_index');
-        $this->props['formUrl'] = route('vuecrud_'.$slug.'_create');
-        $this->props['storeUrl'] = route('vuecrud_'.$slug.'_store');
-        $this->props['formAjaxOperationsUrl'] = route('vuecrud_'.$slug.'_ajax_operations', ['subject' => $id]);
+        $this->props['uploadUrl'] = route('vuecrud_'.$slug.'_ajax_operations', ['subject' => $id]);
 
         return $this;
     }
