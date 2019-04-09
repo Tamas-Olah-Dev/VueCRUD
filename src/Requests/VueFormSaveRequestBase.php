@@ -103,4 +103,11 @@ class VueCRUDRequestBase extends FormRequest
 
         return $dataset;
     }
+
+    public function isCurrentStepFinal()
+    {
+        $class = static::FORMDATABUILDER_CLASS;
+
+        return request()->get('currentStep') == $class::getLastStep();
+    }
 }

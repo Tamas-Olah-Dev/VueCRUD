@@ -5,8 +5,10 @@ This is a Vue.js-based CRUD model manager for Eloquent models. With a little set
 # Installation:
 
 The package needs the project to have vue.js set up
-##### composer require datalytix/vuecrud
-##### artisan vendor:publish
+ ```
+composer require datalytix/vuecrud
+artisan vendor:publish
+ ```
 If you don't have the Vue component auto-discovery enabled in app.js, add the modules published in resources/js/components.
 ##### npm run dev
 
@@ -38,10 +40,25 @@ When using the Trix rich text editor, attachments are saved and removed in the p
 When using a Treeselect component, the library needs to be installed by running npm install --save @riophae/vue-treeselect, and 
 app.js has to import it by adding the following to it:
 
+ ```
 import Treeselect from '@riophae/vue-treeselect'
 
 import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 
 Vue.component('treeselect', Treeselect);
+ ```
 
 The valueset model should have a getVueTreeselectCompatibleCollection public static method that provides the node list. It should use the canBeTurnedIntoKeyValueCollection trait's getVueTreeselectCompatibleValueset method.
+
+## Multi-step forms
+The package supports multi-step (multi-stage?) forms, where the different steps only appear when the previous step's form elements were validated. Saving only occurs on the last step. To use multi-step forms:
+- use the setStep(int $step) method on form elements in the formdatabuilder
+- it's optional (but recommended) to add headers to each step so that the form sections can be distinct. This has to be done in the formdatabuilder's constructor, with the addStepLabel method.
+- the save method of the request needs a check before saving/updating: you should insert
+ 
+ ```
+ if (!$this->isCurrentStepFinal()) {
+     return response('OK');
+ }
+ ```
+as the first three lines of the method.

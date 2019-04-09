@@ -26,7 +26,7 @@ class VueCRUDServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/resources/views/', 'vue-crud');
 
         $this->publishes([
-            __DIR__.'/resources/views' => resource_path('views/vendor/vue-crud'),
+            __DIR__.'/resources/views' => resource_path('views/packages/vue-crud'),
         ], 'vuecrud-views');
         $this->publishes([
             __DIR__.'/resources/js' => resource_path('js'),

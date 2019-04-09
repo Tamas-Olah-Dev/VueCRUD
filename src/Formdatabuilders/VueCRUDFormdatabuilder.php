@@ -16,6 +16,15 @@ abstract class VueCRUDFormdatabuilder
     protected $defaultContainerClass = 'form-group col';
     protected $defaultInputClass = 'form-control';
 
+    protected $steps = [];
+
+    public function addStepLabel($index, $label)
+    {
+        $this->steps[$index] = $label;
+
+        return $this;
+    }
+
     public function getValue($fieldId)
     {
         $customGetterMethodName = 'get_'.$fieldId.'_value';
@@ -90,10 +99,11 @@ abstract class VueCRUDFormdatabuilder
     public function buildAllFields()
     {
         $this->formdata = [];
-        $fields = self::getFieldsForStep(self::getCurrentStep());
+        $fields = static::getFields();
         foreach ($fields as $fieldId => $fieldData) {
             if ($this->shouldBuildField($fieldId)) {
                 $element = [
+                    'step'           => $fieldData->getStep(),
                     'kind'           => $fieldData->getKind(),
                     'type'           => $fieldData->getType(),
                     'containerClass' => $this->defaultContainerClass.' '.$fieldData->getContainerClass(),
@@ -118,21 +128,22 @@ abstract class VueCRUDFormdatabuilder
     {
         return [
             'config' => [
-                'currentStep' => self::getCurrentStep(),
-                'steps' => self::getSteps()
+                'mode' => $this->subject === null ? 'creating' : 'editing',
+                'steps' => self::getSteps(),
+                'stepLabels' => $this->steps
             ]
         ];
     }
 
     public function getFormdataJson()
     {
-        return json_encode($this->formdata);
+        return json_encode(array_merge($this->buildConfigurationFormdata(), $this->formdata));
     }
 
-    public static function getValidationRules($requestType, $step = 1)
+    public static function getValidationRules($requestType)
     {
         $rules = [];
-        foreach (self::getFieldsForStep($step) as $fieldId => $fieldData) {
+        foreach (self::getFieldsForStep(self::getCurrentStep()) as $fieldId => $fieldData) {
             if (($requestType == self::REQUEST_TYPE_CREATING)
                 || (! self::isFieldOnlyNeededWhenCreating($fieldId))
             ) {
@@ -289,6 +300,6 @@ abstract class VueCRUDFormdatabuilder
 
     protected static function getCurrentStep()
     {
-        return request()->get('formStep', 1);
+        return request()->get('currentStep', 1);
     }
 }
