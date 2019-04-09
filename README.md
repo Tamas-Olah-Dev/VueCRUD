@@ -4,14 +4,25 @@ This is a Vue.js-based CRUD model manager for Eloquent models. With a little set
 
 # Installation:
 
-The package needs the project to have vue.js set up
- ```
-composer require datalytix/vuecrud
-artisan vendor:publish
- ```
-If you don't have the Vue component auto-discovery enabled in app.js, add the modules published in resources/js/components.
-##### npm run dev
+The package needs the project to have vue.js included (it's default in new Laravel projects)
 
+Install the package with
+```
+composer require datalytix/vuecrud
+```
+
+and use 
+```
+artisan vendor:publish --force 
+```
+to publish the JS components. When running this command the first time everything in the package should be published, but later only choose vuecrud-scripts from the tags, so that customized views or configurations aren't overwritten. 
+If you don't have the Vue component auto-discovery enabled in app.js, add the modules published in resources/js/components.
+
+If everything is done, run
+```
+npm run dev
+```
+(or prod, depending on the situation)
 
 # Adding to a model:
 
