@@ -216,7 +216,11 @@
                 let result = {};
                 for (let key in this.subjectData) {
                     if (this.subjectData.hasOwnProperty(key)) {
-                        result[key] = this.subjectData[key].value;
+                        if (this.subjectData[key].type == 'text') {
+                            result[key] = this.subjectData[key].value.toString();
+                        } else {
+                            result[key] = this.subjectData[key].value;
+                        }
                     }
                 }
                 result['respondWith'] = this.redirectToResponseOnSuccess == 'true'
@@ -405,7 +409,7 @@
         left: -2px;
         width: 101%;
         height: 101%;
-        z-index: 2000;
+        z-index: 100;
         background-color: rgba(210, 210, 210, .2);
     }
     h4.form-step-header {

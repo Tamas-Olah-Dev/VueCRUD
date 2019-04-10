@@ -53,25 +53,26 @@ abstract class VueCRUDFormdatabuilder
 
     public function getValueset($fieldId)
     {
-        if (static::getFields()->get($fieldId)->getType() == 'yesno') {
+        $field = static::getFielddata($fieldId);
+        if ($field->getType() == 'yesno') {
             $result = collect([0 => 'Nem', 1 => 'Igen']);
-            if ((static::getFields()->get($fieldId)->getAddChooseMessage()) && (! $this->isValidValue($this->getValue($fieldId)))) {
+            if (($field->getAddChooseMessage()) && (! $this->isValidValue($this->getValue($fieldId)))) {
                 $result->put(-1, __('Please select:'));
             }
             return $result;
         }
-        if (static::getFields()->get($fieldId)->getType() == 'custom') {
-            return collect(static::getFields()->get($fieldId)->getValuesetClass());
+        if ($field->getType() == 'custom') {
+            return collect($field->getValuesetClass());
         }
-        $valuesetClass = static::getFields()->get($fieldId)->getValuesetClass();
+        $valuesetClass = $field->getValuesetClass();
         if ($valuesetClass === null) {
             return collect([]);
         }
         $result = collect([]);
-        if ((static::getFields()->get($fieldId)->getAddChooseMessage()) && (! $this->isValidValue($this->getValue($fieldId)))) {
+        if (($field->getAddChooseMessage()) && (! $this->isValidValue($this->getValue($fieldId)))) {
             $result->put(-1, __('Please select:'));
         }
-        $valuesetGetterMethod = static::getFields()->get($fieldId)->getValuesetGetter();
+        $valuesetGetterMethod = $field->getValuesetGetter();
         if (method_exists($valuesetClass, $valuesetGetterMethod)) {
             $valueset = call_user_func($valuesetClass.'::'.$valuesetGetterMethod);
             foreach ($valueset as $index => $value) {

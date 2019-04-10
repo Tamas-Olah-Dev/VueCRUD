@@ -34,7 +34,7 @@ class TreeselectWithAddButtonVueCRUDFormfield extends VueCRUDFormfield
     public function addRoutes($slug)
     {
         $id = \Route::getCurrentRoute()->hasParameter('subject')
-            ? \Route::getCurrentRoute()->getParameter('subject')
+            ? \Route::getCurrentRoute()->parameters()['subject']
             : -1;
         $this->props['fetchUrl'] = route('vuecrud_'.$slug.'_index');
         $this->props['formUrl'] = route('vuecrud_'.$slug.'_create');

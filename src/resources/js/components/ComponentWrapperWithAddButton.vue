@@ -85,6 +85,7 @@
             },
         },
         mounted() {
+            this.subComponentValue = this.value;
             this.subComponentProps =  {...this.defaultSubComponentProps};
             this.fetchValueset();
         }

@@ -64,6 +64,16 @@ The valueset model should have a getVueTreeselectCompatibleCollection public sta
 ## Multi-step forms
 The package supports multi-step (multi-stage?) forms, where the different steps only appear when the previous step's form elements were validated. Saving only occurs on the last step. To use multi-step forms:
 - use the setStep(int $step) method on form elements in the formdatabuilder
+- use the setConditions(array $conditions) method to set up the conditions based on which the form element will appear. A condition definition looks like this: 
+ ```
+['field' => fieldname, 'value' => value]
+    
+//so if we want to show the field only if the 'name' property is 'Danny' or 'Gilbert', we use
+    
+['field' => 'name', 'value' => 'Danny']
+['field' => 'name', 'value' => 'Gilbert']
+ ```
+ 
 - it's optional (but recommended) to add headers to each step so that the form sections can be distinct. This has to be done in the formdatabuilder's constructor, with the addStepLabel method.
 - the save method of the request needs a check before saving/updating: you should insert
  
