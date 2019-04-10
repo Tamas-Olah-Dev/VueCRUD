@@ -22,6 +22,7 @@ class VueTreeselectVueCRUDFormfield extends VueCRUDFormfield
         $this->props['noResultsText'] = __('No results found');
         $this->props['clearAllText'] = __('Clear all');
         $this->props['clearValueText'] = __('Clear value');
+        $this->props['placeholder'] = __('Select...');
     }
 
     /**
