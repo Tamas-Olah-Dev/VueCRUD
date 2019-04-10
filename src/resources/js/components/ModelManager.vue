@@ -75,7 +75,7 @@
                         </div>
                         <div class="portlet-body">
                             <div v-show="mode == 'elements-loading'" v-html="spinnerSrc" style="width:100%; display:flex; justify-content: center"></div>
-                            <table v-show="mode != 'elements-loading'" class="table table-striped" v-bind:class="elementTableClass">
+                            <table v-show="mode != 'elements-loading'" class="table table-striped model-manager-table" v-bind:class="elementTableClass">
                                 <thead>
                                 <tr>
                                     <th v-for="columnName, columnField in columns"
@@ -94,7 +94,7 @@
                                 <tbody>
                                 <tr v-for="element, elementIndex in elements">
                                     <td v-for="columnName, columnField in columns" v-html="element[columnField]"></td>
-                                    <td v-if="allowOperations == 'true'">
+                                    <td v-if="allowOperations == 'true'" class="model-manager-operations">
                                         <button type="button" v-if="showButton('details')"
                                                 v-bind:class="buttons['details']['class']"
                                                 v-on:click="showDetails(element[idProperty])"
