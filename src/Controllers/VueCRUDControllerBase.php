@@ -305,7 +305,7 @@ class VueCRUDControllerBase
 
     public function cleanRandomizationStringFromUploadFilename($filename)
     {
-        return \Str::after('___', $filename);
+        return Str::after($filename, '___');
     }
 
     protected function getModelManagerViewName()
