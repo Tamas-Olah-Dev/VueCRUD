@@ -56,7 +56,8 @@
                     }
                 }
             }},
-            limit: {default: null}
+            limit: {default: null},
+            mode: {default: 'url'}
         },
         data: function() {
             return {
@@ -100,9 +101,15 @@
                 this.uploadPublicFileToVueCRUDController(
                     this.uploadUrl,
                     this.pendingFiles[0],
-                    'storePublicAttachment'
+                    'storePublicAttachment',
+                    this.mode
                 ).then((response) => {
-                    this.files.push(response.data.url);
+                    if (this.mode == 'url') {
+                        this.files.push(response.data.url);
+                    } else {
+                        this.files.push(response.data);
+                    }
+
                     this.pendingFiles.splice(0, 1);
                     this.$emit('input', this.files);
                     if (this.pendingFiles.length == 0) {
@@ -112,13 +119,18 @@
                     }
                 });
             },
-            filenameLabel: function(filepath) {
-                let filename = filepath;
-                if (filepath.includes('/')) {
-                    let parts = filepath.split('/');
+            filenameLabel: function(file) {
+                let filename = '';
+                if (this.mode == 'url') {
+                    filename = file;
+                } else {
+                    filename = file.name;
+                }
+                if (filename.includes('/')) {
+                    let parts = filename.split('/');
                     filename = parts[parts.length - 1];
                 }
-                if (filepath.includes('___')) {
+                if (filename.includes('___')) {
                     filename = filename.substr(filename.indexOf('___')+3);
                 }
                 if (filename.length > 30) {
@@ -150,7 +162,15 @@
                 this.collectFiles(this.$refs.fileinput.files);
             },
             removeFile: function(index) {
-                this.removeUploadedPublicFile(this.uploadUrl, this.files[index], 'removePublicAttachment')
+                let target = this.mode == 'url'
+                    ? this.files[index]
+                    : this.files[index]['id'];
+                this.removeUploadedPublicFile(
+                    this.uploadUrl,
+                    target,
+                    'removePublicAttachment',
+                    this.mode
+                )
                     .then((response) => {
                         this.files.splice(index, 1);
                         this.$emit('input', this.files);

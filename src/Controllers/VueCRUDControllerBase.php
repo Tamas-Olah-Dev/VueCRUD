@@ -241,32 +241,51 @@ class VueCRUDControllerBase
     protected function storePublicAttachment()
     {
         $processedFilename = $this->saveUploadedFileToPublic();
-        if (method_exists($this, 'processUploadedFile')) {
-            return response()->json([
-                'url' => $this->processUploadedFile($processedFilename),
-            ]);
+        if (request()->get('mode') == 'url') {
+            if (method_exists($this, 'processUploadedFile')) {
+                return response()->json([
+                    'url' => $this->processUploadedFile($processedFilename),
+                ]);
+            } else {
+                return response()->json([
+                    'url' => asset('storage'
+                        .DIRECTORY_SEPARATOR
+                        .'attachments'
+                        .DIRECTORY_SEPARATOR
+                        .basename($processedFilename)),
+                ]);
+            }
         } else {
-            return response()->json([
-                'url' => asset('storage'
-                    .DIRECTORY_SEPARATOR
-                    .'attachments'
-                    .DIRECTORY_SEPARATOR
-                    .basename($processedFilename)),
-            ]);
+            if (method_exists($this, 'processUploadedFileToObject')) {
+                return response()->json($this->processUploadedFileToObject($processedFilename));
+            } else {
+                return response()->json([
+                    'id' => -1,
+                    'name' => $processedFilename
+                ]);
+            }
+
         }
     }
 
     protected function removePublicAttachment()
     {
-        $file = basename(request()->get('url'));
-        if (method_exists($this, 'processRemovedFile')) {
-            $this->processRemovedFile($file);
-        }
-        if (\Storage::disk('public')->exists('attachments'.DIRECTORY_SEPARATOR.$file)) {
-            \Storage::disk('public')->delete('attachments'.DIRECTORY_SEPARATOR.$file);
+        if (request()->get('mode') == 'url') {
+            $file = basename(request()->get('file'));
+            if (method_exists($this, 'processRemovedFile')) {
+                $this->processRemovedFile($file);
+            }
+            if (\Storage::disk('public')->exists('attachments'.DIRECTORY_SEPARATOR.$file)) {
+                \Storage::disk('public')->delete('attachments'.DIRECTORY_SEPARATOR.$file);
+            }
+            return response('OK');
+        } else {
+            if (method_exists($this, 'processRemovedFileObject')) {
+                return $this->processRemovedFileObject(request()->get('file'));
+            }
+            return response('OK');
         }
 
-        return response('OK');
     }
 
     protected function saveUploadedFileToPublic()
