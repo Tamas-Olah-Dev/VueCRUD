@@ -31,6 +31,7 @@ class VueCRUDFormfield
     protected $valuesetSortedGetter;
     protected $step;
     protected $conditions;
+    protected $hideIf;
 
     /**
      * VueCRUDFormfield constructor.
@@ -57,6 +58,7 @@ class VueCRUDFormfield
         $this->valuesetGetter = null;
         $this->valuesetSortedGetter = null;
         $this->conditions = [];
+        $this->hideIf = [];
         $allowedKeys = array_keys($this->toArray());
         $this->step = 1;
         foreach ($properties as $property => $value) {
@@ -474,5 +476,27 @@ class VueCRUDFormfield
         }
 
         return $result;
+    }
+
+    /**
+     * @param array $hideIf
+     * @return VueCRUDFormfield
+     */
+    public function setHideIf(array $hideIf, $merge = true): VueCRUDFormfield
+    {
+        if ($merge) {
+            $this->hideIf = array_merge($this->hideIf, $hideIf);
+        } else {
+            $this->hideIf = $hideIf;
+        }
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getHideIf(): array
+    {
+        return $this->hideIf;
     }
 }

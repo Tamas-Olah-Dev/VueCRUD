@@ -116,8 +116,9 @@ abstract class VueCRUDFormdatabuilder
                     'mandatory'      => $fieldData->getMandatory(),
                     'props'          => json_encode($fieldData->getProps()),
                     'helpTooltip'    => $fieldData->getHelpTooltip(),
-                    'customOptions'    => $fieldData->getCustomOptions(),
-                    'conditions' => $fieldData->getConditions(),
+                    'customOptions'  => $fieldData->getCustomOptions(),
+                    'conditions'     => $fieldData->getConditions(),
+                    'hideIf'         => $fieldData->getHideIf(),
                 ];
                 $this->formdata[$fieldId] = $element;
             }
@@ -142,11 +143,11 @@ abstract class VueCRUDFormdatabuilder
     {
         return [
             'config' => [
-                'mode' => $this->subject === null ? 'creating' : 'editing',
-                'steps' => self::getSteps(),
-                'stepLabels' => $this->steps,
+                'mode'            => $this->subject === null ? 'creating' : 'editing',
+                'steps'           => self::getSteps(),
+                'stepLabels'      => $this->steps,
                 'conditionFields' => $this->getConditionFields(),
-            ]
+            ],
         ];
     }
 
@@ -161,8 +162,8 @@ abstract class VueCRUDFormdatabuilder
         foreach (self::getFieldsForStep(self::getCurrentStep()) as $fieldId => $fieldData) {
             if ((self::shouldBuildValidationField($fieldId))
                 && (($requestType == self::REQUEST_TYPE_CREATING)
-                || (! self::isFieldOnlyNeededWhenCreating($fieldId))))
-            {
+                    || (! self::isFieldOnlyNeededWhenCreating($fieldId)))
+            ) {
                 $ruleset = [];
                 if ($fieldData->getMandatory()) {
                     $ruleset[] = 'required';
@@ -182,7 +183,7 @@ abstract class VueCRUDFormdatabuilder
                 }
                 $fieldDataRules = $fieldData->getRules();
                 if (\Route::getCurrentRoute()->hasParameter('subject')) {
-                    $fieldDataRules = collect($fieldDataRules)->transform(function($fieldDataRule, $key) {
+                    $fieldDataRules = collect($fieldDataRules)->transform(function ($fieldDataRule, $key) {
                         if (\Illuminate\Support\Str::contains($fieldDataRule, 'unique:')) {
                             $table = \Illuminate\Support\Str::after($fieldDataRule, ':');
                             return Rule::unique($table)->ignore(\Route::getCurrentRoute()->parameters()['subject']->id);
@@ -262,11 +263,11 @@ abstract class VueCRUDFormdatabuilder
             return false;
         }
         if (request()->has('subjectdata')) {
-            if (!$fieldData->meetsConditions((array)json_decode(request()->get('subjectdata')))) {
+            if (! $fieldData->meetsConditions((array) json_decode(request()->get('subjectdata')))) {
                 return false;
             }
         }
-        if (!$fieldData->meetsConditions(request()->all())) {
+        if (! $fieldData->meetsConditions(request()->all())) {
             return false;
         }
 
@@ -285,11 +286,11 @@ abstract class VueCRUDFormdatabuilder
             return false;
         }
         if (request()->has('subjectdata')) {
-            if (!$fieldData->meetsConditions((array)json_decode(request()->get('subjectdata')))) {
+            if (! $fieldData->meetsConditions((array) json_decode(request()->get('subjectdata')))) {
                 return false;
             }
         }
-        if (($this->subject != null) && (!$fieldData->meetsConditions($this->subject->toArray()))) {
+        if (($this->subject != null) && (! $fieldData->meetsConditions($this->subject->toArray()))) {
             return false;
         }
         if (! self::isFieldOnlyNeededWhenCreating($fieldId)) {
@@ -327,7 +328,7 @@ abstract class VueCRUDFormdatabuilder
 
     public static function getSteps()
     {
-        return static::getFields()->map(function($item) {
+        return static::getFields()->map(function ($item) {
             return $item->getStep();
         })->values()->unique()->sort()->values();
     }

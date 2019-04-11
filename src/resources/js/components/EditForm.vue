@@ -13,122 +13,123 @@
                     <div v-for="data, fieldname in subjectDataForStep(step)"
                          v-bind:style="{height: typeof(data.customOptions['cssHeight']) == 'undefined' ? 'auto' : data.customOptions['cssHeight']}"
                          v-bind:class="data.containerClass">
-                        <label v-if="data.label != null">
-                            {{ data.label }}
-                            <span v-if="data.mandatory"> *</span>
-                            <span class="edit-form-label-tooltip" v-if="typeof(data.helpTooltip) != 'undefined'" v-html="data.helpTooltip"></span>
-                            <span v-if="errorExists(fieldname)" class="text-danger validation-error-label-message" v-html="errors[fieldname][0]"></span>
-                        </label>
-                        <input v-if="data.kind == 'input'  && data.type != 'password'"
-                               v-model="subjectData[fieldname].value"
-                               v-bind:class="data.class"
-                        >
-                        <div v-if="data.kind == 'slug'">
-                            <input v-model="subjectData[fieldname].value"
-                                   v-bind:class="data.class"
-                                   style="padding-right: 1.5em; display: inline-block; width: 90%">
-                            <span style="margin-left: -1.5em; cursor:pointer"
-                                  v-on:click="generateSlug(data.customOptions['source'], fieldname)"
-                            >↺</span>
-                        </div>
-                        <input v-if="data.kind == 'input' && data.type == 'password'"
-                               v-model="subjectData[fieldname].value"
-                               v-bind:class="data.class"
-                               type="password"
-                        >
-                        <number-field v-if="data.kind == 'numberfield'"
-                                      editable="true"
-                                      input-class="form-control col-12"
-                                      show-currency-label="true"
-                                      container-class="col-12"
-                                      v-model="subjectData[fieldname].value"
-                                      v-bind="JSON.parse(data.props)"
-                        ></number-field>
-
-                        <textarea v-if="data.kind == 'text' && data.type == 'simple'"
-                                  v-model="subjectData[fieldname].value"
-                                  v-bind:class="data.class"
-                        ></textarea>
-                        <div v-if="data.kind == 'text' && data.type == 'richtext-trix'" v-bind:class="data.class" style="min-height:95%; height:95%; margin-bottom: 2em">
-                            <trix-wrapper v-model="subjectData[fieldname].value"
-                                          v-bind:fieldname="fieldname"
-                                          v-bind="JSON.parse(data.props)"
-                                          v-bind:ajax-operations-url="ajaxOperationsUrl"
-                            ></trix-wrapper>
-                        </div>
-                        <select v-if="data.kind == 'select' && (data.type == null || data.type == 'yesno' || data.type == 'custom')"
-                                v-model="subjectData[fieldname].value"
-                                v-bind:class="data.class"
-                        >
-                            <option v-for="valuesetvalue, valuesetitem in data.valuesetSorted"
-                                    v-bind:value="valuesetvalue"
-                                    v-html="valuesetitem">
-                            </option>
-                        </select>
-                        <select-or-add-field v-if="data.kind == 'select' && data.type == 'select-or-add-field'"
-                                             v-bind="JSON.parse(data.props)"
-                                             v-model="subjectData[fieldname].value"
-                        ></select-or-add-field>
-                        <datepicker v-if="data.kind == 'datepicker'"
-                                    v-bind="JSON.parse(data.props)"
-                                    v-model="subjectData[fieldname].value"
-                        ></datepicker>
-                        <image-picker v-if="data.kind == 'imagepicker'"
-                                      v-bind="JSON.parse(data.props)"
-                                      v-model="subjectData[fieldname].value"
-                                      v-bind:upload-url="ajaxOperationsUrl"
-                        ></image-picker>
-                        <span v-if="data.kind == 'radio'">
-                            <p v-for="valuesetvalue, valuesetitem in data.valuesetSorted">
-                                <input
-                                        type="radio"
-                                        v-model="subjectData[fieldname].value"
-                                        :id="fieldname+'_'+valuesetvalue"
-                                        :value="valuesetvalue">
-                                <label :for="fieldname+'_'+valuesetvalue" v-html="valuesetitem">
-                                </label>
-                            </p>
-                        </span>
-                        <span v-if="data.kind == 'checkbox'">
-                            <p v-for="valuesetvalue, valuesetitem in data.valuesetSorted">
-                                <input
-                                        type="checkbox"
-                                        v-model="subjectData[fieldname].value[valuesetvalue]"
-                                        :id="fieldname+'_'+valuesetvalue"
-                                        :value="valuesetvalue">
-                                <label :for="fieldname+'_'+valuesetvalue" v-html="valuesetitem">
-                                </label>
-                            </p>
-                        </span>
-                        <multi-select v-if="data.kind == 'vue-multiselect'"
-                                      v-bind="JSON.parse(data.props)"
-                                      :valueset="data.valuesetSorted"
-                                      v-model="subjectData[fieldname].value"
-                        ></multi-select>
-                        <treeselect v-if="data.kind == 'vue-treeselect'"
-                                    v-bind="JSON.parse(data.props)"
-                                    :options="data.valuesetSorted"
-                                    v-model="subjectData[fieldname].value"
-                        ></treeselect>
-                        <component v-if="data.kind == 'custom-component'"
-                                   v-bind:is="data.type"
-                                   v-bind="JSON.parse(data.props)"
+                        <template v-if="!shouldHideField(fieldname)">
+                            <label v-if="data.label != null">
+                                {{ data.label }}
+                                <span v-if="data.mandatory"> *</span>
+                                <span class="edit-form-label-tooltip" v-if="typeof(data.helpTooltip) != 'undefined'" v-html="data.helpTooltip"></span>
+                                <span v-if="errorExists(fieldname)" class="text-danger validation-error-label-message" v-html="errors[fieldname][0]"></span>
+                            </label>
+                            <input v-if="data.kind == 'input'  && data.type != 'password'"
                                    v-model="subjectData[fieldname].value"
-                                   v-bind:errors="componentError(fieldname)"
-                                   :buttons="buttons"
-                        ></component>
-                        <select v-if="data.kind == 'multiselect'"
-                                style="height: 200px; min-height: 200px"
-                                class="form-control"
-                                v-bind:class="data.class"
-                                multiple="multiple"
-                                v-model="subjectData[fieldname].value"
-                        >
-                            <option v-for="valuesetvalue, valuesetitem in data.valuesetSorted"
-                                    v-bind:value="valuesetvalue" v-html="valuesetitem"
-                            ></option>
-                        </select>
+                                   v-bind:class="data.class"
+                            >
+                            <div v-if="data.kind == 'slug'">
+                                <input v-model="subjectData[fieldname].value"
+                                       v-bind:class="data.class"
+                                       style="padding-right: 1.5em; display: inline-block; width: 90%">
+                                <span style="margin-left: -1.5em; cursor:pointer"
+                                      v-on:click="generateSlug(data.customOptions['source'], fieldname)"
+                                >↺</span>
+                            </div>
+                            <input v-if="data.kind == 'input' && data.type == 'password'"
+                                   v-model="subjectData[fieldname].value"
+                                   v-bind:class="data.class"
+                                   type="password"
+                            >
+                            <number-field v-if="data.kind == 'numberfield'"
+                                          editable="true"
+                                          input-class="form-control col-12"
+                                          show-currency-label="true"
+                                          container-class="col-12"
+                                          v-model="subjectData[fieldname].value"
+                                          v-bind="JSON.parse(data.props)"
+                            ></number-field>
 
+                            <textarea v-if="data.kind == 'text' && data.type == 'simple'"
+                                      v-model="subjectData[fieldname].value"
+                                      v-bind:class="data.class"
+                            ></textarea>
+                            <div v-if="data.kind == 'text' && data.type == 'richtext-trix'" v-bind:class="data.class" style="min-height:95%; height:95%; margin-bottom: 2em">
+                                <trix-wrapper v-model="subjectData[fieldname].value"
+                                              v-bind:fieldname="fieldname"
+                                              v-bind="JSON.parse(data.props)"
+                                              v-bind:ajax-operations-url="ajaxOperationsUrl"
+                                ></trix-wrapper>
+                            </div>
+                            <select v-if="data.kind == 'select' && (data.type == null || data.type == 'yesno' || data.type == 'custom')"
+                                    v-model="subjectData[fieldname].value"
+                                    v-bind:class="data.class"
+                            >
+                                <option v-for="valuesetvalue, valuesetitem in data.valuesetSorted"
+                                        v-bind:value="valuesetvalue"
+                                        v-html="valuesetitem">
+                                </option>
+                            </select>
+                            <select-or-add-field v-if="data.kind == 'select' && data.type == 'select-or-add-field'"
+                                                 v-bind="JSON.parse(data.props)"
+                                                 v-model="subjectData[fieldname].value"
+                            ></select-or-add-field>
+                            <datepicker v-if="data.kind == 'datepicker'"
+                                        v-bind="JSON.parse(data.props)"
+                                        v-model="subjectData[fieldname].value"
+                            ></datepicker>
+                            <image-picker v-if="data.kind == 'imagepicker'"
+                                          v-bind="JSON.parse(data.props)"
+                                          v-model="subjectData[fieldname].value"
+                                          v-bind:upload-url="ajaxOperationsUrl"
+                            ></image-picker>
+                            <span v-if="data.kind == 'radio'">
+                                <p v-for="valuesetvalue, valuesetitem in data.valuesetSorted">
+                                    <input
+                                            type="radio"
+                                            v-model="subjectData[fieldname].value"
+                                            :id="fieldname+'_'+valuesetvalue"
+                                            :value="valuesetvalue">
+                                    <label :for="fieldname+'_'+valuesetvalue" v-html="valuesetitem">
+                                    </label>
+                                </p>
+                            </span>
+                            <span v-if="data.kind == 'checkbox'">
+                                <p v-for="valuesetvalue, valuesetitem in data.valuesetSorted">
+                                    <input
+                                            type="checkbox"
+                                            v-model="subjectData[fieldname].value[valuesetvalue]"
+                                            :id="fieldname+'_'+valuesetvalue"
+                                            :value="valuesetvalue">
+                                    <label :for="fieldname+'_'+valuesetvalue" v-html="valuesetitem">
+                                    </label>
+                                </p>
+                            </span>
+                            <multi-select v-if="data.kind == 'vue-multiselect'"
+                                          v-bind="JSON.parse(data.props)"
+                                          :valueset="data.valuesetSorted"
+                                          v-model="subjectData[fieldname].value"
+                            ></multi-select>
+                            <treeselect v-if="data.kind == 'vue-treeselect'"
+                                        v-bind="JSON.parse(data.props)"
+                                        :options="data.valuesetSorted"
+                                        v-model="subjectData[fieldname].value"
+                            ></treeselect>
+                            <component v-if="data.kind == 'custom-component'"
+                                       v-bind:is="data.type"
+                                       v-bind="JSON.parse(data.props)"
+                                       v-model="subjectData[fieldname].value"
+                                       v-bind:errors="componentError(fieldname)"
+                                       :buttons="buttons"
+                            ></component>
+                            <select v-if="data.kind == 'multiselect'"
+                                    style="height: 200px; min-height: 200px"
+                                    class="form-control"
+                                    v-bind:class="data.class"
+                                    multiple="multiple"
+                                    v-model="subjectData[fieldname].value"
+                            >
+                                <option v-for="valuesetvalue, valuesetitem in data.valuesetSorted"
+                                        v-bind:value="valuesetvalue" v-html="valuesetitem"
+                                ></option>
+                            </select>
+                        </template>
                     </div>
                 </div>
             </template>
@@ -248,6 +249,31 @@
             }
         },
         methods: {
+            shouldHideField: function(fieldname) {
+                let result = false;
+                let conditions = this.subjectData[fieldname].hideIf;
+                for (let i = 0; i < conditions.length; i++) {
+                    let firstValue = this.literalOrVariableSubjectdataValue(conditions[i][0]);
+                    let secondValue = this.literalOrVariableSubjectdataValue(conditions[i][2]);
+                    if (((conditions[i][1] == '=') && (firstValue == secondValue))
+                        || ((conditions[i][1] == '!=') && (firstValue != secondValue))
+                        || ((conditions[i][1] == '<') && (firstValue < secondValue))
+                        || ((conditions[i][1] == '>') && (firstValue > secondValue))) {
+                        result = true;
+                    }
+                }
+
+                return result;
+            },
+            literalOrVariableSubjectdataValue: function(value) {
+                if ((value.toString().substr(0, 1) == '$')
+                    && (typeof(this.subjectData[value.toString().substr(1)]) != 'undefined'))
+                {
+                    return this.subjectData[value.toString().substr(1)].value;
+                }
+
+                return value;
+            },
             subjectDataForStep: function(step) {
                 let result = {};
                 for (var item in this.subjectData) {
