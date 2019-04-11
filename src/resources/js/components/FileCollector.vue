@@ -21,7 +21,7 @@
                 <span v-for="pendingFile in pendingFiles" v-html="spinnerSrc">
                 </span>
             </div>
-            <div class="file-collector-add-button-container">
+            <div class="file-collector-add-button-container" v-if="this.limit == null || this.limit > this.combinedLength">
                 <label for="fileinput">
                     <input name="fileinput"
                            :ref="'fileinput'"
@@ -30,7 +30,7 @@
                            type="file"
                            style="position:absolute; opacity: 0; width: 0px">
                     <span :class="buttons.fileUpload.class"
-                          v-html="buttons.fileUpload.html"></span>
+                            v-html="buttons.fileUpload.html"></span>
                 </label>
             </div>
         </div>
@@ -55,7 +55,8 @@
                         html: '+'
                     }
                 }
-            }}
+            }},
+            limit: {default: null}
         },
         data: function() {
             return {
@@ -73,6 +74,9 @@
         computed: {
             pendingFilesLength: function() {
                 return this.pendingFiles.length;
+            },
+            combinedLength: function() {
+                return this.pendingFiles.length + this.files.length;
             },
             collectorLabel: function() {
                 return this.files.length == 0
@@ -124,6 +128,10 @@
                 }
             },
             collectFiles: function(filelist) {
+                if ((this.limit != null) && (filelist.length + this.combinedLength > this.limit)) {
+                    alert('Maximum '+this.limit+' fájl tölthető fel!')
+                    return false;
+                }
                 for (var i = 0; i < filelist.length; i++) {
                     this.pendingFiles.push(filelist[i]);
                 }
@@ -185,7 +193,7 @@
         padding-top: .4em;
     }
     /*.file-collector-add-button-container:hover {*/
-    /*border: 1px dotted lightblue;*/
+        /*border: 1px dotted lightblue;*/
     /*}*/
     .file-collector-container-focused {
         background-color: lightgrey;
