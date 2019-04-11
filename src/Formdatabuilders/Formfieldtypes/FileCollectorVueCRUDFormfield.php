@@ -46,4 +46,11 @@ class FileCollectorVueCRUDFormfield extends VueCRUDFormfield
 
         return $this;
     }
+
+    public function setLimit(int $limit)
+    {
+        $this->props['limit'] = $limit;
+
+        return $this;
+    }
 }
