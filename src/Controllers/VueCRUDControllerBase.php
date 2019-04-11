@@ -303,7 +303,7 @@ class VueCRUDControllerBase
         return $filename;
     }
 
-    public function cleanRandomizationStringFromUploadFilename($filename)
+    public static function cleanRandomizationStringFromUploadFilename($filename)
     {
         return Str::after($filename, '___');
     }

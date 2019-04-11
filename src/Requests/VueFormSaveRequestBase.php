@@ -4,6 +4,7 @@ namespace Datalytix\VueCRUD\Requests;
 
 use Datalytix\VueCRUD\Formdatabuilders\VueCRUDFormdatabuilder;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 
 class VueCRUDRequestBase extends FormRequest
 {
@@ -110,4 +111,11 @@ class VueCRUDRequestBase extends FormRequest
 
         return request()->get('currentStep') == $class::getLastStep();
     }
+
+
+    public static function cleanRandomizationStringFromUploadFilename($filename)
+    {
+        return Str::after($filename, '___');
+    }
+
 }
