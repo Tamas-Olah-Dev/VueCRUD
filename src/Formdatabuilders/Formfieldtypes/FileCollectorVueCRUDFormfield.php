@@ -53,4 +53,18 @@ class FileCollectorVueCRUDFormfield extends VueCRUDFormfield
 
         return $this;
     }
+
+    public function setObjectMode()
+    {
+        $this->props['mode'] = 'object';
+
+        return $this;
+    }
+
+    public function setUrlMode()
+    {
+        $this->props['mode'] = 'url';
+
+        return $this;
+    }
 }
