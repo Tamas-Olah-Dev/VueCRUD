@@ -69,7 +69,6 @@
         },
         mounted() {
             this.files = this.value.slice();
-            this.defaultUploadUrl = this.uploadUrl;
         },
         computed: {
             pendingFilesLength: function() {
@@ -105,9 +104,9 @@
                 ).then((response) => {
                     this.files.push(response.data.url);
                     this.pendingFiles.splice(0, 1);
+                    this.$emit('input', this.files);
                     if (this.pendingFiles.length == 0) {
                         this.uploading = false;
-                        this.uploadUrl = this.defaultUploadUrl;
                     } else {
                         this.uploadFirstFile();
                     }

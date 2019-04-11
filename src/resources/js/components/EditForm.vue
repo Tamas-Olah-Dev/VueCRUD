@@ -218,7 +218,9 @@
                 for (let key in this.subjectData) {
                     if (this.subjectData.hasOwnProperty(key)) {
                         if (this.subjectData[key].type == 'text') {
-                            result[key] = this.subjectData[key].value.toString();
+                            result[key] = this.subjectData[key].value == null
+                                ? ''
+                                : this.subjectData[key].value.toString();
                         } else {
                             result[key] = this.subjectData[key].value;
                         }
