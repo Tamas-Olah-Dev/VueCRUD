@@ -30,7 +30,7 @@
                            type="file"
                            style="position:absolute; opacity: 0; width: 0px">
                     <span :class="buttons.fileUpload.class"
-                            v-html="buttons.fileUpload.html"></span>
+                          v-html="buttons.fileUpload.html"></span>
                 </label>
             </div>
         </div>
@@ -119,6 +119,9 @@
                     let parts = filepath.split('/');
                     filename = parts[parts.length - 1];
                 }
+                if (filepath.includes('___')) {
+                    filename = filename.substr(filename.indexOf('___')+3);
+                }
                 if (filename.length > 30) {
                     return filename.substring(0, 12)
                         +'(...)'
@@ -193,7 +196,7 @@
         padding-top: .4em;
     }
     /*.file-collector-add-button-container:hover {*/
-        /*border: 1px dotted lightblue;*/
+    /*border: 1px dotted lightblue;*/
     /*}*/
     .file-collector-container-focused {
         background-color: lightgrey;

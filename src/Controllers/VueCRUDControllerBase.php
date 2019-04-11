@@ -271,11 +271,13 @@ class VueCRUDControllerBase
 
     protected function saveUploadedFileToPublic()
     {
-        $originalFileInfo = pathinfo(request()->get('fileName'));
-        if (!isset($originalFileInfo['extension'])) {
-            $originalFileInfo['extension'] = '';
-        }
-        $filename = $this->generatePublicFilename($originalFileInfo['extension']);
+//        $originalFileInfo = pathinfo(request()->get('fileName'));
+//        if (!isset($originalFileInfo['extension'])) {
+//            $originalFileInfo['extension'] = '';
+//        }
+        $filename = $this->generatePublicFilename(
+            request()->get('fileName')
+        );
         \Storage::disk('public')->put(
             $filename,
             base64_decode(Str::after(request()->get('fileData'), ';base64,'))
@@ -290,15 +292,20 @@ class VueCRUDControllerBase
             .basename($filename));
     }
 
-    protected function generatePublicFilename($extension)
+    protected function generatePublicFilename($originalName)
     {
         $basePath = 'attachments'.DIRECTORY_SEPARATOR;
-        $filename = $basePath.Str::random(32).'.'.$extension;
+        $filename = $basePath.Str::random(32).'___'.$originalName;
         while (\Storage::disk('public')->exists($filename)) {
-            $filename = $basePath.Str::random(32).'.'.$extension;
+            $filename = $basePath.Str::random(32).'___'.$originalName;
         }
 
         return $filename;
+    }
+
+    public function cleanRandomizationStringFromUploadFilename($filename)
+    {
+        return \Str::after('___', $filename);
     }
 
     protected function getModelManagerViewName()
