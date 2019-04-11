@@ -119,7 +119,7 @@ trait VueCRUDManageable
             'save' => self::buildButtonFromConfigData('vuecrud.buttons.save', [
                 'class' => 'btn btn-outline-primary btn-block', 'html' => __('Save'),
             ]),
-            'proceed' => self::buildButtonFromConfigData('vuecrud.buttons.save', [
+            'proceed' => self::buildButtonFromConfigData('vuecrud.buttons.proceed', [
                 'class' => 'btn btn-outline-primary btn-block', 'html' => __('Proceed'),
             ]),
             'backToList' => self::buildButtonFromConfigData('vuecrud.buttons.backToList', [
