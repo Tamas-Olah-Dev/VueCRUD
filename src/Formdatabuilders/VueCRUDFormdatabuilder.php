@@ -60,7 +60,7 @@ abstract class VueCRUDFormdatabuilder
                 $result->put(-1, __('Please select:'));
             }
             $result->put(0, __('No'));
-            $result->put(0, __('Yes'));
+            $result->put(1, __('Yes'));
             return $result;
         }
         if ($field->getType() == 'custom') {
