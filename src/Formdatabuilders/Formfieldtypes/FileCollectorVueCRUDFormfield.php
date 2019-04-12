@@ -18,31 +18,12 @@ class FileCollectorVueCRUDFormfield extends VueCRUDFormfield
         $this->props['subComponentValuesetProp'] = 'originalOptions';
     }
 
-    public function setComponent($componentName)
-    {
-        $this->type = $componentName;
-
-        return $this;
-    }
-
-    public function getComponent()
-    {
-        return $this->type;
-    }
-
     public function addRoutes($slug)
     {
         $id = \Route::getCurrentRoute()->hasParameter('subject')
             ? \Route::getCurrentRoute()->parameters()['subject']
             : -1;
         $this->props['uploadUrl'] = route('vuecrud_'.$slug.'_ajax_operations', ['subject' => $id]);
-
-        return $this;
-    }
-
-    public function setTreeselectLabelFieldName($name)
-    {
-        $this->props['defaultSubComponentProps'] = ['labelName' => $name];
 
         return $this;
     }

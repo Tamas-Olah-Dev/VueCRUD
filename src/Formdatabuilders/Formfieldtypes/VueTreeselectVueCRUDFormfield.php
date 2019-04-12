@@ -15,7 +15,8 @@ class VueTreeselectVueCRUDFormfield extends VueCRUDFormfield
         parent::__construct($properties);
         $this->kind = 'vue-treeselect';
         $this->type = null;
-        $this->valuesetGetter = 'getVueTreeselectCompatibleCollection';
+        $this->valuesetGetter = 'getVueTreeselectCollection';
+        $this->valuesetSortedGetter = 'getVueTreeselectCollection';
         $this->props['loadingText'] = __('Loading');
         $this->props['noChildrenText'] = __('No sub-options');
         $this->props['noOptionsText'] = __('No options available');
