@@ -314,6 +314,8 @@ A text field that allows generating a slug from the contents of another text fie
 A simple text area.
 ###### TextVueCRUDFormfield
 A simple text input.
+###### NumberVueCRUDFormfield
+A simple number input. With the `setForceInteger(bool $value)` method it can be set to allow only integer values (checked during validation)
 ###### VueTreeselectVueCRUDFormfield
 A VueTreeselect wrapper component. Instead of getKeyValueCollection, it uses the valuesetClass's `public static getVueTreeselectCollection()` method. While this has to be defined, typically it's enough that it returns the `getVueTreeselectCompatibleValueset()` function's results from the canBeTurnedIntoKeyValueCollection trait. For tree-type models where relationships are set up (a model has a nullable model_id pointing to a parent model if it's a child, and a hasMany relationship to list the children) the relationship name should be passed to this function to build a tree.
 The `setMultiple(bool $multiple)` option allows for enabling/disabling multiselect.

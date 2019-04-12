@@ -20,8 +20,16 @@
                                 <span class="edit-form-label-tooltip" v-if="typeof(data.helpTooltip) != 'undefined'" v-html="data.helpTooltip"></span>
                                 <span v-if="errorExists(fieldname)" class="text-danger validation-error-label-message" v-html="errors[fieldname][0]"></span>
                             </label>
-                            <input v-if="data.kind == 'input'  && data.type != 'password'"
+                            <input v-if="data.kind == 'input' && data.type != 'password'  && data.type != 'number'"
                                    v-model="subjectData[fieldname].value"
+                                   v-bind:placeholder="subjectData[fieldname].placeholder"
+                                   v-bind:class="data.class"
+                                   type="text"
+                            >
+                            <input v-if="data.kind == 'input' && data.type == 'number'"
+                                   v-model="subjectData[fieldname].value"
+                                   type="number"
+                                   v-bind:placeholder="subjectData[fieldname].placeholder"
                                    v-bind:class="data.class"
                             >
                             <div v-if="data.kind == 'slug'">
@@ -34,6 +42,7 @@
                             </div>
                             <input v-if="data.kind == 'input' && data.type == 'password'"
                                    v-model="subjectData[fieldname].value"
+                                   v-bind:placeholder="subjectData[fieldname].placeholder"
                                    v-bind:class="data.class"
                                    type="password"
                             >
@@ -48,6 +57,7 @@
 
                             <textarea v-if="data.kind == 'text' && data.type == 'simple'"
                                       v-model="subjectData[fieldname].value"
+                                      v-bind:placeholder="subjectData[fieldname].placeholder"
                                       v-bind:class="data.class"
                             ></textarea>
                             <div v-if="data.kind == 'text' && data.type == 'richtext-trix'" v-bind:class="data.class" style="min-height:95%; height:95%; margin-bottom: 2em">

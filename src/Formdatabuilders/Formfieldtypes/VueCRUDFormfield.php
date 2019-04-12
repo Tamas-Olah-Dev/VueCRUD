@@ -32,6 +32,7 @@ class VueCRUDFormfield
     protected $step;
     protected $conditions;
     protected $hideIf;
+    protected $placeholder;
 
     /**
      * VueCRUDFormfield constructor.
@@ -59,6 +60,7 @@ class VueCRUDFormfield
         $this->valuesetSortedGetter = null;
         $this->conditions = [];
         $this->hideIf = [];
+        $this->placeholder = '';
         $allowedKeys = array_keys($this->toArray());
         $this->step = 1;
         foreach ($properties as $property => $value) {
@@ -498,5 +500,23 @@ class VueCRUDFormfield
     public function getHideIf(): array
     {
         return $this->hideIf;
+    }
+
+    /**
+     * @param string $placeholder
+     * @return VueCRUDFormfield
+     */
+    public function setPlaceholder(string $placeholder): VueCRUDFormfield
+    {
+        $this->placeholder = $placeholder;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPlaceholder(): string
+    {
+        return $this->placeholder;
     }
 }

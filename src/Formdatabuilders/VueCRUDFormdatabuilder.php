@@ -38,7 +38,7 @@ abstract class VueCRUDFormdatabuilder
     public function getDefaultOrSubjectValue($fieldId)
     {
         $value = null;
-        if (static::getFields()->get($fieldId)->getDefault() != null) {
+        if (static::getFields()->get($fieldId)->getDefault() !== null) {
             $value = static::getFields()->get($fieldId)->getDefault();
         }
         if ((is_array($this->defaults)) && (isset($this->defaults[$fieldId]))) {
@@ -55,10 +55,12 @@ abstract class VueCRUDFormdatabuilder
     {
         $field = static::getFielddata($fieldId);
         if ($field->getType() == 'yesno') {
-            $result = collect([0 => 'Nem', 1 => 'Igen']);
+            $result = collect([]);
             if (($field->getAddChooseMessage()) && (! $this->isValidValue($this->getValue($fieldId)))) {
                 $result->put(-1, __('Please select:'));
             }
+            $result->put(0, __('No'));
+            $result->put(0, __('Yes'));
             return $result;
         }
         if ($field->getType() == 'custom') {
@@ -119,6 +121,7 @@ abstract class VueCRUDFormdatabuilder
                     'customOptions'  => $fieldData->getCustomOptions(),
                     'conditions'     => $fieldData->getConditions(),
                     'hideIf'         => $fieldData->getHideIf(),
+                    'placeholder'    => $fieldData->getPlaceholder(),
                 ];
                 $this->formdata[$fieldId] = $element;
             }
@@ -173,8 +176,11 @@ abstract class VueCRUDFormdatabuilder
                 if ($fieldData->getType() == 'text') {
                     $ruleset[] = 'string';
                 }
-                if ($fieldData->getType() == 'numeric') {
+                if (($fieldData->getType() == 'numeric') || ($fieldData->getType() == 'number')) {
                     $ruleset[] = 'numeric';
+                    if (($fieldData->getType() == 'number') && ($fieldData->getForceInteger())) {
+                        $ruleset[] = 'integer';
+                    }
                 }
                 if ($fieldData->getKind() == 'select') {
                     if ($fieldData->getMandatory()) {
@@ -213,28 +219,31 @@ abstract class VueCRUDFormdatabuilder
                 } else {
                     switch ($rulename) {
                         case 'required':
-                            $messages[$fieldId.'.required'] = __('Hiányzó mező').$label;
+                            $messages[$fieldId.'.required'] = __('Value missing').$label;
                             break;
                         case 'not_in':
-                            $messages[$fieldId.'.not_in'] = __('Hiányzó mező').$label;
+                            $messages[$fieldId.'.not_in'] = __('Value missing').$label;
                             break;
                         case 'string':
-                            $messages[$fieldId.'.string'] = __('Nem szöveges tartalom').$label;
+                            $messages[$fieldId.'.string'] = __('Not a string').$label;
                             break;
                         case 'numeric':
-                            $messages[$fieldId.'.numeric'] = __('Nem numerikus').$label;
+                            $messages[$fieldId.'.numeric'] = __('Not a number').$label;
+                            break;
+                        case 'integer':
+                            $messages[$fieldId.'.integer'] = __('Not an integer').$label;
                             break;
                         case 'email':
-                            $messages[$fieldId.'.email'] = __('Nem megfelelő e-mailcím').$label;
+                            $messages[$fieldId.'.email'] = __('Not a valid e-mail address').$label;
                             break;
                         case 'date':
-                            $messages[$fieldId.'.date'] = __('Nem megfelelő dátum').$label;
+                            $messages[$fieldId.'.date'] = __('Not a valid date').$label;
                             break;
                         case 'confirmed':
-                            $messages[$fieldId.'.confirmed'] = __('A két jelszómező tartalma nem egyezik').$label;
+                            $messages[$fieldId.'.confirmed'] = __('The two password fields do not match').$label;
                             break;
                         case 'same':
-                            $messages[$fieldId.'.same'] = __('A két mező tartalma nem egyezik').$label;
+                            $messages[$fieldId.'.same'] = __('The two fields do not match').$label;
                             break;
                     }
                 }
