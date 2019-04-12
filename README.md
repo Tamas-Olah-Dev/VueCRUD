@@ -166,7 +166,15 @@ public static function shouldVueCRUDOperationsBeDisplayed()
 ```
 This allows for injecting authorization logic to the list, like only enabling operations for admin users.
 
+```
+public function addAdditionalDetails()
+```
+If this function is defined on the model, the Details view will incorporate the string it returns. Laravel allows for views to be returned as string via ->render(), so it can be used for complex pages as well. 
+
 The trait also provides the necessary routes. For those to be registered, the Modelname::setVueCRUDRoutes($subjectSlug = null, $urlBase = '/') method has to be called in web.php.  
+
+### Controllers
+Generated with the other scaffolding. The base controllers typically need no customizations.
 
 ### Data providers
 

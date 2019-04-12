@@ -95,8 +95,8 @@ class VueCRUDControllerBase
         if ($subject === null) {
             abort(404);
         }
-        if (method_exists($this, 'addAdditionalDetails')) {
-            $this->addAdditionalDetails($subject);
+        if (method_exists($subject, 'addAdditionalDetails')) {
+            $subject['additional_details_rendered'] = $subject->addAdditionalDetails();
         }
 
         $fields = $subject->getVueCRUDDetailsFields();
