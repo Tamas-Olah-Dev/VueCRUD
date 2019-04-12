@@ -24,7 +24,7 @@ npm run dev
 ```
 (or prod, depending on the situation)
 
-# Adding to a model:
+# Short version:
 
 - run artisan vuecrud:generate Modelname
 - set SUBJECT_SLUG const on the model (typically to a slug version of the model name, so that it can be used in route names and other similar places)
@@ -97,7 +97,7 @@ public function processUploadedFile($absolutePathOfFile)
 processRemovedFile($publicUrlOfFile) 
  ```
 
-#Details
+# Detailed version
 
 ## Adding VueCRUD capabilities to a model
 
