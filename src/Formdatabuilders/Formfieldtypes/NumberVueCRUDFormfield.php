@@ -36,4 +36,66 @@ class NumberVueCRUDFormfield extends VueCRUDFormfield
     {
         return $this->forceInteger;
     }
+
+    public function setMax($max)
+    {
+        $this->customOptions['max'] = $max;
+
+        return $this;
+    }
+
+    public function setMin($min)
+    {
+        $this->customOptions['min'] = $min;
+
+        return $this;
+    }
+
+    public function setInputStep($step)
+    {
+        $this->customOptions['step'] = $step;
+
+        return $this;
+    }
+
+    /**
+     * @param array $rules
+     * valid keys for $rules as 'min', 'max' and 'step'
+     * @return VueCRUDFormfield
+     */
+    public function setNumberRules(array $rules)
+    {
+        if (isset($rules['max'])) {
+            $this->setMax($rules['max']);
+        }
+        if (isset($rules['min'])) {
+            $this->setMin($rules['min']);
+        }
+        if (isset($rules['step'])) {
+            $this->setInputStep($rules['step']);
+        }
+
+        return $this;
+    }
+
+    public function getMin()
+    {
+        return isset($this->customOptions['min'])
+            ? $this->customOptions['min']
+            : null;
+    }
+
+    public function getMax()
+    {
+        return isset($this->customOptions['max'])
+            ? $this->customOptions['max']
+            : null;
+    }
+
+    public function getInputStep()
+    {
+        return isset($this->customOptions['step'])
+            ? $this->customOptions['step']
+            : null;
+    }
 }

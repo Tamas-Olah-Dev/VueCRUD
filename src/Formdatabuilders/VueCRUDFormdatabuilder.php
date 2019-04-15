@@ -181,6 +181,12 @@ abstract class VueCRUDFormdatabuilder
                     if (($fieldData->getType() == 'number') && ($fieldData->getForceInteger())) {
                         $ruleset[] = 'integer';
                     }
+                    if (($fieldData->getType() == 'number') && ($fieldData->getMin() != null)) {
+                        $ruleset[] = 'min:'.$fieldData->getMin();
+                    }
+                    if (($fieldData->getType() == 'number') && ($fieldData->getMax() != null)) {
+                        $ruleset[] = 'max:'.$fieldData->getMax();
+                    }
                 }
                 if ($fieldData->getKind() == 'select') {
                     if ($fieldData->getMandatory()) {
@@ -245,6 +251,13 @@ abstract class VueCRUDFormdatabuilder
                         case 'same':
                             $messages[$fieldId.'.same'] = __('The two fields do not match').$label;
                             break;
+                        case 'min':
+                            $messages[$fieldId.'.min'] = __('Value has to be at least :min', ['min' => $field->getMin()]);
+                            break;
+                        case 'max':
+                            $messages[$fieldId.'.max'] = __('Value cannot exceed :max', ['max' => $field->getMax()]);
+                            break;
+
                     }
                 }
             }

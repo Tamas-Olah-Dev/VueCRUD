@@ -58,4 +58,6 @@
   "Not a valid date": "Nem megfelelő dátum",
   "The two password fields do not match": "A két jelszómező tartalma nem egyezik",
   "The two fields do not match": "A két mező tartalma nem egyezik",
+  "Value has to be at least :min": "Nem lehet kevesebb mint :min",
+  "Value cannot exceed :max": "Nem lehet több, mint :max"
 }
