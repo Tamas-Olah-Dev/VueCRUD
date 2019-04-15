@@ -5,7 +5,8 @@ namespace Datalytix\VueCRUD\Formdatabuilders\Formfieldtypes;
 
 class FileCollectorVueCRUDFormfield extends VueCRUDFormfield
 {
-
+    const ACCEPTS_PRESET_PDF = '.pdf,application/pdf';
+    const ACCEPTS_PRESET_IMAGE = 'image/*';
     /**
      * FileCollectorVueCRUDFormfield constructor.
      * @param array $properties
@@ -45,6 +46,21 @@ class FileCollectorVueCRUDFormfield extends VueCRUDFormfield
     public function setUrlMode()
     {
         $this->props['mode'] = 'url';
+
+        return $this;
+    }
+
+    /**
+     * @param $conditionString
+     * https://w3c.github.io/html/sec-forms.html#element-attrdef-input-accept
+     * @return $this
+     */
+    public function addAcceptCondition($conditionString)
+    {
+        if (!isset($this->props['accept'])) {
+            $this->props['accept'] = [];
+        }
+        $this->props['accept'][] = $conditionString;
 
         return $this;
     }

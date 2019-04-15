@@ -31,6 +31,9 @@
                                    type="number"
                                    v-bind:placeholder="subjectData[fieldname].placeholder"
                                    v-bind:class="data.class"
+                                   v-bind:min="numberFieldMin(fieldname)"
+                                   v-bind:max="numberFieldMax(fieldname)"
+                                   v-bind:step="numberFieldStep(fieldname)"
                             >
                             <div v-if="data.kind == 'slug'">
                                 <input v-model="subjectData[fieldname].value"
@@ -261,6 +264,27 @@
             }
         },
         methods: {
+            numberFieldMin: function(fieldname) {
+                if ((typeof(this.subjectData[fieldname]) != 'undefined')
+                    && (typeof(this.subjectData[fieldname].customOptions['min']) != 'undefined')) {
+                    return this.subjectData[fieldname].customOptions['min'];
+                }
+                return false;
+            },
+            numberFieldMax: function(fieldname) {
+                if ((typeof(this.subjectData[fieldname]) != 'undefined')
+                    && (typeof(this.subjectData[fieldname].customOptions['max']) != 'undefined')) {
+                    return this.subjectData[fieldname].customOptions['max'];
+                }
+                return false;
+            },
+            numberFieldStep: function(fieldname) {
+                if ((typeof(this.subjectData[fieldname]) != 'undefined')
+                    && (typeof(this.subjectData[fieldname].customOptions['step']) != 'undefined')) {
+                    return this.subjectData[fieldname].customOptions['step'];
+                }
+                return false;
+            },
             shouldHideField: function(fieldname) {
                 let result = false;
                 let conditions = this.subjectData[fieldname].hideIf;

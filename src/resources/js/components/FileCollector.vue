@@ -28,6 +28,7 @@
                            id="fileinput"
                            v-on:change="addFileFromInput"
                            type="file"
+                           v-bind:accept="accept"
                            style="position:absolute; opacity: 0; width: 0px">
                     <span :class="buttons.fileUpload.class"
                           v-html="buttons.fileUpload.html"></span>
@@ -57,7 +58,9 @@
                 }
             }},
             limit: {default: null},
-            mode: {default: 'url'}
+            mode: {default: 'url'},
+            accept: {default: false},
+            acceptErrorMessage: {default: ''}
         },
         data: function() {
             return {
@@ -93,6 +96,22 @@
             }
         },
         methods: {
+            filelistCompliesWithAccept: function(filelist) {
+                if (this.accept === false) {
+                    return true;
+                }
+                let result = true;
+                let acceptArray = this.accept.split(',');
+                for (var i = 0; i < filelist.length; i++) {
+                    let fileparts = filelist[i].name.split('.');
+                    if ((acceptArray.indexOf(filelist[i].type) == -1)
+                        && (acceptArray.indexOf(fileparts[fileparts.length - 1]) == -1)) {
+                        result = false;
+                    }
+                }
+
+                return result;
+            },
             uploadFiles: function() {
                 this.uploading = true;
                 this.uploadFirstFile();
@@ -105,19 +124,19 @@
                     this.mode
                 ).then((response) => {
                     if (this.mode == 'url') {
-                        this.files.push(response.data.url);
-                    } else {
-                        this.files.push(response.data);
-                    }
+                    this.files.push(response.data.url);
+                } else {
+                    this.files.push(response.data);
+                }
 
-                    this.pendingFiles.splice(0, 1);
-                    this.$emit('input', this.files);
-                    if (this.pendingFiles.length == 0) {
-                        this.uploading = false;
-                    } else {
-                        this.uploadFirstFile();
-                    }
-                });
+                this.pendingFiles.splice(0, 1);
+                this.$emit('input', this.files);
+                if (this.pendingFiles.length == 0) {
+                    this.uploading = false;
+                } else {
+                    this.uploadFirstFile();
+                }
+            });
             },
             filenameLabel: function(file) {
                 let filename = '';
@@ -144,6 +163,10 @@
             collectFiles: function(filelist) {
                 if ((this.limit != null) && (filelist.length + this.combinedLength > this.limit)) {
                     alert('Maximum '+this.limit+' fájl tölthető fel!')
+                    return false;
+                }
+                if (!this.filelistCompliesWithAccept(filelist)) {
+                    alert(this.acceptErrorMessage);
                     return false;
                 }
                 for (var i = 0; i < filelist.length; i++) {
