@@ -2,7 +2,7 @@
 
 namespace Datalytix\VueCRUD\Formdatabuilders;
 
-use Datalytix\VueCRUD\Valuesets\YesNoValueset;
+use Datalytix\VueCRUD\Formdatabuilders\Valuesets\YesNoValueset;
 use Illuminate\Validation\Rule;
 
 abstract class VueCRUDFormdatabuilder
