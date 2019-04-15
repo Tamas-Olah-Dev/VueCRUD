@@ -24,8 +24,16 @@
                                    v-model="subjectData[fieldname].value"
                                    v-bind:placeholder="subjectData[fieldname].placeholder"
                                    v-bind:class="data.class"
+                                   v-bind:list="Object.keys(subjectData[fieldname].valueset).length > 0 ? fieldname+'-lookup' : null"
                                    type="text"
                             >
+                            <datalist v-if="data.kind == 'input' && data.type != 'password'  && data.type != 'number' && Object.keys(subjectData[fieldname].valueset).length > 0"
+                                      v-bind:id="fieldname+'-lookup'"
+                            >
+                                <option v-for="valuesetvalue, valuesetitem in data.valueset"
+                                        v-bind:value="valuesetvalue"
+                                ></option>
+                            </datalist>
                             <input v-if="data.kind == 'input' && data.type == 'number'"
                                    v-model="subjectData[fieldname].value"
                                    type="number"
