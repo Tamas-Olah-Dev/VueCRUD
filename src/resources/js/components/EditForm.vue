@@ -80,10 +80,12 @@
                             </div>
                             <select v-if="data.kind == 'select' && (data.type == null || data.type == 'yesno' || data.type == 'custom')"
                                     v-model="subjectData[fieldname].value"
+                                    v-bind:style="subjectData[fieldname].value == -1 ? {'color': 'lightgray'} : {}"
                                     v-bind:class="data.class"
                             >
                                 <option v-for="valuesetvalue, valuesetitem in data.valuesetSorted"
                                         v-bind:value="valuesetvalue"
+                                        v-bind:style="valuesetvalue == -1 ? {'color': 'lightgray'} : {'color': 'black'}"
                                         v-html="valuesetitem">
                                 </option>
                             </select>

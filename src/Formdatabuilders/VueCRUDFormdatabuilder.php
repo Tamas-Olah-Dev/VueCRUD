@@ -2,6 +2,7 @@
 
 namespace Datalytix\VueCRUD\Formdatabuilders;
 
+use Datalytix\VueCRUD\Valuesets\YesNoValueset;
 use Illuminate\Validation\Rule;
 
 abstract class VueCRUDFormdatabuilder
@@ -59,12 +60,21 @@ abstract class VueCRUDFormdatabuilder
             if (($field->getAddChooseMessage()) && (! $this->isValidValue($this->getValue($fieldId)))) {
                 $result->put(-1, __('Please select:'));
             }
-            $result->put(0, __('No'));
-            $result->put(1, __('Yes'));
+            $result = $result->merge(YesNoValueset::getKeyValueCollection());
             return $result;
         }
         if ($field->getType() == 'custom') {
-            return collect($field->getValuesetClass());
+            $class = $field->getValuesetClass();
+            $getter = $field->getValuesetGetter();
+            $result = $class::$getter();
+            if ($field->getAddChooseMessage()) {
+                if (method_exists($field, 'addUndefinedToValueset')) {
+                    $result = $field::addUndefinedToValueset($result);
+                } else {
+                    $result->put(-1, __('Please select:'));
+                }
+            }
+            return $result;
         }
         $valuesetClass = $field->getValuesetClass();
         if ($valuesetClass === null) {
@@ -72,7 +82,11 @@ abstract class VueCRUDFormdatabuilder
         }
         $result = collect([]);
         if (($field->getAddChooseMessage()) && (! $this->isValidValue($this->getValue($fieldId)))) {
-            $result->put(-1, __('Please select:'));
+            if (method_exists($field, 'addUndefinedToValueset()')) {
+                $result = $field::addUndefinedToValueset($result);
+            } else {
+                $result->put(-1, __('Please select:'));
+            }
         }
         $valuesetGetterMethod = $field->getValuesetGetter();
         if (method_exists($valuesetClass, $valuesetGetterMethod)) {

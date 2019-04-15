@@ -14,7 +14,7 @@ class VueTreeselectVueCRUDFormfield extends VueCRUDFormfield
     {
         parent::__construct($properties);
         $this->kind = 'vue-treeselect';
-        $this->type = null;
+        $this->type = 'custom';
         $this->valuesetGetter = 'getVueTreeselectCollection';
         $this->valuesetSortedGetter = 'getVueTreeselectCollection';
         $this->props['loadingText'] = __('Loading');
@@ -35,5 +35,14 @@ class VueTreeselectVueCRUDFormfield extends VueCRUDFormfield
         $this->props['multiple'] = $multiple;
 
         return $this;
+    }
+
+    public static function addUndefinedToValueset($valueset)
+    {
+        $result = collect([collect(['id' => -1, 'label' => __('Please select:')])]);
+        foreach ($valueset as $value) {
+            $result->push($value);
+        }
+        return $result;
     }
 }

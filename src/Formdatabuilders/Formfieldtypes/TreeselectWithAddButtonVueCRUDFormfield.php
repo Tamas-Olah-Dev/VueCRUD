@@ -17,7 +17,7 @@ class TreeselectWithAddButtonVueCRUDFormfield extends VueCRUDFormfield
         $this->type = 'component-wrapper-with-add-button';
         $this->props['subComponent'] = 'treeselect-wrapper';
         $this->props['subComponentValuesetProp'] = 'originalOptions';
-        $this->props['subComponentProps'] = [
+        $this->props['defaultSubComponentProps'] = [
             'loadingText' => __('Loading'),
             'noChildrenText' => __('No sub-options'),
             'noOptionsText' => __('No options available'),
@@ -63,9 +63,9 @@ class TreeselectWithAddButtonVueCRUDFormfield extends VueCRUDFormfield
     public function setSubcomponentProps($props, $merge = true)
     {
         if ($merge) {
-            $this->props['subComponentProps'] = array_merge($this->props['subComponentProps'], $props);
+            $this->props['defaultSubComponentProps'] = array_merge($this->props['defaultSubComponentProps'], $props);
         } else {
-            $this->props['subComponentProps'] = $props;
+            $this->props['defaultSubComponentProps'] = $props;
         }
 
         return $this;
