@@ -6,7 +6,7 @@
  * Time: 3:07 PM
  */
 
-namespace Datalytix\VueCRUD\Valuesets;
+namespace Datalytix\VueCRUD\Formdatabuilders\Valuesets;
 
 
 use Datalytix\KeyValue\canBeTurnedIntoKeyValueCollection;
