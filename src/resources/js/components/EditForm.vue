@@ -182,22 +182,27 @@
             <div class="alert alert-success col col-12"
                  v-html="resultMessage"></div>
         </div>
-        <div class="row" v-if="!formDisabled">
-            <div class="col">
+        <div class="row" v-if="!formDisabled"
+             v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-buttons-container', 'edit-form-form-buttons-container')"
+        >
+            <div v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-button-container', 'col')"
+            >
                 <button type="button"
                         v-bind:class="buttons['save']['class']"
                         v-on:click="submitForm"
                 >
                     <span v-if="loading" class="button-loading-indicator" v-html="spinnerSrc"></span>
-                    <span v-if="currentStep != lastStep">{{ buttons['proceed']['html'] }}</span>
-                    <span v-if="currentStep == lastStep">{{ buttons['save']['html'] }}</span>
+                    <span v-if="currentStep != lastStep" v-html="buttons['proceed']['html']"></span>
+                    <span v-if="currentStep == lastStep" v-html="buttons['save']['html']"></span>
                 </button>
             </div>
-            <div class="col">
+            <div v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-button-container', 'col')"
+            >
                 <button type="button"
                         v-bind:class="buttons['cancel']['class']"
                         v-on:click="cancelEditing"
-                >{{ buttons['cancel']['html'] }}</button>
+                        v-html="buttons['cancel']['html']"
+                ></button>
             </div>
         </div>
     </div>
