@@ -6,7 +6,7 @@ namespace Datalytix\VueCRUD\Formdatabuilders\Formfieldtypes;
 class FileCollectorVueCRUDFormfield extends VueCRUDFormfield
 {
     const ACCEPTS_PRESET_PDF = '.pdf,application/pdf';
-    const ACCEPTS_PRESET_IMAGE = 'image/*';
+    const ACCEPTS_PRESET_IMAGE = '.jpg,.jpeg,.png,.gif,image/jpeg,image/gif,image/png';
     /**
      * FileCollectorVueCRUDFormfield constructor.
      * @param array $properties

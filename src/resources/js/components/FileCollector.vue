@@ -101,7 +101,7 @@
                     return true;
                 }
                 let result = true;
-                let acceptArray = this.accept.split(',');
+                let acceptArray = this.accept.join(',').split(',');
                 for (var i = 0; i < filelist.length; i++) {
                     let fileparts = filelist[i].name.split('.');
                     if ((acceptArray.indexOf(filelist[i].type) == -1)

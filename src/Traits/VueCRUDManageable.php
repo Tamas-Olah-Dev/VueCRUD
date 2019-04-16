@@ -112,7 +112,8 @@ trait VueCRUDManageable
 
     public static function getModelManagerMainButtons()
     {
-        return [
+        $subjectName = defined('self::SUBJECT_NAME') ? ' '.mb_strtolower(self::SUBJECT_NAME) : '';
+        $result = [
             'add' => self::buildButtonFromConfigData('vuecrud.buttons.add', [
                 'class' => 'btn btn-outline-primary', 'html' => __('New'),
             ]),
@@ -140,8 +141,11 @@ trait VueCRUDManageable
             'fileUpload' => self::buildButtonFromConfigData('vuecrud.buttons.fileUpload', [
                 'class' => 'btn btn-outline-primary', 'html' => '+',
             ]),
-
         ];
+
+        $result['add']['html'] = $result['add']['html'].$subjectName;
+
+        return $result;
     }
 
     public static function buildButtonFromConfigData($configPath, $default = [])
