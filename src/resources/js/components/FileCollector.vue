@@ -12,7 +12,7 @@
             {{ collectorLabel }}
             <div style="display:flex; flex-wrap:wrap">
         <span v-for="file, index in files"
-              class="file-collector-file-span"
+              v-bind:class="getClassOverrideOrDefaultClass('file-collector-file-span', 'file-collector-file-span')"
         >
             {{ filenameLabel(file) }}
             <span v-on:click="removeFile(index)"
@@ -44,8 +44,9 @@
 <script>
     import {fileUploadMixin} from './mixins/fileUploadMixin.js'
     import {spinner} from './mixins/spinner.js'
+    import {classOverridesMixin} from './mixins/classOverridesMixin.js'
     export default {
-        mixins: [fileUploadMixin, spinner],
+        mixins: [fileUploadMixin, spinner, classOverridesMixin],
         props: {
             uploadUrl: {type: String, default: ''},
             value: {type: Array, default: () => {return [];}},

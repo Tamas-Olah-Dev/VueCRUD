@@ -7,14 +7,21 @@
                     <div class="col-12 d-flex justify-content-between"
                          style="margin-bottom: 25px; padding: 0px"
                     >
-                        <div style="font-size: 1.8em; font-weight: bold" v-if="title != ''" v-html="title"></div>
+                        <div style="font-size: 1.8em; font-weight: bold" v-if="title != ''"
+                             v-html="title"
+                             v-bind:class="getClassOverrideOrDefaultClass('model-manager-title', 'model-manager-title')"
+                        ></div>
                         <button v-bind:class="mainButtons['add']['class']"
                                 v-on:click="createElement"
                                 v-html="mainButtons['add']['html']"
                         ></button>
                     </div>
-                    <div v-if="JSON.stringify(filters) != '{}'" class="portlet full-width-div model-manager-filter-container">
-                        <div class="portlet-heading  bg-inverse d-flex justify-content-between">
+                    <div v-if="JSON.stringify(filters) != '{}'" class="full-width-div model-manager-filter-container portlet"
+                         v-bind:class="getClassOverrideOrDefaultClass('model-manager-filter-box', 'model-manager-filter-box')"
+                    >
+                        <div class="bg-inverse d-flex justify-content-between portlet-heading align-items-baseline"
+                             v-bind:class="getClassOverrideOrDefaultClass('model-manager-filters-heading')"
+                        >
                             <div>
                                 <span v-bind:class="iconClasses.filter"></span>
                                 {{ translate('Filters') }}
@@ -24,26 +31,35 @@
                                     v-html="mainButtons['resetFilters']['html']"
                             ></button>
                         </div>
-                        <div class="d-flex portlet-body model-manager-filters-list">
-                            <div v-for="filterData, filterName in filters" class="form-group m-1 model-manager-filter-block">
-                                <label v-html="filterData['label']"></label>
-                                <datepicker v-if="filterData['type'] == 'datepicker'"
-                                            locale="hu"
-                                            v-model="filterData['value']"
-                                ></datepicker>
-                                <input v-if="filterData['type'] == 'text'"
-                                       type="text"
-                                       class="form-control"
-                                       v-model="filterData['value']"
-                                >
-                                <select v-if="filterData['type'] == 'select'"
-                                        class="form-control"
-                                        v-model="filterData['value']">
-                                    <option v-for="data in filterData['valueset']"
-                                            v-bind:value="data.value"
-                                            v-html="data.label"
-                                    ></option>
-                                </select>
+                        <div class="portlet-body model-manager-filters-list-container">
+                            <div class="row d-flex model-manager-filters-list">
+                                <div v-for="filterData, filterName in filters" class="form-group m-1 model-manager-filter-block">
+                                    <label v-html="filterData['label']"></label>
+                                    <datepicker v-if="filterData['type'] == 'datepicker'"
+                                                locale="hu"
+                                                v-model="filterData['value']"
+                                    ></datepicker>
+                                    <input v-if="filterData['type'] == 'text'"
+                                           type="text"
+                                           class="form-control"
+                                           v-model="filterData['value']"
+                                    >
+                                    <select v-if="filterData['type'] == 'select'"
+                                            class="form-control"
+                                            v-model="filterData['value']">
+                                        <option v-for="data in filterData['valueset']"
+                                                v-bind:value="data.value"
+                                                v-html="data.label"
+                                        ></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div v-if="!autoFilter" class="row d-flex justify-content-start p-1" style="min-width: 100%">
+                                <button class="col-3"
+                                        v-bind:class="mainButtons['search']['class']"
+                                        v-html="mainButtons['search']['html']"
+                                        v-on:click="fetchElements(true)"
+                                ></button>
                             </div>
                         </div>
                     </div>
@@ -75,7 +91,7 @@
                         </div>
                         <div class="portlet-body">
                             <div v-show="mode == 'elements-loading'" v-html="spinnerSrc" style="width:100%; display:flex; justify-content: center"></div>
-                            <table v-show="mode != 'elements-loading'" class="table table-striped model-manager-table" v-bind:class="elementTableClass">
+                            <table v-show="mode != 'elements-loading'" class="table table-striped" v-bind:class="elementTableClass">
                                 <thead>
                                 <tr>
                                     <th v-for="columnName, columnField in columns"
@@ -88,13 +104,13 @@
                                               v-html="currentSortingColumn == columnField ? sortingChevron : '⇵'"
                                         ></span>
                                     </th>
-                                    <th v-if="allowOperations == 'true'">{{ translate('Operations') }}</th>
+                                    <th v-if="allowOperations">{{ translate('Operations') }}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <tr v-for="element, elementIndex in elements">
                                     <td v-for="columnName, columnField in columns" v-html="element[columnField]"></td>
-                                    <td v-if="allowOperations == 'true'" class="model-manager-operations">
+                                    <td v-if="allowOperations">
                                         <button type="button" v-if="showButton('details')"
                                                 v-bind:class="buttons['details']['class']"
                                                 v-on:click="showDetails(element[idProperty])"
@@ -178,20 +194,34 @@
                                     v-on:editing-canceled="fetchElements"
                                     redirect-to-response-on-success="false"
                                     v-bind:buttons="mainButtons"
+                                    v-bind:class-overrides="classOverrides"
                             ></edit-form>
                         </div>
                     </div>
                 </div>
                 <div  v-if="mode == 'create'">
-                    <edit-form
-                            v-bind:data-url="createUrl"
-                            v-bind:save-url="storeUrl"
-                            v-bind:ajax-operations-url="ajaxOperationsUrl"
-                            v-on:submit-success="fetchElements"
-                            v-on:editing-canceled="fetchElements"
-                            redirect-to-response-on-success="false"
-                            v-bind:buttons="mainButtons"
-                    ></edit-form>
+                    <div class="portlet full-width-div">
+                        <div class="portlet-heading bg-primary"
+                             style="display:flex; justify-content: space-between; align-items: baseline"
+                        >
+                            {{ translate('Add element') }}
+                            <button v-on:click="fetchElements"
+                                    v-bind:class="mainButtons['backToList']['class']"
+                            >X</button>
+                        </div>
+                        <div class="portlet-body">
+                            <edit-form
+                                    v-bind:data-url="createUrl"
+                                    v-bind:save-url="storeUrl"
+                                    v-bind:ajax-operations-url="ajaxOperationsUrl"
+                                    v-on:submit-success="fetchElements"
+                                    v-on:editing-canceled="fetchElements"
+                                    redirect-to-response-on-success="false"
+                                    v-bind:buttons="mainButtons"
+                                    v-bind:class-overrides="classOverrides"
+                            ></edit-form>
+                        </div>
+                    </div>
                 </div>
                 <div v-if="mode == 'delete-confirmation'">
                     <div class="alert alert-danger">{{ translate('Are you sure you want to delete this element') }}: {{ currentSubjectName }} ?</div>
@@ -217,8 +247,9 @@
 <script>
     import {translateMixin} from './mixins/translateMixin.js'
     import {spinner} from './mixins/spinner.js'
+    import {classOverridesMixin} from './mixins/classOverridesMixin.js'
     export default {
-        mixins: [translateMixin, spinner],
+        mixins: [translateMixin, spinner, classOverridesMixin],
         props: {
             indexUrl: {type: String, required: true},
             detailsUrl: {type: String, required: true},
@@ -228,27 +259,11 @@
             updateUrl: {type: String, required: true},
             deleteUrl: {type: String, required: true},
             ajaxOperationsUrl: {type: String, required: true},
-            allowOperations: {type: String, default: 'true'},
+            allowOperations: {type: Boolean, default: true},
+            autoFilter: {type: Boolean, default: false},
             nameProperty: {type: String, default: 'name'},
             idProperty: {type: String, default: 'id'},
             itemsPerPage: {type: Number, default: 20},
-//            buttons: {type:Object, default: function() {
-//                return {
-//                    details: {
-//                        class: 'btn btn-primary btn-block',
-//                        html: 'Részletek',
-//                    },
-//                    edit: {
-//                        class: 'btn btn-info btn-block',
-//                        html: 'Szerkesztés',
-//                    },
-//                    delete: {
-//                        class: 'btn btn-danger btn-block',
-//                        html: 'Törlés',
-//                    },
-//                }
-//            }},
-
             iconClasses: {type: Object, default: function() {
                 return {
                     "filter": "ti-filter",
@@ -323,7 +338,7 @@
                 }
 
                 return result;
-            }
+            },
         },
         methods: {
             columnIsSorting: function(columnField) {
@@ -382,19 +397,21 @@
             },
             loadFilters: function(filters) {
                 this.filters = filters;
-                for (var filterName in this.filters) {
-                    if (this.filters.hasOwnProperty(filterName)) {
-                        this.watches[filterName] = this.$watch(
-                            'filters.'+filterName+'.value',
-                            (newValue, oldValue) => {
-                                if (newValue != oldValue) {
-                                    window.clearTimeout(this.fetchTimeout);
-                                    this.fetchTimeout = window.setTimeout(() => {
-                                        this.currentPage = 1;
-                                        this.fetchElements(true);
-                                    }, this.getFilterTimeoutByType(this.filters[filterName].type));
-                                }
-                            }, {deep: true});
+                if (this.autoFilter) {
+                    for (var filterName in this.filters) {
+                        if (this.filters.hasOwnProperty(filterName)) {
+                            this.watches[filterName] = this.$watch(
+                                    'filters.'+filterName+'.value',
+                                    (newValue, oldValue) => {
+                                    if (newValue != oldValue) {
+                                window.clearTimeout(this.fetchTimeout);
+                                this.fetchTimeout = window.setTimeout(() => {
+                                    this.currentPage = 1;
+                                this.fetchElements(true);
+                            }, this.getFilterTimeoutByType(this.filters[filterName].type));
+                            }
+                        }, {deep: true});
+                        }
                     }
                 }
             },

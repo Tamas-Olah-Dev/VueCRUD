@@ -141,6 +141,9 @@ trait VueCRUDManageable
             'fileUpload' => self::buildButtonFromConfigData('vuecrud.buttons.fileUpload', [
                 'class' => 'btn btn-outline-primary', 'html' => '+',
             ]),
+            'search' => self::buildButtonFromConfigData('vuecrud.buttons.search', [
+                'class' => 'btn btn-outline-secondary', 'html' => __('Search'),
+            ]),
         ];
 
         $result['add']['html'] = $result['add']['html'].$subjectName;

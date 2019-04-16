@@ -72,7 +72,9 @@
 </template>
 
 <script>
+    import {classOverridesMixin} from './mixins/classOverridesMixin.js'
     export default {
+        mixins: [classOverridesMixin],
         props: {
             formElementLabel: {type: String, default: ''},
             value: {},

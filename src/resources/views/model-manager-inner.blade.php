@@ -6,8 +6,10 @@
                update-url="{!! $updateUrl !!}"
                delete-url="{!! $deleteUrl !!}"
                ajax-operations-url="{!! $ajaxOperationsUrl !!}"
-               allow-operations="{{ $allowOperations ? 'true' : 'false' }}"
-               :buttons="{{ json_encode($buttons) }}"
+               :allow-operations="{{ $allowOperations ? 'true' : 'false' }}"
+               :class-overrides="{{ json_encode([
+                    'edit-form-step-head' => 'portlet-head'
+               ]) }}"
                :icon-classes="{{ json_encode([
                             "filter" => "mdi mdi-magnify",
                             "list" => "mdi mdi-format-list-bulleted",

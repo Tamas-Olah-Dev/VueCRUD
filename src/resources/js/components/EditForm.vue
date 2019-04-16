@@ -1,14 +1,26 @@
 <template>
-    <div class="container-fluid vue-editform-container" style="position:relative">
+    <div class="container-fluid vue-editform-container"
+         style="position:relative"
+         v-bind:class="getClassOverrideOrDefaultClass('edit-form-container', 'edit-form-container')"
+    >
         <div v-if="!loaded" v-html="spinnerSrc" style="width:100%; display:flex; justify-content: center"></div>
-        <div v-if="loaded && (typeof(formTitle != 'undefined'))"><h4 v-html="formTitle"></h4></div>
+        <div v-if="loaded && (typeof(formTitle != 'undefined'))"
+             v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-title-container', 'edit-form-form-title-container')"
+        ><h4 v-html="formTitle"></h4></div>
         <div v-if="formDisabled" class="disabled-overlay"></div>
-        <form role="form" class="margin-b-20"  v-on:submit.prevent="submitForm"  v-if="loaded">
-            <template v-for="step in stepsToRender">
-                <h4 v-if="typeof(config.stepLabels[step]) != 'undefined'"
+        <form role="form" class="margin-b-20"  v-on:submit.prevent="submitForm"  v-if="loaded"
+              v-bind:class="getClassOverrideOrDefaultClass('edit-form-form', 'edit-form-form')"
+        >
+            <div v-for="step in stepsToRender"
+                 v-bind:class="getClassOverrideOrDefaultClass('edit-form-step', 'edit-form-step')"
+            >
+                <div v-if="typeof(config.stepLabels[step]) != 'undefined'"
                     class="form-step-header"
-                    v-html="config.stepLabels[step]"></h4>
-                <div class="row" style="position:relative">
+                    v-bind:class="formHeadClass(step)"
+                    v-html="config.stepLabels[step]"></div>
+                <div class="row" style="position:relative"
+                     v-bind:class="getClassOverrideOrDefaultClass('edit-form-step-body', 'edit-form-step-body')"
+                >
                     <div v-if="currentStep != step" class="disabled-overlay"></div>
                     <div v-for="data, fieldname in subjectDataForStep(step)"
                          v-bind:style="{height: typeof(data.customOptions['cssHeight']) == 'undefined' ? 'auto' : data.customOptions['cssHeight']}"
@@ -96,11 +108,13 @@
                             <datepicker v-if="data.kind == 'datepicker'"
                                         v-bind="JSON.parse(data.props)"
                                         v-model="subjectData[fieldname].value"
+                                        v-bind:class-overrides="classOverrides"
                             ></datepicker>
                             <image-picker v-if="data.kind == 'imagepicker'"
                                           v-bind="JSON.parse(data.props)"
                                           v-model="subjectData[fieldname].value"
                                           v-bind:upload-url="ajaxOperationsUrl"
+                                          v-bind:class-overrides="classOverrides"
                             ></image-picker>
                             <span v-if="data.kind == 'radio'">
                                 <p v-for="valuesetvalue, valuesetitem in data.valuesetSorted">
@@ -128,11 +142,13 @@
                                           v-bind="JSON.parse(data.props)"
                                           :valueset="data.valuesetSorted"
                                           v-model="subjectData[fieldname].value"
+                                          v-bind:class-overrides="classOverrides"
                             ></multi-select>
                             <treeselect v-if="data.kind == 'vue-treeselect'"
                                         v-bind="JSON.parse(data.props)"
                                         :options="data.valuesetSorted"
                                         v-model="subjectData[fieldname].value"
+                                        v-bind:class-overrides="classOverrides"
                             ></treeselect>
                             <component v-if="data.kind == 'custom-component'"
                                        v-bind:is="data.type"
@@ -140,6 +156,7 @@
                                        v-model="subjectData[fieldname].value"
                                        v-bind:errors="componentError(fieldname)"
                                        :buttons="buttons"
+                                       v-bind:class-overrides="classOverrides"
                             ></component>
                             <select v-if="data.kind == 'multiselect'"
                                     style="height: 200px; min-height: 200px"
@@ -155,7 +172,7 @@
                         </template>
                     </div>
                 </div>
-            </template>
+            </div>
         </form>
         <div class="row" v-if="false">
             <div class="alert alert-danger col col-12"
@@ -189,8 +206,9 @@
 <script>
     import {translateMixin} from './mixins/translateMixin.js'
     import {spinner} from './mixins/spinner.js'
+    import {classOverridesMixin} from './mixins/classOverridesMixin.js'
     export default {
-        mixins: [translateMixin, spinner],
+        mixins: [translateMixin, spinner, classOverridesMixin],
         props: {
             dataUrl: {type: String},
             saveUrl: {type: String},
@@ -274,6 +292,13 @@
             }
         },
         methods: {
+            formHeadClass: function(step) {
+                if (this.currentStep == step) {
+                    return this.getClassOverrideOrDefaultClass('edit-form-step-head', 'edit-form-step-head')
+                } else {
+                    return this.getClassOverrideOrDefaultClass('edit-form-step-head-inactive', 'edit-form-step-head-inactive')
+                }
+            },
             numberFieldMin: function(fieldname) {
                 if ((typeof(this.subjectData[fieldname]) != 'undefined')
                     && (typeof(this.subjectData[fieldname].customOptions['min']) != 'undefined')) {
