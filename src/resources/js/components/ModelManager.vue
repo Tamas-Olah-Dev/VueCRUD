@@ -33,7 +33,10 @@
                         </div>
                         <div class="portlet-body model-manager-filters-list-container">
                             <div class="row d-flex model-manager-filters-list">
-                                <div v-for="filterData, filterName in filters" class="form-group m-1 model-manager-filter-block">
+                                <div v-for="filterData, filterName in filters"
+                                     class="form-group m-1 model-manager-filter-block"
+                                     v-bind:class="filterData['containerClass']"
+                                >
                                     <label v-html="filterData['label']"></label>
                                     <datepicker v-if="filterData['type'] == 'datepicker'"
                                                 locale="hu"
