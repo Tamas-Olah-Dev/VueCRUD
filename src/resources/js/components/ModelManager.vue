@@ -52,6 +52,10 @@
                                                 v-html="data.label"
                                         ></option>
                                     </select>
+                                    <treeselect v-if="filterData['type'] == 'treeselect'"
+                                                v-bind="filterData['props']"
+                                                v-model="filterData['value']">
+                                    </treeselect>
                                 </div>
                             </div>
                             <div v-if="!autoFilter" class="row d-flex justify-content-start p-1" style="min-width: 100%">
@@ -401,16 +405,16 @@
                     for (var filterName in this.filters) {
                         if (this.filters.hasOwnProperty(filterName)) {
                             this.watches[filterName] = this.$watch(
-                                    'filters.'+filterName+'.value',
-                                    (newValue, oldValue) => {
+                                'filters.'+filterName+'.value',
+                                (newValue, oldValue) => {
                                     if (newValue != oldValue) {
-                                window.clearTimeout(this.fetchTimeout);
-                                this.fetchTimeout = window.setTimeout(() => {
-                                    this.currentPage = 1;
-                                this.fetchElements(true);
-                            }, this.getFilterTimeoutByType(this.filters[filterName].type));
-                            }
-                        }, {deep: true});
+                                        window.clearTimeout(this.fetchTimeout);
+                                        this.fetchTimeout = window.setTimeout(() => {
+                                            this.currentPage = 1;
+                                            this.fetchElements(true);
+                                        }, this.getFilterTimeoutByType(this.filters[filterName].type));
+                                    }
+                                }, {deep: true});
                         }
                     }
                 }

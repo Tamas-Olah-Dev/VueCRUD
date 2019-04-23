@@ -16,6 +16,7 @@ abstract class VueCRUDIndexfilterBase
     public $type;
     public $value;
     public $default;
+    public $containerClass;
 
     public function __construct($property, $label, $default, $value = null)
     {
@@ -23,6 +24,7 @@ abstract class VueCRUDIndexfilterBase
         $this->setLabel($label);
         $this->setValue($value);
         $this->setDefault($default);
+        $this->containerClass = '';
     }
 
     /**
@@ -111,6 +113,24 @@ abstract class VueCRUDIndexfilterBase
         return is_array($property)
             ? implode("_", $property)
             : $property;
+    }
+
+    /**
+     * @param string $containerClass
+     * @return VueCRUDIndexfilterBase
+     */
+    public function setContainerClass(string $containerClass): VueCRUDIndexfilterBase
+    {
+        $this->containerClass = $containerClass;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getContainerClass(): string
+    {
+        return $this->containerClass;
     }
 
 }

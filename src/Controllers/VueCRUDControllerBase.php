@@ -25,12 +25,24 @@ class VueCRUDControllerBase
                 'sorting_field' => $class::getPositionField(),
                 'sorting_direction' => 'asc'
             ]);
+        } else {
+            if (!request()->has('sorting_field')) {
+                if (method_exists($class, 'getVueCRUDDefaultSortingData')) {
+                    request()->merge($class::getVueCRUDDefaultSortingData());
+                } else {
+                    if (count($class::getVueCRUDSortingIndexColumns()) > 0) {
+                        request()->merge([
+                            'sorting_field' => array_values($class::getVueCRUDSortingIndexColumns())[0],
+                            'sorting_direction' => 'asc'
+                        ]);
+                    }
+                }
+            }
         }
         $elementData = static::getElements();
         $filters = method_exists($class, 'getVueCRUDIndexFilters')
             ? (object) $class::getVueCRUDIndexFilters()
             : (object) [];
-
         $viewData = [
             'title' => $this->getSubjectNamePlural(),
             'pageTitleContent' => $this->getSubjectNamePlural(),
