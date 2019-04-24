@@ -65,7 +65,7 @@
                                 <button class="col-3"
                                         v-bind:class="mainButtons['search']['class']"
                                         v-html="mainButtons['search']['html']"
-                                        v-on:click="fetchElements(true)"
+                                        v-on:click="saveFilterState(); fetchElements(true)"
                                 ></button>
                             </div>
                         </div>
@@ -348,6 +348,25 @@
             },
         },
         methods: {
+            saveFilterState: function() {
+                let filterState = {};
+                for (var filterName in this.filters) {
+                    if (this.filters.hasOwnProperty(filterName)) {
+                        filterState[filterName] = typeof(this.filters[filterName]['value']) == 'undefined' ? null : this.filters[filterName]['value'];
+                    }
+                }
+                window.localStorage.setItem(this.indexUrl+'_filters', JSON.stringify(filterState));
+            },
+            restoreFilterState: function() {
+                let filterState = JSON.parse(window.localStorage.getItem(this.indexUrl+'_filters'));
+                if (filterState !== null) {
+                    for (var filterName in this.filters) {
+                        if (filterState.hasOwnProperty(filterName)) {
+                            Vue.set(this.filters[filterName], 'value', filterState[filterName]);
+                        }
+                    }
+                }
+            },
             columnIsSorting: function(columnField) {
                 return typeof(this.sortingColumns[columnField]) != 'undefined';
             },
@@ -408,18 +427,20 @@
                     for (var filterName in this.filters) {
                         if (this.filters.hasOwnProperty(filterName)) {
                             this.watches[filterName] = this.$watch(
-                                'filters.'+filterName+'.value',
-                                (newValue, oldValue) => {
+                                    'filters.'+filterName+'.value',
+                                    (newValue, oldValue) => {
                                     if (newValue != oldValue) {
-                                        window.clearTimeout(this.fetchTimeout);
-                                        this.fetchTimeout = window.setTimeout(() => {
-                                            this.currentPage = 1;
-                                            this.fetchElements(true);
-                                        }, this.getFilterTimeoutByType(this.filters[filterName].type));
-                                    }
-                                }, {deep: true});
+                                window.clearTimeout(this.fetchTimeout);
+                                this.fetchTimeout = window.setTimeout(() => {
+                                    this.currentPage = 1;
+                                this.fetchElements(true);
+                            }, this.getFilterTimeoutByType(this.filters[filterName].type));
+                            }
+                        }, {deep: true});
                         }
                     }
+                } else {
+                    this.restoreFilterState();
                 }
             },
             findSortingColumnKey: function(column) {
@@ -440,6 +461,9 @@
                 if (typeof(suppressLoading) == 'undefined') {
                     suppressLoading = false;
                 }
+                if (!this.autoFilter) {
+                    this.restoreFilterState();
+                }
                 if (!suppressLoading) {
                     if (!onlyElements) {
                         this.mode = 'loading';
@@ -449,27 +473,27 @@
                 }
                 window.axios.get(this.indexUrl, {params: this.getFilterData()})
                     .then((response) => {
-                        this.title = response.data.title;
-                        this.elements = response.data.elements;
-                        this.counts = response.data.counts;
-                        document.getElementsByTagName('title')[0].innerHTML = response.data.pageTitle;
-                        this.sortingColumns = response.data.sortingColumns;
-                        this.currentSortingColumn = this.findSortingColumnKey(response.data.sortingField);
-                        this.currentSortingDirection = response.data.sortingDirection;
-                        this.buttons = response.data.buttons;
-                        if (this.positionedView != response.data.positionedView) {
-                            this.columns = response.data.columns;
+                    this.title = response.data.title;
+                    this.elements = response.data.elements;
+                    this.counts = response.data.counts;
+                    document.getElementsByTagName('title')[0].innerHTML = response.data.pageTitle;
+                    this.sortingColumns = response.data.sortingColumns;
+                    this.currentSortingColumn = this.findSortingColumnKey(response.data.sortingField);
+                    this.currentSortingDirection = response.data.sortingDirection;
+                    this.buttons = response.data.buttons;
+                    if (this.positionedView != response.data.positionedView) {
+                        this.columns = response.data.columns;
+                    }
+                    if (!onlyElements) {
+                        this.mainButtons = response.data.mainButtons;
+                        this.columns = response.data.columns;
+                        if (JSON.stringify(this.filters) == '{}') {
+                            this.loadFilters(response.data.filters);
                         }
-                        if (!onlyElements) {
-                            this.mainButtons = response.data.mainButtons;
-                            this.columns = response.data.columns;
-                            if (JSON.stringify(this.filters) == '{}') {
-                                this.loadFilters(response.data.filters);
-                            }
-                        }
-                        this.mode = 'list';
-                        this.positionedView = response.data.positionedView;
-                    });
+                    }
+                    this.mode = 'list';
+                    this.positionedView = response.data.positionedView;
+                });
             },
             showDetails: function(elementId) {
                 this.mode = 'loading';
@@ -547,7 +571,7 @@
                 if (!this.disablePageWatch) {
                     this.fetchElements(true);
                 }
-            }
+            },
         }
     }
 </script>
