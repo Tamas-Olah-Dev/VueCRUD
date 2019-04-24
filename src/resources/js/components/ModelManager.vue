@@ -111,13 +111,13 @@
                                               v-html="currentSortingColumn == columnField ? sortingChevron : '⇵'"
                                         ></span>
                                     </th>
-                                    <th v-if="allowOperations">{{ translate('Operations') }}</th>
+                                    <th style="min-width: 15%" v-if="allowOperations">{{ translate('Operations') }}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <tr v-for="element, elementIndex in elements">
                                     <td v-for="columnName, columnField in columns" v-html="element[columnField]"></td>
-                                    <td v-if="allowOperations">
+                                    <td v-if="allowOperations" style="white-space: nowrap">
                                         <button type="button" v-if="showButton('details')"
                                                 v-bind:class="buttons['details']['class']"
                                                 v-on:click="showDetails(element[idProperty])"
@@ -231,10 +231,18 @@
                     </div>
                 </div>
                 <div v-if="mode == 'delete-confirmation'">
-                    <div class="alert alert-danger">{{ translate('Are you sure you want to delete this element') }}: {{ currentSubjectName }} ?</div>
-                    <div class="d-flex justify-content-between">
-                        <button class="btn btn-danger" v-on:click="deleteElement">{{ translate('Yes') }}</button>
-                        <button class="btn btn-default" v-on:click="fetchElements">{{ translate('Cancel') }}</button>
+                    <div class="alert alert-danger">{{ translate('Are you sure you want to delete this element') }}? <br><span v-html="currentSubjectName"></span></div>
+                    <div class="d-flex justify-content-center">
+                        <button type="button"
+                                v-bind:class="mainButtons['confirmDeletion']['class']"
+                                v-on:click="deleteElement"
+                                v-html="translate('Yes')"
+                        ></button>
+                        <button type="button"
+                                v-bind:class="mainButtons['cancelDeletion']['class']"
+                                v-on:click="fetchElements"
+                                v-html="translate('Cancel')"
+                        ></button>
                     </div>
                 </div>
                 <div  v-if="mode == 'custom-component'">
@@ -365,6 +373,12 @@
                             Vue.set(this.filters[filterName], 'value', filterState[filterName]);
                         }
                     }
+                } else {
+                    for (var filter in this.filters) {
+                        if (this.filters.hasOwnProperty(filter)) {
+                            Vue.set(this.filters[filter], 'value', this.filters[filter].default);
+                        }
+                    }
                 }
             },
             columnIsSorting: function(columnField) {
@@ -474,26 +488,26 @@
                 window.axios.get(this.indexUrl, {params: this.getFilterData()})
                     .then((response) => {
                     this.title = response.data.title;
-                    this.elements = response.data.elements;
-                    this.counts = response.data.counts;
-                    document.getElementsByTagName('title')[0].innerHTML = response.data.pageTitle;
-                    this.sortingColumns = response.data.sortingColumns;
-                    this.currentSortingColumn = this.findSortingColumnKey(response.data.sortingField);
-                    this.currentSortingDirection = response.data.sortingDirection;
-                    this.buttons = response.data.buttons;
-                    if (this.positionedView != response.data.positionedView) {
-                        this.columns = response.data.columns;
+                this.elements = response.data.elements;
+                this.counts = response.data.counts;
+                document.getElementsByTagName('title')[0].innerHTML = response.data.pageTitle;
+                this.sortingColumns = response.data.sortingColumns;
+                this.currentSortingColumn = this.findSortingColumnKey(response.data.sortingField);
+                this.currentSortingDirection = response.data.sortingDirection;
+                this.buttons = response.data.buttons;
+                if (this.positionedView != response.data.positionedView) {
+                    this.columns = response.data.columns;
+                }
+                if (!onlyElements) {
+                    this.mainButtons = response.data.mainButtons;
+                    this.columns = response.data.columns;
+                    if (JSON.stringify(this.filters) == '{}') {
+                        this.loadFilters(response.data.filters);
                     }
-                    if (!onlyElements) {
-                        this.mainButtons = response.data.mainButtons;
-                        this.columns = response.data.columns;
-                        if (JSON.stringify(this.filters) == '{}') {
-                            this.loadFilters(response.data.filters);
-                        }
-                    }
-                    this.mode = 'list';
-                    this.positionedView = response.data.positionedView;
-                });
+                }
+                this.mode = 'list';
+                this.positionedView = response.data.positionedView;
+            });
             },
             showDetails: function(elementId) {
                 this.mode = 'loading';

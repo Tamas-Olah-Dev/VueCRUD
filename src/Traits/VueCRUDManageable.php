@@ -144,6 +144,12 @@ trait VueCRUDManageable
             'search' => self::buildButtonFromConfigData('vuecrud.buttons.search', [
                 'class' => 'btn btn-outline-secondary', 'html' => __('Search'),
             ]),
+            'confirmDeletion' => self::buildButtonFromConfigData('vuecrud.buttons.confirmDeletion', [
+                'class' => 'btn btn-danger', 'html' => __('Yes'),
+            ]),
+            'cancelDeletion' => self::buildButtonFromConfigData('vuecrud.buttons.cancelDeletion', [
+                'class' => 'btn btn-secondary', 'html' => __('No'),
+            ]),
         ];
 
         $result['add']['html'] = $result['add']['html'].$subjectName;
