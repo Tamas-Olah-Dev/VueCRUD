@@ -232,7 +232,7 @@
                 </div>
                 <div v-if="mode == 'delete-confirmation'">
                     <div class="alert alert-danger">{{ translate('Are you sure you want to delete this element') }}? <br><span v-html="currentSubjectName"></span></div>
-                    <div class="d-flex justify-content-center">
+                    <div class="d-flex justify-content-between">
                         <button type="button"
                                 v-bind:class="mainButtons['confirmDeletion']['class']"
                                 v-on:click="deleteElement"
@@ -534,9 +534,14 @@
                 this.mode = 'delete-confirmation';
             },
             deleteElement: function() {
+                this.mode = 'loading';
                 window.axios.delete(this.currentDeleteUrl)
                     .then((response) => {
                         this.fetchElements();
+                    })
+                    .catch((error) => {
+                        alert(error.data);
+                        this.mode = 'list';
                     });
             },
             createElement: function() {

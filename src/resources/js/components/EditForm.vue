@@ -15,9 +15,9 @@
                  v-bind:class="getClassOverrideOrDefaultClass('edit-form-step', 'edit-form-step')"
             >
                 <div v-if="typeof(config.stepLabels[step]) != 'undefined'"
-                    class="form-step-header"
-                    v-bind:class="formHeadClass(step)"
-                    v-html="config.stepLabels[step]"></div>
+                     class="form-step-header"
+                     v-bind:class="formHeadClass(step)"
+                     v-html="config.stepLabels[step]"></div>
                 <div class="row" style="position:relative"
                      v-bind:class="getClassOverrideOrDefaultClass('edit-form-step-body', 'edit-form-step-body')"
                 >
@@ -190,6 +190,7 @@
                 <button type="button"
                         v-bind:class="buttons['save']['class']"
                         v-on:click="submitForm"
+                        v-bind:disabled="loading"
                 >
                     <span v-if="loading" class="button-loading-indicator" v-html="spinnerSrc"></span>
                     <span v-if="currentStep != lastStep" v-html="buttons['proceed']['html']"></span>
@@ -342,6 +343,9 @@
                 return result;
             },
             literalOrVariableSubjectdataValue: function(value) {
+                if (value === null) {
+                    return value;
+                }
                 if ((value.toString().substr(0, 1) == '$')
                     && (typeof(this.subjectData[value.toString().substr(1)]) != 'undefined'))
                 {
@@ -432,33 +436,33 @@
                     });
             },
             submitForm: function() {
-                this.errors = {};
                 this.loading = true;
+                this.errors = {};
                 this.$emit('submit-pending', this.formdata);
                 window.axios.post(this.saveUrl, this.formdata)
                     .then((response) => {
-                        if (this.currentStep != this.lastStep) {
-                            this.currentStep++;
-                            this.updateFormData();
-                        } else {
-                            if (typeof(this.successCallback) != 'undefined') {
-                                window[this.successCallback]();
-                            }
-                            this.$emit('submit-success', response.data);
-                            if (this.redirectToResponseOnSuccess == 'true') {
-                                window.location.href = response.data;
-                            }
-                            this.resultMessage = 'Változások elmentve';
-                            setTimeout(() => {this.resultMessage = ''}, 3000);
-                        }
-                        this.loading = false;
-                    })
-                    .catch((error) => {
-                        if (error.response.status == 422) {
-                            this.errors = error.response.data.errors;
-                        }
-                        this.loading = false;
-                    });
+                    if (this.currentStep != this.lastStep) {
+                    this.currentStep++;
+                    this.updateFormData();
+                } else {
+                    if (typeof(this.successCallback) != 'undefined') {
+                        window[this.successCallback]();
+                    }
+                    this.$emit('submit-success', response.data);
+                    if (this.redirectToResponseOnSuccess == 'true') {
+                        window.location.href = response.data;
+                    }
+                    this.resultMessage = 'Változások elmentve';
+                    setTimeout(() => {this.resultMessage = ''}, 3000);
+                }
+                this.loading = false;
+            })
+                .catch((error) => {
+                    if (error.response.status == 422) {
+                    this.errors = error.response.data.errors;
+                }
+                this.loading = false;
+            });
             },
             cancelEditing: function() {
                 this.subjectData = {};
