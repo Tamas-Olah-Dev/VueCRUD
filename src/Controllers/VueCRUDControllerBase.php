@@ -22,18 +22,18 @@ class VueCRUDControllerBase
             && $this->filtersRequirePositionedView();
         if ($positionedView) {
             request()->merge([
-                'sorting_field' => $class::getPositionField(),
-                'sorting_direction' => 'asc'
+                'sorting_field'     => $class::getPositionField(),
+                'sorting_direction' => 'asc',
             ]);
         } else {
-            if (!request()->has('sorting_field')) {
+            if (! request()->has('sorting_field')) {
                 if (method_exists($class, 'getVueCRUDDefaultSortingData')) {
                     request()->merge($class::getVueCRUDDefaultSortingData());
                 } else {
                     if (count($class::getVueCRUDSortingIndexColumns()) > 0) {
                         request()->merge([
-                            'sorting_field' => array_values($class::getVueCRUDSortingIndexColumns())[0],
-                            'sorting_direction' => 'asc'
+                            'sorting_field'     => array_values($class::getVueCRUDSortingIndexColumns())[0],
+                            'sorting_direction' => 'asc',
                         ]);
                     }
                 }
@@ -44,9 +44,9 @@ class VueCRUDControllerBase
             ? (object) $class::getVueCRUDIndexFilters()
             : (object) [];
         $viewData = [
-            'title' => $this->getSubjectNamePlural(),
+            'title'            => $this->getSubjectNamePlural(),
             'pageTitleContent' => $this->getSubjectNamePlural(),
-            'pageTitle' => config('app.name').' - '.$this->getSubjectNamePlural(),
+            'pageTitle'        => config('app.name').' - '.$this->getSubjectNamePlural(),
             'elements'         => $elementData->elements,
             'counts'           => $elementData->counts,
             'columns'          => $this->getIndexColumns($positionedView),
@@ -55,10 +55,11 @@ class VueCRUDControllerBase
             'sortingDirection' => $elementData->sortingDirection,
             'filters'          => $filters,
             'buttons'          => $this->getModellistButtons($positionedView),
-            'mainButtons' => $class::getModelManagerMainButtons(),
+            'subjectName'      => $this->getSubjectName(),
+            'mainButtons'      => $class::getModelManagerMainButtons(),
             'allowOperations'  => $class::shouldVueCRUDOperationsBeDisplayed(),
-            'allowAdding'  => $class::shouldVueCRUDAddButtonBeDisplayed(),
-            'positionedView' => $positionedView,
+            'allowAdding'      => $class::shouldVueCRUDAddButtonBeDisplayed(),
+            'positionedView'   => $positionedView,
         ];
         if (request()->isXmlHttpRequest()) {
             return response()->json($viewData);
@@ -79,7 +80,6 @@ class VueCRUDControllerBase
         } else {
             return $class::getVueCRUDModellistButtons();
         }
-
     }
 
     protected function getIndexColumns($positionedView)
@@ -273,11 +273,10 @@ class VueCRUDControllerBase
                 return response()->json($this->processUploadedFileToObject($processedFilename));
             } else {
                 return response()->json([
-                    'id' => -1,
-                    'name' => $processedFilename
+                    'id'   => -1,
+                    'name' => $processedFilename,
                 ]);
             }
-
         }
     }
 
@@ -298,7 +297,6 @@ class VueCRUDControllerBase
             }
             return response('OK');
         }
-
     }
 
     protected function saveUploadedFileToPublic()
@@ -382,13 +380,13 @@ class VueCRUDControllerBase
     protected function filtersRequirePositionedView()
     {
         $class = static::SUBJECT_CLASS;
-        if (!$class::hasPositioningEnabled()) {
+        if (! $class::hasPositioningEnabled()) {
             return false;
         }
         $validNullResponses = [null, 0, -1, ''];
         $filters = $class::getVueCRUDIndexFilters();
         foreach ($class::getRestrictingFields() as $restrictingField) {
-            if (!isset($filters[$restrictingField])) {
+            if (! isset($filters[$restrictingField])) {
                 return false;
             }
             if (array_search(request()->get($restrictingField), $validNullResponses) !== false) {

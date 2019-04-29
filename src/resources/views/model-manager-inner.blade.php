@@ -7,6 +7,9 @@
                delete-url="{!! $deleteUrl !!}"
                ajax-operations-url="{!! $ajaxOperationsUrl !!}"
                :allow-operations="{{ $allowOperations ? 'true' : 'false' }}"
+               :allow-adding="{{ $allowAdding ? 'true' : 'false' }}"
+               :use-sweet-alert="false"
+               subject-name="{{ $subjectName }}"
                :class-overrides="{{ json_encode([
                     'edit-form-step-head' => 'portlet-head'
                ]) }}"
