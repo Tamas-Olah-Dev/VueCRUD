@@ -233,7 +233,11 @@ abstract class VueCRUDFormdatabuilder
             foreach ($ruleset as $rule) {
                 $field = static::getFields()->get($fieldId);
                 $label = static::getValidationErrorLabel(__($field->getLabel()));
-                $rulename = \Illuminate\Support\Str::before($rule, ':');
+                if (is_string($rule)) {
+                    $rulename = \Illuminate\Support\Str::before($rule, ':');
+                } else {
+                    $rulename = get_class($rule);
+                }
                 if (isset($field->getMessages()[$rulename])) {
                     $messages[$fieldId.'.'.$rulename] = $field->getMessages()[$rulename];
                 } else {

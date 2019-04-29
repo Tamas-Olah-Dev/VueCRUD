@@ -57,6 +57,7 @@ class VueCRUDControllerBase
             'buttons'          => $this->getModellistButtons($positionedView),
             'mainButtons' => $class::getModelManagerMainButtons(),
             'allowOperations'  => $class::shouldVueCRUDOperationsBeDisplayed(),
+            'allowAdding'  => $class::shouldVueCRUDAddButtonBeDisplayed(),
             'positionedView' => $positionedView,
         ];
         if (request()->isXmlHttpRequest()) {

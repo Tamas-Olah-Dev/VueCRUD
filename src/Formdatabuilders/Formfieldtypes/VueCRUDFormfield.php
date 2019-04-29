@@ -33,6 +33,7 @@ class VueCRUDFormfield
     protected $conditions;
     protected $hideIf;
     protected $placeholder;
+    protected $nullableIfRequired;
 
     /**
      * VueCRUDFormfield constructor.
@@ -519,4 +520,22 @@ class VueCRUDFormfield
     {
         return $this->placeholder;
     }
+
+
+    /**
+     * @param bool $nullableIfRequired
+     * @return VueCRUDFormfield
+     */
+    public function setNullableIfRequired(bool $nullableIfRequired): VueCRUDFormfield
+    {
+        $this->nullableIfRequired = $nullableIfRequired;
+
+        return $this;
+    }
+
+    public function getNullableIfRequired()
+    {
+        return $this->nullableIfRequired;
+    }
+
 }

@@ -92,6 +92,12 @@ trait VueCRUDManageable
         return true;
     }
 
+    public static function shouldVueCRUDAddButtonBeDisplayed()
+    {
+        // authorization logic can be implemented here
+        return true;
+    }
+
     public static function getVueCRUDModellistButtons()
     {
         /**

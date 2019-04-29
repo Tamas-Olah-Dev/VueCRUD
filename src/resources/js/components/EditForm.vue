@@ -83,6 +83,10 @@
                                       v-bind:placeholder="subjectData[fieldname].placeholder"
                                       v-bind:class="data.class"
                             ></textarea>
+                            <div v-if="data.kind == 'text' && data.type == 'static'"
+                            >
+                                <div v-html="subjectData[fieldname].value"></div>
+                            </div>
                             <div v-if="data.kind == 'text' && data.type == 'richtext-trix'" v-bind:class="data.class" style="min-height:95%; height:95%; margin-bottom: 2em">
                                 <trix-wrapper v-model="subjectData[fieldname].value"
                                               v-bind:fieldname="fieldname"
@@ -460,6 +464,9 @@
                 .catch((error) => {
                     if (error.response.status == 422) {
                     this.errors = error.response.data.errors;
+                }
+                if (error.response.status != 422) {
+                    alert(error.response.data);
                 }
                 this.loading = false;
             });
