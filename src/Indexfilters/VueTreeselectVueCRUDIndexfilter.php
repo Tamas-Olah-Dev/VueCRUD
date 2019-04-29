@@ -27,6 +27,7 @@ class VueTreeselectVueCRUDIndexfilter extends VueCRUDIndexfilterBase implements 
         $this->props['clearAllText'] = __('Clear all');
         $this->props['clearValueText'] = __('Clear value');
         $this->props['placeholder'] = __('Select...');
+        $this->props = array_merge($this->props, config('vuecrud.vuetreeselectDefaults', []));
     }
 
     /**

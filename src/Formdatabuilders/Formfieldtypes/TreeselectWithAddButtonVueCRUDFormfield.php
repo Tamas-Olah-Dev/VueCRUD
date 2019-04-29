@@ -26,6 +26,8 @@ class TreeselectWithAddButtonVueCRUDFormfield extends VueCRUDFormfield
             'clearValueText' => __('Clear value'),
             'placeholder' => __('Select...'),
         ];
+        $this->props['defaultSubComponentProps'] = array_merge($this->props['defaultSubComponentProps'], config('vuecrud.vuetreeselectDefaults', []));
+
     }
 
     public function setComponent($componentName)
