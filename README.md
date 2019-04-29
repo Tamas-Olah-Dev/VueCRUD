@@ -61,6 +61,15 @@ Vue.component('treeselect', Treeselect);
 
 The valueset model should have a getVueTreeselectCompatibleCollection public static method that provides the node list. It should use the canBeTurnedIntoKeyValueCollection trait's getVueTreeselectCompatibleValueset method.
 
+
+When using SweetAlert2 for notifications, run `npm install sweetalert2 --save` and import it:
+```
+window.Swal = require('sweetalert2')
+```
+In this case the modelmanager component needs an extra option (:use-sweet-alert="true")
+
+
+
 ## Multi-step forms
 The package supports multi-step (multi-stage?) forms, where the different steps only appear when the previous step's form elements were validated. Saving only occurs on the last step. To use multi-step forms:
 - use the setStep(int $step) method on form elements in the formdatabuilder
@@ -165,6 +174,11 @@ These allows for customizing the buttons in the model manager component. For det
 public static function shouldVueCRUDOperationsBeDisplayed()
 ```
 This allows for injecting authorization logic to the list, like only enabling operations for admin users.
+
+```
+public static function shouldVueCRUDAddButtonBeDisplayed()
+```
+This allows for injecting authorization logic to the list, like only enabling the new element button for admin users.
 
 ```
 public function addAdditionalDetails()
@@ -319,12 +333,18 @@ A simple number input. With the `setForceInteger(bool $value)` method it can be 
 ###### VueTreeselectVueCRUDFormfield
 A VueTreeselect wrapper component. Instead of getKeyValueCollection, it uses the valuesetClass's `public static getVueTreeselectCollection()` method. While this has to be defined, typically it's enough that it returns the `getVueTreeselectCompatibleValueset()` function's results from the canBeTurnedIntoKeyValueCollection trait. For tree-type models where relationships are set up (a model has a nullable model_id pointing to a parent model if it's a child, and a hasMany relationship to list the children) the relationship name should be passed to this function to build a tree.
 The `setMultiple(bool $multiple)` option allows for enabling/disabling multiselect.
+
+
+For all treeselect-based fields, default props can be defined in config('app.vuecrud.vuetreeselectDefaults') as an array.
+
 ###### TreeselectWithAddButtonVueCRUDFormfield
 This is a wrapper for a VueTreeselect and an 'Add' button that can be connected to another VueCRUDManageable model. At configuration the addRoutes method has to be used with the SUBJECT_SLUG of the related model, so that routes are configured. The `setTreeselectLabelFieldName($fieldName)` function is needed to set up the property of the model to be used as a node label.  
 ###### VueComponentVueCRUDFormfield
 This allows for using any custom v-model-compatible Vue.js component as a form field.
 ###### YesNoSelectVueCRUDFormfield
 A simple Yes/No select.
+###### StaticVueCRUDFormfield
+A div rendered with the formfield's value in it (for displaying static information if needed)
 
 ### Form requests
 
