@@ -22,10 +22,10 @@
                 </span>
             </div>
             <div class="file-collector-add-button-container" v-if="this.limit == null || this.limit > this.combinedLength">
-                <label for="fileinput">
-                    <input name="fileinput"
+                <label :for="'fileinput'+token">
+                    <input :name="'fileinput'+token"
                            :ref="'fileinput'"
-                           id="fileinput"
+                           :id="'fileinput'+token"
                            v-on:change="addFileFromInput"
                            type="file"
                            v-bind:accept="accept"
@@ -61,7 +61,8 @@
             limit: {default: null},
             mode: {default: 'url'},
             accept: {default: false},
-            acceptErrorMessage: {default: ''}
+            acceptErrorMessage: {default: ''},
+            token: {type: String, default: () => Math.random().toString().substr(3, 8)}
         },
         data: function() {
             return {
