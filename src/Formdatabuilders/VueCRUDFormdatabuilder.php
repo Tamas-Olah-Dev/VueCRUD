@@ -210,9 +210,11 @@ abstract class VueCRUDFormdatabuilder
                 $fieldDataRules = $fieldData->getRules();
                 if (\Route::getCurrentRoute()->hasParameter('subject')) {
                     $fieldDataRules = collect($fieldDataRules)->transform(function ($fieldDataRule, $key) {
-                        if (\Illuminate\Support\Str::contains($fieldDataRule, 'unique:')) {
-                            $table = \Illuminate\Support\Str::after($fieldDataRule, ':');
-                            return Rule::unique($table)->ignore(\Route::getCurrentRoute()->parameters()['subject']->id);
+                        if(is_string($fieldDataRule)) {
+                            if (\Illuminate\Support\Str::contains($fieldDataRule, 'unique:')) {
+                                $table = \Illuminate\Support\Str::after($fieldDataRule, ':');
+                                return Rule::unique($table)->ignore(\Route::getCurrentRoute()->parameters()['subject']->id);
+                            }
                         }
                         return $fieldDataRule;
                     })->all();

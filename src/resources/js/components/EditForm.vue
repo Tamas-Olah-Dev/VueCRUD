@@ -466,7 +466,9 @@
                     this.errors = error.response.data.errors;
                 }
                 if (error.response.status != 422) {
-                    alert(error.response.data);
+                    if (error.response.status == 500) {
+                        alert(error.response.data.message);
+                    }
                 }
                 this.loading = false;
             });
