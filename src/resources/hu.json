@@ -59,5 +59,10 @@
   "The two password fields do not match": "A két jelszómező tartalma nem egyezik",
   "The two fields do not match": "A két mező tartalma nem egyezik",
   "Value has to be at least :min": "Nem lehet kevesebb mint :min",
-  "Value cannot exceed :max": "Nem lehet több, mint :max"
+  "Value cannot exceed :max": "Nem lehet több, mint :max",
+  "Single page": "Egy oldalra",
+  "Operations on the selected items": "Műveletek a kijelölt elemekkel",
+  "Export items": "Exportálás",
+  "Export as CSV": "Exportálás CSV formátumban",
+  "Export as HTML": "Exportálás HTML formátumban"
 }

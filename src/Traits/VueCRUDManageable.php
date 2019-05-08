@@ -82,6 +82,14 @@ trait VueCRUDManageable
         return method_exists(static::class, 'getRestrictingFields');
     }
 
+    public static function getVueCRUDOptionalAjaxFunctions()
+    {
+        return array_merge(
+            self::getVueCRUDMassFunctions(),
+            self::getVueCRUDExportFunctions()
+        );
+    }
+
     /** The following methods provide sensible defaults,
      * but they are to be overridden as needed.
      * */
@@ -107,6 +115,30 @@ trait VueCRUDManageable
         return [];
     }
 
+    // an array of export functions, keyed by the controller method
+    // exportCsv and exportHTML are two predefined methods that can be added with
+    // a label of our choosing and can be used instantly
+    public static function getVueCRUDExportFunctions()
+    {
+        return [];
+    }
+
+    // by overriding this, we can set up custom column structure for exports
+    // by default it uses the index column definitions
+    public static function getVueCRUDExportColumns()
+    {
+        return static::getVueCRUDIndexColumns();
+    }
+
+    public static function getVueCRUDHTMLExportTableStyle()
+    {
+        return [
+            'table' => 'border: 1px solid darkgrey; min-width: 600px;',
+            'th' => '',
+            'tr' => '',
+            'td' => 'border: 1px solid lightgrey',
+        ];
+    }
 
     public static function getVueCRUDModellistButtons()
     {
@@ -174,6 +206,9 @@ trait VueCRUDManageable
             ]),
             'massOperations' => self::buildButtonFromConfigData('vuecrud.buttons.massOperations', [
                 'class' => 'btn btn-primary', 'html' => __('Operations on the selected items'),
+            ]),
+            'exportOperations' => self::buildButtonFromConfigData('vuecrud.buttons.exportOperations', [
+                'class' => 'btn btn-primary', 'html' => __('Export items'),
             ]),
         ];
 

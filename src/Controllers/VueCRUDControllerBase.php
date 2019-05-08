@@ -61,6 +61,7 @@ class VueCRUDControllerBase
             'allowAdding'      => $class::shouldVueCRUDAddButtonBeDisplayed(),
             'positionedView'   => $positionedView,
             'massOperations'   => (object)$class::getVueCRUDMassFunctions(),
+            'exportOperations' => (object)$class::getVueCRUDExportFunctions(),
         ];
         if (request()->isXmlHttpRequest()) {
             return response()->json($viewData);
@@ -220,7 +221,7 @@ class VueCRUDControllerBase
     protected function getAllowedAjaxOperations()
     {
         $class = static::SUBJECT_CLASS;
-        $classMassOperations = array_keys($class::getVueCRUDMassFunctions());
+        $classMassOperations = array_keys($class::getVueCRUDOptionalAjaxFunctions());
 
         return array_merge($classMassOperations, [
             'trixStoreAttachment',
@@ -437,4 +438,79 @@ class VueCRUDControllerBase
 
         return $subject;
     }
+
+    protected function exportCsv()
+    {
+        $class = static::SUBJECT_CLASS;
+        if (defined($class.'::exportCsv')) {
+            return response($class::exportCsv());
+        }
+        $tableData = $this->generateTableFromModelList(
+            $this->getExportData(),
+            $class::getVueCRUDExportColumns()
+        );
+        $result = [];
+        $csv = fopen('php://temp/maxmemory:'. (5*1024*1024), 'r+');
+        foreach ($tableData as $row) {
+            fputcsv($csv, $row, ';');
+        }
+
+        rewind($csv);
+        return response()->json([
+            'headers' => ['Content-Type' => 'text/csv'],
+            'content' => stream_get_contents($csv),
+            'filename' => $this->getSubjectNamePlural().'-'.now()->format('Y-m-d_H-i-s').'.csv'
+        ]);
+    }
+
+    protected function exportHTML()
+    {
+        $class = static::SUBJECT_CLASS;
+        if (defined($class.'::exportHTML')) {
+            return response($class::exportHTML());
+        }
+        $tableData = $this->generateTableFromModelList(
+            $this->getExportData(),
+            $class::getVueCRUDExportColumns()
+        );
+        $styles = $class::getVueCRUDHTMLExportTableStyle();
+        $result = ['<table style="'.$styles['table'].'">'];
+        foreach ($tableData as $index => $row) {
+            if ($index == 0) {
+                $result[] = '<tr style="'.$styles['tr'].'"><th style="'.$styles['th'].'">'.implode('</th style="'.$styles['th'].'"><th>', $row).'</th>';
+            } else {
+                $result[] = '<tr style="'.$styles['tr'].'"><td style="'.$styles['td'].'">'.implode('</td><td style="'.$styles['td'].'">', $row).'</td>';
+            }
+        }
+        $result[] = '</table>';
+        return response()->json([
+            'headers' => ['Content-Type' => 'text/html'],
+            'content' => implode("\n", $result),
+            'filename' => $this->getSubjectNamePlural().'-'.now()->format('Y-m-d_H-i-s').'.html'
+        ]);
+    }
+
+    protected function getExportData()
+    {
+        $class = static::SUBJECT_CLASS;
+        return $class::whereIn('id', request()->get('exportIds', []))
+            ->orderBy(request()->get('sorting_field', 'id'), request()->get('sorting_direction', 'asc'))
+            ->get();
+    }
+
+    protected function generateTableFromModelList($list, $columns)
+    {
+        $result = [];
+        $result[] = array_values($columns);
+        foreach ($list as $element) {
+            $row = [];
+            foreach ($columns as $field => $label) {
+                $row[] = $element->$field;
+            }
+            $result[] = $row;
+        }
+
+        return $result;
+    }
+
 }
