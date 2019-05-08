@@ -77,15 +77,23 @@
                                 <span v-bind:class="iconClasses.list"></span>
                                 <span v-html="totalLabel"></span>
                             </div>
-                            <div class="model-manager-paging-controls d-flex align-items-center"
+                            <div class="model-manager-paging-controls"
                                  v-if="typeof(counts['total']) != 'undefined'"
                             >
+                                <span v-if="pageOptions.length > 1 || showAllInOnePage"
+                                      style="flex-basis: 60%;"
+                                >
+                                    <label>
+                                        <input type="checkbox" v-model="showAllInOnePage">
+                                        {{ translate('Single page') }}
+                                    </label>
+                                </span>
                                 <span>{{ counts['filtered'] }}&nbsp;/&nbsp;{{ counts['total'] }}&nbsp;&nbsp;</span>
                                 <button v-bind:class="mainButtons['prevPage']['class']"
                                         v-on:click="previousPage"
                                         v-html="mainButtons['prevPage']['html']"
                                 ></button>
-                                <select class="form-control" v-model="currentPage">
+                                <select class="form-control model-manager-page-select" v-model="currentPage">
                                     <option v-for="p in pageOptions"
                                             v-bind:value="p"
                                             v-html="p"
@@ -99,60 +107,93 @@
                         </div>
                         <div class="portlet-body">
                             <div v-show="mode == 'elements-loading'" v-html="spinnerSrc" style="width:100%; display:flex; justify-content: center"></div>
-                            <table v-show="mode != 'elements-loading'" class="table table-striped" v-bind:class="elementTableClass">
-                                <thead>
-                                <tr>
-                                    <th v-for="columnName, columnField in columns"
-                                        v-bind:class="{'sorting-column': columnIsSorting(columnField)}"
-                                        v-on:click="setSorting(columnField)">
-                                        <span v-html="columnName"></span>
-                                        <span style="margin-left: 3px"
-                                              v-if="columnIsSorting(columnField)"
-                                              v-bind:style="{color: currentSortingColumn == columnField ? 'black': 'darkgrey'}"
-                                              v-html="currentSortingColumn == columnField ? sortingChevron : '⇵'"
-                                        ></span>
-                                    </th>
-                                    <th style="min-width: 15%" v-if="allowOperations">{{ translate('Operations') }}</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr v-for="element, elementIndex in elements">
-                                    <td v-for="columnName, columnField in columns" v-html="element[columnField]"></td>
-                                    <td v-if="allowOperations" style="white-space: nowrap">
-                                        <button type="button" v-if="showButton('details')"
-                                                v-bind:class="buttons['details']['class']"
-                                                v-on:click="showDetails(element[idProperty])"
-                                                v-html="buttons['details']['html']"
-                                        ></button>
-                                        <button type="button" v-if="showButton('edit')"
-                                                v-bind:class="buttons['edit']['class']"
-                                                v-on:click="editElement(element[idProperty])"
-                                                v-html="buttons['edit']['html']"
-                                        ></button>
-                                        <button type="button" v-if="showButton('delete')"
-                                                v-bind:class="buttons['delete']['class']"
-                                                v-on:click="confirmElementDeletion(element[idProperty], element[nameProperty])"
-                                                v-html="buttons['delete']['html']"
-                                        ></button>
-                                        <button type="button" v-if="showButton('moveUp') && elementIndex > 0"
-                                                v-bind:class="buttons['moveUp']['class']"
-                                                v-on:click="moveElementUp(element[idProperty])"
-                                                v-html="buttons['moveUp']['html']"
-                                        ></button>
-                                        <button type="button" v-if="showButton('moveDown') && elementIndex < elements.length - 1"
-                                                v-bind:class="buttons['moveDown']['class']"
-                                                v-on:click="moveElementDown(element[idProperty])"
-                                                v-html="buttons['moveDown']['html']"
-                                        ></button>
-                                        <button type="button" v-for="customComponentButton, customComponentButtonKey in customComponentButtons"
-                                                v-bind:class="customComponentButton['class']"
-                                                v-on:click="activateCustomComponent(customComponentButtonKey)"
-                                                v-html="customComponentButton['html']">
-                                        </button>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
+                            <template v-show="mode != 'elements-loading'">
+                                <template v-if="showMassControls">
+                                    <div style="width: 100%; display: flex; justify-content: start; margin-bottom: 1em;">
+                                        <dropdown-button :main-button-class="mainButtons['massOperations']['class']"
+                                                         :main-button-label="mainButtons['massOperations']['html'] + (selectedElements.length > 0 ? '&nbsp;('+selectedElements.length+')' : '')"
+                                                         :items="massOperations"
+                                                         @clicked="handleMassOperation($event)"
+                                                         :disabled="selectedElements.length == 0"></dropdown-button>
+                                    </div>
+                                </template>
+                                <table v-show="mode != 'elements-loading'" class="table table-striped" v-bind:class="elementTableClass">
+                                    <thead>
+                                    <tr>
+                                        <th v-if="showMassControls">
+                                                <span v-html="'✔'"
+                                                      role="button"
+                                                      :title="translate('Select/deselect all')"
+                                                      v-on:click="toggleSelectAll"
+                                                      style="cursor:pointer; font-size:1.7em; user-select: none"></span>
+                                        </th>
+                                        <th v-for="columnName, columnField in columns"
+                                            v-bind:class="{'sorting-column': columnIsSorting(columnField)}"
+                                            v-on:click="setSorting(columnField)">
+                                            <span v-html="columnName"></span>
+                                            <span style="margin-left: 3px"
+                                                  v-if="columnIsSorting(columnField)"
+                                                  v-bind:style="{color: currentSortingColumn == columnField ? 'black': 'darkgrey'}"
+                                                  v-html="currentSortingColumn == columnField ? sortingChevron : '⇵'"
+                                            ></span>
+                                        </th>
+                                        <th style="min-width: 15%" v-if="allowOperations">{{ translate('Operations') }}</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="element, elementIndex in elements"
+                                        v-bind:style="{'background-color': selectedElements.indexOf(element.id) > -1 ? '#CAE1F6' : null}"
+                                    >
+                                        <td v-if="showMassControls">
+                                            <label :for="element.id">
+                                                <input type="checkbox"
+                                                       :value="element.id"
+                                                       :id="element.id"
+                                                       :name="element.id"
+                                                       v-model="selectedElements"
+                                                       style="opacity: 0; height:0px; width: 0px;"
+                                                >
+                                                <span v-html="selectedElements.indexOf(element.id) > -1 ? '✔' : '✅'"
+                                                      style="cursor:pointer; font-size:1.7em; user-select: none"></span>
+                                            </label>
+                                        </td>
+                                        <td v-for="columnName, columnField in columns" v-html="element[columnField]"></td>
+                                        <td v-if="allowOperations" style="white-space: nowrap">
+                                            <button type="button" v-if="showButton('details')"
+                                                    v-bind:class="buttons['details']['class']"
+                                                    v-on:click="showDetails(element[idProperty])"
+                                                    v-html="buttons['details']['html']"
+                                            ></button>
+                                            <button type="button" v-if="showButton('edit')"
+                                                    v-bind:class="buttons['edit']['class']"
+                                                    v-on:click="editElement(element[idProperty])"
+                                                    v-html="buttons['edit']['html']"
+                                            ></button>
+                                            <button type="button" v-if="showButton('delete')"
+                                                    v-bind:class="buttons['delete']['class']"
+                                                    v-on:click="confirmElementDeletion(element[idProperty], element[nameProperty])"
+                                                    v-html="buttons['delete']['html']"
+                                            ></button>
+                                            <button type="button" v-if="showButton('moveUp') && elementIndex > 0"
+                                                    v-bind:class="buttons['moveUp']['class']"
+                                                    v-on:click="moveElementUp(element[idProperty])"
+                                                    v-html="buttons['moveUp']['html']"
+                                            ></button>
+                                            <button type="button" v-if="showButton('moveDown') && elementIndex < elements.length - 1"
+                                                    v-bind:class="buttons['moveDown']['class']"
+                                                    v-on:click="moveElementDown(element[idProperty])"
+                                                    v-html="buttons['moveDown']['html']"
+                                            ></button>
+                                            <button type="button" v-for="customComponentButton, customComponentButtonKey in customComponentButtons"
+                                                    v-bind:class="customComponentButton['class']"
+                                                    v-on:click="activateCustomComponent(customComponentButtonKey)"
+                                                    v-html="customComponentButton['html']">
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -299,7 +340,7 @@
                 }
             }},
             subjectName: {type: String, default: () => {return this.translate('Item')}},
-            useSweetAlert: {type: Boolean, default: false}
+            useSweetAlert: {type: Boolean, default: false},
         },
         data: function() {
             return {
@@ -332,12 +373,18 @@
                 showNotification: false,
                 notificationContent: '',
                 notificationType: '',
+                selectedElements: [],
+                massOperations: {},
+                showAllInOnePage: false,
             }
         },
         mounted() {
             this.fetchElements();
         },
         computed: {
+            showMassControls: function() {
+                return JSON.stringify(this.massOperations) != '{}';
+            },
             modelManagerContentClass: function() {
                 if (this.notificationType == 'error') {
                     return 'text-danger';
@@ -380,7 +427,7 @@
         },
         methods: {
             confirmEditSuccess: function() {
-                this.successNotification(this.subjectName +'  ' + this.translate('updated successfully'));
+                this.successNotification(this.subjectName +' ' + this.translate('updated successfully'));
                 this.fetchElements();
             },
             confirmCreationSuccess: function() {
@@ -388,7 +435,7 @@
                 this.fetchElements();
             },
             confirmDeletionSuccess: function() {
-                this.successNotification(this.translate(this.subjectName+' deleted'));
+                this.successNotification(this.subjectName + ' ' + this.translate('deleted'));
                 this.fetchElements();
             },
             successNotification: function(content) {
@@ -487,7 +534,7 @@
                 let result = {
                     token: Math.random().toString(36),
                     page: this.currentPage,
-                    items_per_page: this.itemsPerPage,
+                    items_per_page: this.showAllInOnePage ? 99999999 : this.itemsPerPage,
                     sorting_field: this.sortingColumns[this.currentSortingColumn],
                     sorting_direction: this.currentSortingDirection
                 };
@@ -558,6 +605,7 @@
                         this.sortingColumns = response.data.sortingColumns;
                         this.currentSortingColumn = this.findSortingColumnKey(response.data.sortingField);
                         this.currentSortingDirection = response.data.sortingDirection;
+                        this.massOperations = response.data.massOperations;
                         this.buttons = response.data.buttons;
                         if (this.positionedView != response.data.positionedView) {
                             this.columns = response.data.columns;
@@ -645,6 +693,29 @@
                         this.elementTableClass = '';
                     }).catch((error) => {this.elementTableClass = '';});
             },
+            handleMassOperation: function(action) {
+                window.axios.post(this.ajaxOperationsUrl, {
+                    selectedElements: this.selectedElements,
+                    action: action
+                }).then((response) => {
+                    this.successNotification(response.data)
+                    this.fetchElements(true, true);
+                    this.elementTableClass = '';
+                }).catch((error) => {
+                    this.errorNotification(error.response.data);
+                    this.elementTableClass = '';
+                });
+            },
+            toggleSelectAll: function() {
+                if (this.selectedElements.length > 0) {
+                    this.selectedElements = [];
+                } else {
+                    this.selectedElements = []
+                    for (let i = 0; i < this.elements.length; i++) {
+                        this.selectedElements.push(this.elements[i].id);
+                    }
+                }
+            }
         },
         watch: {
             currentPage: function() {
@@ -652,6 +723,10 @@
                     this.fetchElements(true);
                 }
             },
+            showAllInOnePage: function() {
+                this.currentPage = 1;
+                this.fetchElements(true);
+            }
         }
     }
 </script>
@@ -681,5 +756,14 @@
     }
     .model-manager-notification-show {
         opacity: 1;
+    }
+    .model-manager-paging-controls {
+        display: flex;
+        flex-basis: 60%;
+        align-items:baseline;
+
+    }
+    .model-manager-page-select {
+        width: 5em;
     }
 </style>

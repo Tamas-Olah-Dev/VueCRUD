@@ -45,8 +45,9 @@
     import {fileUploadMixin} from './mixins/fileUploadMixin.js'
     import {spinner} from './mixins/spinner.js'
     import {classOverridesMixin} from './mixins/classOverridesMixin.js'
+    import {translateMixin} from './mixins/translateMixin.js'
     export default {
-        mixins: [fileUploadMixin, spinner, classOverridesMixin],
+        mixins: [fileUploadMixin, spinner, classOverridesMixin, translateMixin],
         props: {
             uploadUrl: {type: String, default: ''},
             value: {type: Array, default: () => {return [];}},
@@ -61,7 +62,6 @@
             limit: {default: null},
             mode: {default: 'url'},
             accept: {default: false},
-            acceptErrorMessage: {default: ''},
             token: {type: String, default: () => Math.random().toString().substr(3, 8)}
         },
         data: function() {
@@ -71,6 +71,7 @@
                 uploading: false,
                 addDropClass: false,
                 pendingFiles: [],
+                acceptErrorMessage: this.translate('Invalid file type'),
             }
         },
         mounted() {
@@ -126,19 +127,19 @@
                     this.mode
                 ).then((response) => {
                     if (this.mode == 'url') {
-                    this.files.push(response.data.url);
-                } else {
-                    this.files.push(response.data);
-                }
+                        this.files.push(response.data.url);
+                    } else {
+                        this.files.push(response.data);
+                    }
 
-                this.pendingFiles.splice(0, 1);
-                this.$emit('input', this.files);
-                if (this.pendingFiles.length == 0) {
-                    this.uploading = false;
-                } else {
-                    this.uploadFirstFile();
-                }
-            });
+                    this.pendingFiles.splice(0, 1);
+                    this.$emit('input', this.files);
+                    if (this.pendingFiles.length == 0) {
+                        this.uploading = false;
+                    } else {
+                        this.uploadFirstFile();
+                    }
+                });
             },
             filenameLabel: function(file) {
                 let filename = '';

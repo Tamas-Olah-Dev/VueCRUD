@@ -98,6 +98,16 @@ trait VueCRUDManageable
         return true;
     }
 
+    // an array of functionalities that can be applied to multiple selected items.
+    // if this array is not empty, a selection column will be present on the model list
+    // keys are controller method names, while the values are the labels to show in the
+    // dropdown
+    public static function getVueCRUDMassFunctions()
+    {
+        return [];
+    }
+
+
     public static function getVueCRUDModellistButtons()
     {
         /**
@@ -118,7 +128,13 @@ trait VueCRUDManageable
 
     public static function getModelManagerMainButtons()
     {
-        $subjectName = defined('self::SUBJECT_NAME') ? ' '.mb_strtolower(self::SUBJECT_NAME) : '';
+        if (defined('self::SUBJECT_NAME')) {
+            $subjectName = config('vuecrud.translateConstants', false)
+                ? ' '.mb_strtolower(__(self::SUBJECT_NAME))
+                : ' '.mb_strtolower(self::SUBJECT_NAME);
+        } else {
+            $subjectName = '';
+        }
         $result = [
             'add' => self::buildButtonFromConfigData('vuecrud.buttons.add', [
                 'class' => 'btn btn-outline-primary', 'html' => __('New'),
@@ -155,6 +171,9 @@ trait VueCRUDManageable
             ]),
             'cancelDeletion' => self::buildButtonFromConfigData('vuecrud.buttons.cancelDeletion', [
                 'class' => 'btn btn-secondary', 'html' => __('No'),
+            ]),
+            'massOperations' => self::buildButtonFromConfigData('vuecrud.buttons.massOperations', [
+                'class' => 'btn btn-primary', 'html' => __('Operations on the selected items'),
             ]),
         ];
 

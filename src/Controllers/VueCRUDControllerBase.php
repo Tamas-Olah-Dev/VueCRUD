@@ -60,6 +60,7 @@ class VueCRUDControllerBase
             'allowOperations'  => $class::shouldVueCRUDOperationsBeDisplayed(),
             'allowAdding'      => $class::shouldVueCRUDAddButtonBeDisplayed(),
             'positionedView'   => $positionedView,
+            'massOperations'   => (object)$class::getVueCRUDMassFunctions(),
         ];
         if (request()->isXmlHttpRequest()) {
             return response()->json($viewData);
@@ -218,7 +219,10 @@ class VueCRUDControllerBase
 
     protected function getAllowedAjaxOperations()
     {
-        return [
+        $class = static::SUBJECT_CLASS;
+        $classMassOperations = array_keys($class::getVueCRUDMassFunctions());
+
+        return array_merge($classMassOperations, [
             'trixStoreAttachment',
             'trixRemoveAttachment',
             'storePublicAttachment',
@@ -226,7 +230,7 @@ class VueCRUDControllerBase
             'trixGeneratePreview',
             'move',
             'moveTo',
-        ];
+        ]);
     }
 
     public function ajaxOperations($subject)
@@ -401,18 +405,28 @@ class VueCRUDControllerBase
     {
         $class = static::SUBJECT_CLASS;
         if (defined($class.'::SUBJECT_NAME')) {
-            return $class::SUBJECT_NAME;
+            $result = $class::SUBJECT_NAME;
+        } else {
+            $result = static::SUBJECT_NAME;
         }
-        return static::SUBJECT_NAME;
+
+        return config('vuecrud.translateConstants', false)
+            ? __($result)
+            : $result;
     }
 
     protected function getSubjectNamePlural()
     {
         $class = static::SUBJECT_CLASS;
         if (defined($class.'::SUBJECT_NAME_PLURAL')) {
-            return $class::SUBJECT_NAME_PLURAL;
+            $result = $class::SUBJECT_NAME_PLURAL;
+        } else {
+            $result = static::SUBJECT_NAME;
         }
-        return static::SUBJECT_NAME;
+
+        return config('vuecrud.translateConstants', false)
+            ? __($result)
+            : $result;
     }
 
     protected function getModificationResponse($subject)
