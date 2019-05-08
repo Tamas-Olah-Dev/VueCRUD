@@ -34,6 +34,7 @@ class VueCRUDFormfield
     protected $hideIf;
     protected $placeholder;
     protected $nullableIfRequired;
+    protected $staticValue;
 
     /**
      * VueCRUDFormfield constructor.
@@ -536,6 +537,24 @@ class VueCRUDFormfield
     public function getNullableIfRequired()
     {
         return $this->nullableIfRequired;
+    }
+
+    /**
+     * @param mixed $staticValue
+     * @return VueCRUDFormfield
+     */
+    public function setStaticValue($staticValue)
+    {
+        $this->staticValue = $staticValue;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getStaticValue()
+    {
+        return $this->staticValue;
     }
 
 }

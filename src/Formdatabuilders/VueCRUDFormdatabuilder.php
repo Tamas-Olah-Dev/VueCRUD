@@ -129,6 +129,7 @@ abstract class VueCRUDFormdatabuilder
                     'valuesetSorted' => $this->getValuesetSorted($fieldId),
                     'label'          => __($fieldData->getLabel()),
                     'value'          => $this->getValue($fieldId),
+                    'staticValue'    => $fieldData->getStaticValue(),
                     'mandatory'      => $fieldData->getMandatory(),
                     'props'          => json_encode($fieldData->getProps()),
                     'helpTooltip'    => $fieldData->getHelpTooltip(),
@@ -139,6 +140,9 @@ abstract class VueCRUDFormdatabuilder
                 ];
                 $this->formdata[$fieldId] = $element;
             }
+        }
+        if (method_exists($this, 'postProcessFormfields')) {
+            $this->postProcessFormfields();
         }
 
         return $this;

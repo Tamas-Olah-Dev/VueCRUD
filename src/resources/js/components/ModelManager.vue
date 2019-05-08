@@ -796,7 +796,7 @@
         display: flex;
         flex-basis: 60%;
         align-items:baseline;
-
+        justify-content: flex-end;
     }
     .model-manager-page-select {
         width: 5em;

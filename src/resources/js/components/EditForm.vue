@@ -85,7 +85,7 @@
                             ></textarea>
                             <div v-if="data.kind == 'text' && data.type == 'static'"
                             >
-                                <div v-html="subjectData[fieldname].value"></div>
+                                <div v-html="subjectData[fieldname].staticValue"></div>
                             </div>
                             <div v-if="data.kind == 'text' && data.type == 'richtext-trix'" v-bind:class="data.class" style="min-height:95%; height:95%; margin-bottom: 2em">
                                 <trix-wrapper v-model="subjectData[fieldname].value"
