@@ -69,10 +69,20 @@ class VueCRUDDataproviderBase
             'filtered' => $this->getQuery()->count(),
             'total' => $this->getBaseQuery()->count(),
             'start' => ($this->getPage() - 1) * $this->getItemsPerPage() + 1,
-            'end' => $this->getPage() * $this->getItemsPerPage(),
         ];
+        $result['start'] = $result['filtered'] > 0 ? $result['start'] : 0;
+        if ($result['filtered'] == 0) {
+            $result['end'] = 0;
+        } else {
+            $result['end'] = $result['filtered'] > ($this->getPage() - 1) * $this->getItemsPerPage()
+                ? $this->getPage() * $this->getItemsPerPage()
+                : $result['filtered'];
+            if ($result['end'] > $result['filtered']) {
+                $result['end'] = $result['filtered'];
+            }
+        }
 
-        $result['pagesMax'] = ceil($result['total'] / $this->getItemsPerPage());
+        $result['pagesMax'] = ceil($result['filtered'] / $this->getItemsPerPage());
 
         return (object) $result;
     }
