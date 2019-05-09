@@ -1,18 +1,21 @@
 <template>
-    <div ref="container">
+    <div ref="container" style="position: relative">
         <button class="dropdown-button"
                 ref="mainButton"
                 v-bind:class="mainButtonClass"
                 :disabled="disabled"
                 v-on:click="openDropdown = !openDropdown"
         >
-            <span v-html="mainButtonLabel"></span>
+            <slot></slot>
             <span ref="caret"
                   class="dropdown-button-caret"
                   v-bind:class="caretClass"
             >&#9666;</span>
         </button>
-        <div class="dropdown-button-dropdown" v-show="openDropdown" ref="dropdown">
+        <div class="dropdown-button-dropdown"
+             :class="dropdownPositioningClass"
+             v-show="openDropdown"
+             ref="dropdown">
             <button v-for="label, event in items"
                     :key="event"
                     :ref="event"
@@ -35,10 +38,18 @@
         },
         data: function() {
             return {
-                openDropdown: false
+                openDropdown: false,
+                dropdownPositioningClass: [],
             }
         },
-        mounted() {},
+        mounted() {
+            if (this.$refs.container.getBoundingClientRect().left > document.documentElement.clientWidth / 2) {
+                this.dropdownPositioningClass.push('dropdown-button-dropdown-toleft');
+            }
+            if (this.$refs.container.getBoundingClientRect().top > document.documentElement.clientHeight * 0.7) {
+                this.dropdownPositioningClass.push('dropdown-button-dropdown-upwards');
+            }
+        },
         computed: {
             caretClass: function() {
                 return this.openDropdown ? 'dropdown-button-caret-open' : ''
@@ -81,12 +92,20 @@
     }
     .dropdown-button-dropdown {
         z-index: 1000;
-        max-width: 50%;
         padding: 5px;
         border-top: none;
         box-shadow: 5px 5px rgba(64, 64, 64, .3);
         background-color: white;
         position:absolute;
+    }
+    .dropdown-button-dropdown-toright {
+        left: 10px;
+    }
+    .dropdown-button-dropdown-toleft {
+        margin-left: -40%;
+    }
+    .dropdown-button-dropdown-upwards {
+        bottom: 4em;
     }
 
 </style>

@@ -443,23 +443,24 @@ class VueCRUDControllerBase
     {
         $class = static::SUBJECT_CLASS;
         if (defined($class.'::exportCsv')) {
-            return response($class::exportCsv());
-        }
-        $tableData = $this->generateTableFromModelList(
-            $this->getExportData(),
-            $class::getVueCRUDExportColumns()
-        );
-        $result = [];
-        $csv = fopen('php://temp/maxmemory:'. (5*1024*1024), 'r+');
-        foreach ($tableData as $row) {
-            fputcsv($csv, $row, ';');
-        }
+            $content = $class::exportCsv();
+        } else {
+            $tableData = $this->generateTableFromModelList(
+                $this->getExportData(),
+                $class::getVueCRUDExportColumns()
+            );
+            $result = [];
+            $csv = fopen('php://temp/maxmemory:'. (5*1024*1024), 'r+');
+            foreach ($tableData as $row) {
+                fputcsv($csv, $row, ';');
+            }
 
-        rewind($csv);
-        return response()->json([
-            'headers' => ['Content-Type' => 'text/csv'],
-            'content' => stream_get_contents($csv),
-            'filename' => $this->getSubjectNamePlural().'-'.now()->format('Y-m-d_H-i-s').'.csv'
+            rewind($csv);
+            $content = stream_get_contents($csv);
+        }
+        return response($content)->withHeaders([
+            'Content-Type' => 'text/csv',
+            'filename' => utf8_decode($this->getSubjectNamePlural()).'-'.now()->format('Y-m-d_H-i-s').'.csv'
         ]);
     }
 
@@ -467,26 +468,59 @@ class VueCRUDControllerBase
     {
         $class = static::SUBJECT_CLASS;
         if (defined($class.'::exportHTML')) {
-            return response($class::exportHTML());
-        }
-        $tableData = $this->generateTableFromModelList(
-            $this->getExportData(),
-            $class::getVueCRUDExportColumns()
-        );
-        $styles = $class::getVueCRUDHTMLExportTableStyle();
-        $result = ['<table style="'.$styles['table'].'">'];
-        foreach ($tableData as $index => $row) {
-            if ($index == 0) {
-                $result[] = '<tr style="'.$styles['tr'].'"><th style="'.$styles['th'].'">'.implode('</th style="'.$styles['th'].'"><th>', $row).'</th>';
-            } else {
-                $result[] = '<tr style="'.$styles['tr'].'"><td style="'.$styles['td'].'">'.implode('</td><td style="'.$styles['td'].'">', $row).'</td>';
+            $content = $class::exportHTML();
+        } else {
+            $tableData = $this->generateTableFromModelList(
+                $this->getExportData(),
+                $class::getVueCRUDExportColumns()
+            );
+            $styles = $class::getVueCRUDHTMLExportTableStyle();
+            $result = ['<table style="'.$styles['table'].'">'];
+            foreach ($tableData as $index => $row) {
+                if ($index == 0) {
+                    $result[] = '<tr style="'.$styles['tr'].'"><th style="'.$styles['th'].'">'.implode('</th style="'.$styles['th'].'"><th>', $row).'</th>';
+                } else {
+                    $result[] = '<tr style="'.$styles['tr'].'"><td style="'.$styles['td'].'">'.implode('</td><td style="'.$styles['td'].'">', $row).'</td>';
+                }
             }
+            $result[] = '</table>';
+            $content = implode("\n", $result);
         }
-        $result[] = '</table>';
-        return response()->json([
-            'headers' => ['Content-Type' => 'text/html'],
-            'content' => implode("\n", $result),
-            'filename' => $this->getSubjectNamePlural().'-'.now()->format('Y-m-d_H-i-s').'.html'
+        return response($content)->withHeaders([
+            'Content-Type' => 'text/html',
+            'filename' => utf8_decode($this->getSubjectNamePlural()).'-'.now()->format('Y-m-d_H-i-s').'.html'
+        ]);
+    }
+    //this function requires the PhpSpreadsheet library
+    protected function exportXlsx()
+    {
+        $class = static::SUBJECT_CLASS;
+        if (defined($class.'::exportXlsx')) {
+            $content = $class::exportXlsx();
+        } else {
+            $tableData = $this->generateTableFromModelList(
+                $this->getExportData(),
+                $class::getVueCRUDExportColumns()
+            );
+            $result = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $sheet = $result->getActiveSheet();
+            foreach ($tableData as $row => $rowData) {
+                foreach ($rowData as $column => $columnData) {
+                    $sheet->setCellValueByColumnAndRow($column + 1, $row + 1, $columnData);
+                    if ($row == 0) {
+                        $sheet->getCellByColumnAndRow($column + 1, $row + 1)->getStyle()->getFont()->setBold(true);
+                    }
+                }
+            }
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($result);
+            $tmpfile = storage_path('app'.DIRECTORY_SEPARATOR.now()->format('YmdHis').str_random(32));
+            $writer->save($tmpfile);
+            $content = file_get_contents($tmpfile);
+            unlink($tmpfile);
+        }
+        return response($content)->withHeaders([
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'filename' => utf8_decode($this->getSubjectNamePlural()).'-'.now()->format('Y-m-d_H-i-s').'.xlsx'
         ]);
     }
 

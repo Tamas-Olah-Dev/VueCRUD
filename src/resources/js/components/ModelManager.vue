@@ -111,10 +111,9 @@
                                 <template v-if="showMassControls">
                                     <div style="width: 100%; display: flex; justify-content: start; margin-bottom: 1em;">
                                         <dropdown-button :main-button-class="mainButtons['massOperations']['class']"
-                                                         :main-button-label="mainButtons['massOperations']['html'] + (selectedElements.length > 0 ? '&nbsp;('+selectedElements.length+')' : '')"
                                                          :items="massOperations"
                                                          @clicked="handleMassOperation($event)"
-                                                         :disabled="selectedElements.length == 0"></dropdown-button>
+                                                         :disabled="selectedElements.length == 0">{{ mainButtons['massOperations']['html'] + (selectedElements.length > 0 ? '&nbsp;('+selectedElements.length+')' : '') }}</dropdown-button>
                                     </div>
                                 </template>
                                 <table v-show="mode != 'elements-loading'" class="table table-striped" v-bind:class="elementTableClass">
@@ -196,10 +195,11 @@
                                 <template v-if="showExportControls">
                                     <div style="width: 100%; display: flex; justify-content: start; margin-bottom: 1em;">
                                         <dropdown-button :main-button-class="mainButtons['exportOperations']['class']"
-                                                         :main-button-label="mainButtons['exportOperations']['html'] + (selectedElements.length > 0 ? '&nbsp;('+selectedElements.length+')' : '')"
                                                          :items="exportOperations"
                                                          @clicked="handleExportOperation($event)"
-                                                         :disabled="elements.length == 0"></dropdown-button>
+                                                         :disabled="elements.length == 0">
+                                            {{ mainButtons['exportOperations']['html'] + (selectedElements.length > 0 ? '&nbsp;('+selectedElements.length+')' : '') }}
+                                        </dropdown-button>
                                     </div>
                                 </template>
                             </template>
@@ -729,11 +729,12 @@
                     action: action,
                     sorting_field: this.sortingColumns[this.currentSortingColumn],
                     sorting_direction: this.currentSortingDirection
-                }).then((response) => {
-                    var blob = new Blob([response.data.content], { type: response.data.headers['Content-Type'] });
+                }, {responseType: 'blob'}).then((response) => {
+                    var blob = new Blob([response.data], { type: response.headers['Content-Type'] });
+                    var filename = response.headers['filename'];
                     var link = document.createElement('a');
                     link.href = window.URL.createObjectURL(blob);
-                    link.download = response.data.filename;
+                    link.download = filename;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
