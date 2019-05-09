@@ -118,6 +118,9 @@ trait VueCRUDManageable
     // an array of export functions, keyed by the controller method
     // exportCsv and exportHTML are two predefined methods that can be added with
     // a label of our choosing and can be used instantly
+    // exportXlsx is also implemented, but it needs the phpspreadsheet package
+    // if any of these methods are implemented on the model, the export content
+    // will be provided by them instead of the controller's built-in methods
     public static function getVueCRUDExportFunctions()
     {
         return [];
