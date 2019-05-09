@@ -66,7 +66,7 @@
                                 <button class="col-3"
                                         v-bind:class="mainButtons['search']['class']"
                                         v-html="mainButtons['search']['html']"
-                                        v-on:click="saveFilterState(); fetchElements(true)"
+                                        v-on:click="saveFilterState(); currentPage = 1; fetchElements(true)"
                                 ></button>
                             </div>
                         </div>
@@ -88,7 +88,7 @@
                                         {{ translate('Single page') }}
                                     </label>
                                 </span>
-                                <span>{{ counts['filtered'] }}&nbsp;/&nbsp;{{ counts['total'] }}&nbsp;&nbsp;</span>
+                                <span>{{ counts['start'] }}&nbsp;-&nbsp;{{ counts['end'] }}&nbsp;/&nbsp;{{ counts['filtered'] }}&nbsp;&nbsp;</span>
                                 <button v-bind:class="mainButtons['prevPage']['class']"
                                         v-on:click="previousPage"
                                         v-html="mainButtons['prevPage']['html']"
@@ -419,8 +419,11 @@
                 if (typeof(this.counts.filtered) == 'undefined') {
                     return this.translate('Results');
                 }
-
-                return this.translate('Results')+'&nbsp;('+this.counts.filtered+')';
+                if (this.counts.filtered == this.counts.total) {
+                    return this.translate('Results')+'&nbsp;('+this.counts.filtered+')';
+                } else {
+                    return this.translate('Results')+'&nbsp;('+this.counts.filtered+' / '+this.counts.total+')';
+                }
             },
             sortingChevron: function() {
                 return this.currentSortingDirection == 'asc'
@@ -570,7 +573,9 @@
                                     if (newValue != oldValue) {
                                         window.clearTimeout(this.fetchTimeout);
                                         this.fetchTimeout = window.setTimeout(() => {
+                                            this.disablePageWatch = true;
                                             this.currentPage = 1;
+                                            this.disablePageWatch = false;
                                             this.fetchElements(true);
                                         }, this.getFilterTimeoutByType(this.filters[filterName].type));
                                     }
