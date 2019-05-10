@@ -386,9 +386,20 @@
                 massOperations: {},
                 exportOperations: {},
                 showAllInOnePage: false,
+                initialLoading: true,
+                urlParameters: {},
             }
         },
         mounted() {
+            let urlparts = window.location.href.split('?');
+            let keyvalue = [];
+            if (urlparts.length > 1) {
+                let queryparts = urlparts[1].split('&');
+                for (let i = 0; i < queryparts.length; i++) {
+                    keyvalue = queryparts[i].split('=');
+                    this.urlParameters[keyvalue[0]] = keyvalue[1];
+                }
+            }
             this.fetchElements();
         },
         computed: {
@@ -541,7 +552,7 @@
                     return 1;
                 }
                 if (type == 'text') {
-                    return 300;
+                    return 500;
                 }
 
                 return 1;
@@ -557,6 +568,13 @@
                 for (var filterName in this.filters) {
                     if (this.filters.hasOwnProperty(filterName)) {
                         result[filterName] = this.filters[filterName]['value'];
+                    }
+                }
+                if (this.initialLoading) {
+                    for (let key in this.urlParameters) {
+                        if (this.urlParameters.hasOwnProperty(key)) {
+                            result[key] = this.urlParameters[key];
+                        }
                     }
                 }
 
@@ -614,7 +632,9 @@
                         this.mode = 'elements-loading';
                     }
                 }
-                window.axios.get(this.indexUrl, {params: this.getFilterData()})
+                let filterData = this.getFilterData();
+                this.initialLoading = false;
+                window.axios.get(this.indexUrl, {params: filterData})
                     .then((response) => {
                         this.title = response.data.title;
                         this.elements = response.data.elements;
