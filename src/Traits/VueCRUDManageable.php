@@ -16,42 +16,44 @@ trait VueCRUDManageable
             : $default;
     }
 
-    public static function setVueCRUDRoutes($subjectSlug = null, $urlBase = '/')
+    public static function setVueCRUDRoutes($subjectSlug = null, $urlBase = '/', $nameSuffix = '')
     {
         $subjectSlug = self::getSubjectSlug($subjectSlug);
-
+        if ($nameSuffix != '') {
+            $nameSuffix = substr($nameSuffix, 0, 1) != '_' ? '_'.$nameSuffix : $nameSuffix;
+        }
         \Route::get(
             $urlBase.$subjectSlug,
-            self::getVueCRUDControllerMethod('index')
-        )->name(self::getVueCRUDRouteName('index', $subjectSlug));
+            self::getVueCRUDControllerMethod('index').$nameSuffix
+        )->name(self::getVueCRUDRouteName('index', $subjectSlug.$nameSuffix));
         \Route::get(
             $urlBase.$subjectSlug.'/{subject}/show',
-            self::getVueCRUDControllerMethod('details')
-        )->name(self::getVueCRUDRouteName('details', $subjectSlug));
+            self::getVueCRUDControllerMethod('details').$nameSuffix
+        )->name(self::getVueCRUDRouteName('details', $subjectSlug.$nameSuffix));
         \Route::get(
             $urlBase.$subjectSlug.'/new',
-            self::getVueCRUDControllerMethod('create')
-        )->name(self::getVueCRUDRouteName('create', $subjectSlug));
+            self::getVueCRUDControllerMethod('create').$nameSuffix
+        )->name(self::getVueCRUDRouteName('create', $subjectSlug.$nameSuffix));
         \Route::get(
             $urlBase.$subjectSlug.'/{subject}/edit',
-            self::getVueCRUDControllerMethod('edit')
-        )->name(self::getVueCRUDRouteName('edit', $subjectSlug));
+            self::getVueCRUDControllerMethod('edit').$nameSuffix
+        )->name(self::getVueCRUDRouteName('edit', $subjectSlug.$nameSuffix));
         \Route::post(
             $urlBase.$subjectSlug,
-            self::getVueCRUDControllerMethod('store')
-        )->name(self::getVueCRUDRouteName('store', $subjectSlug));
+            self::getVueCRUDControllerMethod('store').$nameSuffix
+        )->name(self::getVueCRUDRouteName('store', $subjectSlug.$nameSuffix));
         \Route::post(
             $urlBase.$subjectSlug.'/{subject}',
-            self::getVueCRUDControllerMethod('update')
-        )->name(self::getVueCRUDRouteName('update', $subjectSlug));
+            self::getVueCRUDControllerMethod('update').$nameSuffix
+        )->name(self::getVueCRUDRouteName('update', $subjectSlug.$nameSuffix));
         \Route::delete(
             $urlBase.$subjectSlug.'/{subject}',
-            self::getVueCRUDControllerMethod('delete')
-        )->name(self::getVueCRUDRouteName('delete', $subjectSlug));
+            self::getVueCRUDControllerMethod('delete').$nameSuffix
+        )->name(self::getVueCRUDRouteName('delete', $subjectSlug.$nameSuffix));
         \Route::post(
             $urlBase.$subjectSlug.'/{subject}/ajax',
-            self::getVueCRUDControllerMethod('ajaxOperations')
-        )->name(self::getVueCRUDRouteName('ajax_operations', $subjectSlug));
+            self::getVueCRUDControllerMethod('ajaxOperations').$nameSuffix
+        )->name(self::getVueCRUDRouteName('ajax_operations', $subjectSlug.$nameSuffix));
 
     }
 
@@ -247,4 +249,10 @@ trait VueCRUDManageable
     // (so that if it's an array for combined search fields, it will be using the same name)
     abstract public static function getVueCRUDIndexFilters();
 
+
+    public static function getVueCRUDIndexLink($filters = [], $subjectSlug = null)
+    {
+        $subjectSlug = $subjectSlug === null ? self::getSubjectSlug() : $subjectSlug;
+        return route(self::getVueCRUDRouteName('index', $subjectSlug), $filters);
+    }
 }
