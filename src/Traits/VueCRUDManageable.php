@@ -72,11 +72,11 @@ trait VueCRUDManageable
         return class_basename(static::class).'VueCRUDController@'.$operation;
     }
 
-    protected static function getVueCRUDRouteName($operation, $subjectSlug = null)
+    protected static function getVueCRUDRouteName($operation, $subjectSlug = null, $nameSuffix = '')
     {
         $subjectSlug = self::getSubjectSlug($subjectSlug);
 
-        return 'vuecrud_'.$subjectSlug.'_'.$operation;
+        return 'vuecrud_'.$subjectSlug.$nameSuffix.'_'.$operation;
     }
 
     public static function hasPositioningEnabled()

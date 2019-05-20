@@ -14,7 +14,7 @@ class VueCRUDControllerBase
         return $class::find($id);
     }
 
-    public function index()
+    public function index($nameSuffix = '')
     {
         $class = static::SUBJECT_CLASS;
 
@@ -39,10 +39,10 @@ class VueCRUDControllerBase
                 }
             }
         }
-        $elementData = static::getElements();
         $filters = method_exists($class, 'getVueCRUDIndexFilters')
             ? (object) $class::getVueCRUDIndexFilters()
             : (object) [];
+        $elementData = static::getElements();
         $viewData = [
             'title'            => $this->getSubjectNamePlural(),
             'pageTitleContent' => $this->getSubjectNamePlural(),
@@ -66,7 +66,7 @@ class VueCRUDControllerBase
         if (request()->isXmlHttpRequest()) {
             return response()->json($viewData);
         }
-        $viewData = array_merge($viewData, $this->getCRUDUrls());
+        $viewData = array_merge($viewData, $this->getCRUDUrls($nameSuffix));
 
         return view($this->getModelManagerViewName(), $viewData);
     }
@@ -156,11 +156,11 @@ class VueCRUDControllerBase
         ]);
     }
 
-    public function getRouteName($operation)
+    public function getRouteName($operation, $nameSuffix)
     {
         $class = static::SUBJECT_CLASS;
 
-        return $class::getVueCRUDRouteName($operation);
+        return $class::getVueCRUDRouteName($operation, null, $nameSuffix);
     }
 
     public function delete($subject)
@@ -185,17 +185,17 @@ class VueCRUDControllerBase
             : '';
     }
 
-    protected function getCRUDUrls()
+    protected function getCRUDUrls($nameSuffix)
     {
         $result = [
-            'indexUrl'          => $this->validateRoute($this->getRouteName('index')),
-            'detailsUrl'        => $this->validateRoute($this->getRouteName('details'), ['subject' => '___id___']),
-            'storeUrl'          => $this->validateRoute($this->getRouteName('store')),
-            'createUrl'         => $this->validateRoute($this->getRouteName('create')),
-            'editUrl'           => $this->validateRoute($this->getRouteName('edit'), ['subject' => '___id___']),
-            'deleteUrl'         => $this->validateRoute($this->getRouteName('delete'), ['subject' => '___id___']),
-            'updateUrl'         => $this->validateRoute($this->getRouteName('update'), ['subject' => '___id___']),
-            'ajaxOperationsUrl' => $this->validateRoute($this->getRouteName('ajax_operations'),
+            'indexUrl'          => $this->validateRoute($this->getRouteName('index', $nameSuffix)),
+            'detailsUrl'        => $this->validateRoute($this->getRouteName('details', $nameSuffix), ['subject' => '___id___']),
+            'storeUrl'          => $this->validateRoute($this->getRouteName('store', $nameSuffix)),
+            'createUrl'         => $this->validateRoute($this->getRouteName('create', $nameSuffix)),
+            'editUrl'           => $this->validateRoute($this->getRouteName('edit', $nameSuffix), ['subject' => '___id___']),
+            'deleteUrl'         => $this->validateRoute($this->getRouteName('delete', $nameSuffix), ['subject' => '___id___']),
+            'updateUrl'         => $this->validateRoute($this->getRouteName('update', $nameSuffix), ['subject' => '___id___']),
+            'ajaxOperationsUrl' => $this->validateRoute($this->getRouteName('ajax_operations', $nameSuffix),
                 ['subject' => '___id___']),
         ];
 

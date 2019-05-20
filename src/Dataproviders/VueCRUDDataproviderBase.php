@@ -108,7 +108,11 @@ class VueCRUDDataproviderBase
     protected function addQueryFilters($query, $subjectClass)
     {
         foreach ($subjectClass::getVueCRUDIndexFilters() as $property => $vueCRUDIndexFilter) {
-            $query = $vueCRUDIndexFilter->addFilterToQuery($query, $property);
+            if (request()->has($property)) {
+                $query = $vueCRUDIndexFilter->addFilterToQuery($query, $property);
+            } else {
+                $query = $vueCRUDIndexFilter->addFilterToQuery($query);
+            }
         }
 
         return $query;
