@@ -526,10 +526,9 @@ class VueCRUDControllerBase
 
     protected function getExportData()
     {
-        $class = static::SUBJECT_CLASS;
-        return $class::whereIn('id', request()->get('exportIds', []))
-            ->orderBy(request()->get('sorting_field', 'id'), request()->get('sorting_direction', 'asc'))
-            ->get();
+        $dataproviderClass = 'App\\Dataproviders\\'.class_basename(static::SUBJECT_CLASS).'VueCRUDDataprovider';
+
+        return (new $dataproviderClass)->getQuery()->get();
     }
 
     protected function generateTableFromModelList($list, $columns)

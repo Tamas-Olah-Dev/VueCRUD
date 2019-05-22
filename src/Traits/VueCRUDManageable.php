@@ -250,9 +250,9 @@ trait VueCRUDManageable
     abstract public static function getVueCRUDIndexFilters();
 
 
-    public static function getVueCRUDIndexLink($filters = [], $subjectSlug = null)
+    public static function getVueCRUDIndexLink($filters = [], $subjectSlug = null, $nameSuffix = '')
     {
         $subjectSlug = $subjectSlug === null ? self::getSubjectSlug() : $subjectSlug;
-        return route(self::getVueCRUDRouteName('index', $subjectSlug), $filters);
+        return route(self::getVueCRUDRouteName('index', $subjectSlug, $nameSuffix), $filters);
     }
 }
