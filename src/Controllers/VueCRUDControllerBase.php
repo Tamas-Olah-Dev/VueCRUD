@@ -156,7 +156,7 @@ class VueCRUDControllerBase
         ]);
     }
 
-    public function getRouteName($operation, $nameSuffix)
+    public function getRouteName($operation, $nameSuffix = '')
     {
         $class = static::SUBJECT_CLASS;
 

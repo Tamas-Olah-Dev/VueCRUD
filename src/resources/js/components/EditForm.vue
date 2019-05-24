@@ -183,7 +183,8 @@
                  v-for="error in errors" v-html="error[0]"></div>
         </div>
         <div class="row" v-if="resultMessage != ''">
-            <div class="alert alert-success col col-12"
+            <div class="alert col col-12"
+                 v-bind:class="resultMessageClass"
                  v-html="resultMessage"></div>
         </div>
         <div class="row" v-if="!formDisabled"
@@ -225,6 +226,7 @@
             ajaxOperationsUrl: {type: String, default: ''},
             successCallback: {type: String},
             formTitle: {type: String},
+            showResponseMessage: {type: String, default: false},
             redirectToResponseOnSuccess: {type: String},
             redirectToOnCancel: {type: String},
             buttons: {type: Object, default: () => {
@@ -246,6 +248,7 @@
                 loading: false,
                 config: {},
                 currentStep: -1,
+                resultMessageClass: '',
             }
         },
         mounted() {
@@ -445,33 +448,41 @@
                 this.$emit('submit-pending', this.formdata);
                 window.axios.post(this.saveUrl, this.formdata)
                     .then((response) => {
-                    if (this.currentStep != this.lastStep) {
-                    this.currentStep++;
-                    this.updateFormData();
-                } else {
-                    if (typeof(this.successCallback) != 'undefined') {
-                        window[this.successCallback]();
-                    }
-                    this.$emit('submit-success', response.data);
-                    if (this.redirectToResponseOnSuccess == 'true') {
-                        window.location.href = response.data;
-                    }
-                    this.resultMessage = 'Változások elmentve';
-                    setTimeout(() => {this.resultMessage = ''}, 3000);
-                }
-                this.loading = false;
-            })
-                .catch((error) => {
-                    if (error.response.status == 422) {
-                    this.errors = error.response.data.errors;
-                }
-                if (error.response.status != 422) {
-                    if (error.response.status == 500) {
-                        alert(error.response.data.message);
-                    }
-                }
-                this.loading = false;
-            });
+                        if (this.currentStep != this.lastStep) {
+                            this.currentStep++;
+                            this.updateFormData();
+                        } else {
+                            if (typeof(this.successCallback) != 'undefined') {
+                                window[this.successCallback]();
+                            }
+                            this.$emit('submit-success', response.data);
+                            if (this.redirectToResponseOnSuccess == 'true') {
+                                window.location.href = response.data;
+                            }
+                            this.resultMessage = this.showResponseMessage
+                                ? response.data
+                                : this.translate('Változások elmentve');
+                            this.resultMessageClass = 'alert-success';
+                            setTimeout(() => {this.resultMessage = ''}, 3000);
+                        }
+                        this.loading = false;
+                    })
+                    .catch((error) => {
+                        if (error.response.status == 422) {
+                            this.errors = error.response.data.errors;
+                        }
+                        if (error.response.status != 422) {
+                            if (error.response.status == 500) {
+                                alert(error.response.data.message);
+                            }
+                            if (error.response.status == 419) {
+                                this.resultMessage = error.response.data.message;
+                                this.resultMessageClass = 'alert-danger';
+                                setTimeout(() => {this.resultMessage = ''}, 6000);
+                            }
+                        }
+                        this.loading = false;
+                    });
             },
             cancelEditing: function() {
                 this.subjectData = {};

@@ -60,6 +60,11 @@
                                                 v-bind="filterData['props']"
                                                 v-model="filterData['value']">
                                     </treeselect>
+                                    <component v-if="filterData['type'] == 'custom-component'"
+                                               :is="filterData['component']"
+                                               v-bind="filterData['props']"
+                                               v-model="filterData['value']">
+                                    </component>
                                 </div>
                             </div>
                             <div v-if="!autoFilter" class="row d-flex justify-content-start p-1" style="min-width: 100%">
@@ -83,26 +88,28 @@
                                 <span v-if="pageOptions.length > 1 || showAllInOnePage"
                                       style="flex-basis: 60%;"
                                 >
-                                    <label>
+                                    <label v-if="false">
                                         <input type="checkbox" v-model="showAllInOnePage">
                                         {{ translate('Single page') }}
                                     </label>
                                 </span>
-                                <span>{{ counts['start'] }}&nbsp;-&nbsp;{{ counts['end'] }}&nbsp;/&nbsp;{{ counts['filtered'] }}&nbsp;&nbsp;</span>
-                                <button v-bind:class="mainButtons['prevPage']['class']"
-                                        v-on:click="previousPage"
-                                        v-html="mainButtons['prevPage']['html']"
-                                ></button>
-                                <select class="form-control model-manager-page-select" v-model="currentPage">
-                                    <option v-for="p in pageOptions"
-                                            v-bind:value="p"
-                                            v-html="p"
-                                    ></option>
-                                </select>
-                                <button v-bind:class="mainButtons['nextPage']['class']"
-                                        v-on:click="nextPage"
-                                        v-html="mainButtons['nextPage']['html']"
-                                ></button>
+                                <template v-if="pageOptions.length > 1">
+                                    <span>{{ counts['start'] }}&nbsp;-&nbsp;{{ counts['end'] }}&nbsp;/&nbsp;{{ counts['filtered'] }}&nbsp;&nbsp;</span>
+                                    <button v-bind:class="mainButtons['prevPage']['class']"
+                                            v-on:click="previousPage"
+                                            v-html="mainButtons['prevPage']['html']"
+                                    ></button>
+                                    <select class="form-control model-manager-page-select" v-model="currentPage">
+                                        <option v-for="p in pageOptions"
+                                                v-bind:value="p"
+                                                v-html="p"
+                                        ></option>
+                                    </select>
+                                    <button v-bind:class="mainButtons['nextPage']['class']"
+                                            v-on:click="nextPage"
+                                            v-html="mainButtons['nextPage']['html']"
+                                    ></button>
+                                </template>
                             </div>
                         </div>
                         <div class="portlet-body">
