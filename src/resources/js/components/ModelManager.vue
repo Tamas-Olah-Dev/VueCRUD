@@ -93,7 +93,7 @@
                                         {{ translate('Single page') }}
                                     </label>
                                 </span>
-                                <template v-if="pageOptions.length > 1">
+                                <template v-if="pageOptions.length > 1 && JSON.stringify(counts) != '{}'">
                                     <span>{{ counts['start'] }}&nbsp;-&nbsp;{{ counts['end'] }}&nbsp;/&nbsp;{{ counts['filtered'] }}&nbsp;&nbsp;</span>
                                     <button v-bind:class="mainButtons['prevPage']['class']"
                                             v-on:click="previousPage"
@@ -357,6 +357,7 @@
             }},
             subjectName: {type: String, default: () => {return this.translate('Item')}},
             useSweetAlert: {type: Boolean, default: false},
+            defaultFilters: {type: Object, default: {}}
         },
         data: function() {
             return {
@@ -408,6 +409,15 @@
                     this.urlParameters[keyvalue[0]] = keyvalue[1];
                 }
             }
+            this.loadFilters(this.defaultFilters);
+            for (let key in this.urlParameters) {
+                if (this.urlParameters.hasOwnProperty(key)) {
+                    if (typeof(this.filters[key]) != 'undefined') {
+                        Vue.set(this.filters[key], 'value', this.urlParameters[key]);
+                    }
+                }
+            }
+
             this.fetchMode = 'initial';
             this.fetchElements();
         },
@@ -427,22 +437,26 @@
             },
             pageOptions: function() {
                 let result = [];
-                if (typeof(this.counts.pagesMax) != 'undefined') {
-                    for (var i = 1; i <= this.counts.pagesMax; i++) {
-                        result.push(i);
+                if (JSON.stringify(this.counts) != '{}') {
+                    if (typeof(this.counts.pagesMax) != 'undefined') {
+                        for (var i = 1; i <= this.counts.pagesMax; i++) {
+                            result.push(i);
+                        }
                     }
                 }
 
                 return result;
             },
             totalLabel: function() {
-                if (typeof(this.counts.filtered) == 'undefined') {
-                    return this.translate('Results');
-                }
-                if (this.counts.filtered == this.counts.total) {
-                    return this.translate('Results')+'&nbsp;('+this.counts.filtered+')';
-                } else {
-                    return this.translate('Results')+'&nbsp;('+this.counts.filtered+' / '+this.counts.total+')';
+                if (this.mode != 'loading') {
+                    if (typeof(this.counts.filtered) == 'undefined') {
+                        return this.translate('Results');
+                    }
+                    if (this.counts.filtered == this.counts.total) {
+                        return this.translate('Results')+'&nbsp;('+this.counts.filtered+')';
+                    } else {
+                        return this.translate('Results')+'&nbsp;('+this.counts.filtered+' / '+this.counts.total+')';
+                    }
                 }
             },
             sortingChevron: function() {
@@ -595,7 +609,7 @@
                 return result;
             },
             loadFilters: function(filters) {
-                this.filters = filters;
+                this.filters = {...filters};
                 if (this.autoFilter) {
                     for (var filterName in this.filters) {
                         if (this.filters.hasOwnProperty(filterName)) {
@@ -671,9 +685,9 @@
                                 this.loadFilters(response.data.filters);
                             }
                         }
+                        this.positionedView = response.data.positionedView;
                         this.mode = 'list';
                         this.fetchMode = 'search';
-                        this.positionedView = response.data.positionedView;
                     });
             },
             showDetails: function(elementId) {

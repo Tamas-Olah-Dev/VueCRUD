@@ -8,10 +8,15 @@
                ajax-operations-url="{!! $ajaxOperationsUrl !!}"
                :allow-operations="{{ $allowOperations ? 'true' : 'false' }}"
                :allow-adding="{{ $allowAdding ? 'true' : 'false' }}"
+               :auto-filter="false"
                :use-sweet-alert="false"
                subject-name="{{ $subjectName }}"
+               :default-filters="{{ json_encode($defaultFilters) }}"
                :class-overrides="{{ json_encode([
-                    'edit-form-step-head' => 'portlet-head'
+                    'edit-form-step-head-inactive' => 'portlet-heading bg-inverse',
+                    'edit-form-step-head' => 'portlet-heading bg-primary',
+                    'edit-form-step-body' => 'panel p-2',
+                    'edit-form-step' => 'portlet',
                ]) }}"
                :icon-classes="{{ json_encode([
                             "filter" => "mdi mdi-magnify",
