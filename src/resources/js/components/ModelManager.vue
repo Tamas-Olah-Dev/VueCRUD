@@ -218,7 +218,7 @@
                         <div class="col">
                             <button type="button" class="float-right"
                                     v-bind:class="mainButtons['backToList']['class']"
-                                    v-on:click="mode = list"
+                                    v-on:click="mode = 'list'"
                                     v-html="mainButtons['backToList']['html']"
                             ></button>
                         </div>
@@ -246,7 +246,7 @@
                              style="display:flex; justify-content: space-between; align-items: baseline"
                         >
                             {{ translate('Edit element') }}
-                            <button v-on:click="mode = list"
+                            <button v-on:click="mode = 'list'"
                                     v-bind:class="mainButtons['backToList']['class']"
                             >X</button>
                         </div>
@@ -256,7 +256,7 @@
                                     v-bind:save-url="currentUpdateUrl"
                                     v-bind:ajax-operations-url="currentAjaxOperationsUrl"
                                     v-on:submit-success="confirmEditSuccess"
-                                    v-on:editing-canceled="mode = list"
+                                    v-on:editing-canceled="mode = 'list'"
                                     redirect-to-response-on-success="false"
                                     v-bind:buttons="mainButtons"
                                     v-bind:class-overrides="classOverrides"
@@ -270,7 +270,7 @@
                              style="display:flex; justify-content: space-between; align-items: baseline"
                         >
                             {{ translate('Add element') }}
-                            <button v-on:click="mode = list"
+                            <button v-on:click="mode = 'list'"
                                     v-bind:class="mainButtons['backToList']['class']"
                             >X</button>
                         </div>
@@ -280,7 +280,7 @@
                                     v-bind:save-url="storeUrl"
                                     v-bind:ajax-operations-url="ajaxOperationsUrl"
                                     v-on:submit-success="confirmCreationSuccess"
-                                    v-on:editing-canceled="mode = list"
+                                    v-on:editing-canceled="mode = 'list'"
                                     redirect-to-response-on-success="false"
                                     v-bind:buttons="mainButtons"
                                     v-bind:class-overrides="classOverrides"
@@ -298,7 +298,7 @@
                         ></button>
                         <button type="button"
                                 v-bind:class="mainButtons['cancelDeletion']['class']"
-                                v-on:click="mode = list"
+                                v-on:click="mode = 'list'"
                                 v-html="translate('Cancel')"
                         ></button>
                     </div>
@@ -308,7 +308,7 @@
                             v-bind:is="activeCustomComponent.componentName"
                             v-bind="activeCustomComponent.props"
                             v-on:submit-success="fetchMode = 'update'; fetchElements"
-                            v-on:component-canceled="mode = list"
+                            v-on:component-canceled="mode = 'list'"
                     ></component>
                 </div>
 

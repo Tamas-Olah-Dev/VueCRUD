@@ -64,32 +64,4 @@ class DateVueCRUDIndexfilter extends VueCRUDIndexfilterBase implements IVueCRUDI
             );
         });
     }
-
-    /**
-     * @return mixed
-     */
-    public function getValueSet()
-    {
-        return $this->valueset;
-    }
-
-    /**
-     * $valueset needs to be an array of value => label pairs
-     * @param mixed $valueset
-     * @param null $undefinedIndex
-     * @param null $undefinedLabel
-     */
-    public function setValueSet($valueset, $undefinedIndex = null, $undefinedLabel = null)
-    {
-        $this->valueset = [];
-        if (($undefinedIndex !== null) && ($undefinedLabel !== null)) {
-            $this->valueset[] = ['value' => $undefinedIndex, 'label' => $undefinedLabel];
-        }
-        foreach ($valueset as $value => $label) {
-            $this->valueset[] = [
-                'value' => $value,
-                'label' => $label
-            ];
-        }
-    }
 }

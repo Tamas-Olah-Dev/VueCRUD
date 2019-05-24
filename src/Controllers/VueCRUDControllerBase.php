@@ -42,17 +42,14 @@ class VueCRUDControllerBase
         $filters = method_exists($class, 'getVueCRUDIndexFilters')
             ? (object) $class::getVueCRUDIndexFilters()
             : (object) [];
-        $elementData = static::getElements();
         $viewData = [
             'title'            => $this->getSubjectNamePlural(),
             'pageTitleContent' => $this->getSubjectNamePlural(),
             'pageTitle'        => config('app.name').' - '.$this->getSubjectNamePlural(),
-            'elements'         => $elementData->elements,
-            'counts'           => $elementData->counts,
             'columns'          => $this->getIndexColumns($positionedView),
             'sortingColumns'   => $this->getSortingColumns($positionedView),
-            'sortingField'     => $elementData->sortingField,
-            'sortingDirection' => $elementData->sortingDirection,
+            'sortingField'     => request()->get('sorting_field'),
+            'sortingDirection' => request()->get('sorting_direction'),
             'filters'          => $filters,
             'buttons'          => $this->getModellistButtons($positionedView),
             'subjectName'      => $this->getSubjectName(),
@@ -64,8 +61,13 @@ class VueCRUDControllerBase
             'exportOperations' => (object)$class::getVueCRUDExportFunctions(),
         ];
         if (request()->isXmlHttpRequest()) {
+            $elementData = static::getElements();
+
+            $viewData['elements'] = $elementData->elements;
+            $viewData['counts'] = $elementData->counts;
             return response()->json($viewData);
         }
+        $viewData['defaultFilters'] = $filters;
         $viewData = array_merge($viewData, $this->getCRUDUrls($nameSuffix));
 
         return view($this->getModelManagerViewName(), $viewData);
