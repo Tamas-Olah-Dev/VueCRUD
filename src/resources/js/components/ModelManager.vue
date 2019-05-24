@@ -71,7 +71,7 @@
                                 <button class="col-3"
                                         v-bind:class="mainButtons['search']['class']"
                                         v-html="mainButtons['search']['html']"
-                                        v-on:click="saveFilterState(); currentPage = 1; fetchElements(true)"
+                                        v-on:click="saveFilterState(); currentPage = 1; fetchMode = 'search'; fetchElements(true)"
                                 ></button>
                             </div>
                         </div>
@@ -218,7 +218,7 @@
                         <div class="col">
                             <button type="button" class="float-right"
                                     v-bind:class="mainButtons['backToList']['class']"
-                                    v-on:click="fetchElements"
+                                    v-on:click="mode = list"
                                     v-html="mainButtons['backToList']['html']"
                             ></button>
                         </div>
@@ -246,7 +246,7 @@
                              style="display:flex; justify-content: space-between; align-items: baseline"
                         >
                             {{ translate('Edit element') }}
-                            <button v-on:click="fetchElements"
+                            <button v-on:click="mode = list"
                                     v-bind:class="mainButtons['backToList']['class']"
                             >X</button>
                         </div>
@@ -256,7 +256,7 @@
                                     v-bind:save-url="currentUpdateUrl"
                                     v-bind:ajax-operations-url="currentAjaxOperationsUrl"
                                     v-on:submit-success="confirmEditSuccess"
-                                    v-on:editing-canceled="fetchElements"
+                                    v-on:editing-canceled="mode = list"
                                     redirect-to-response-on-success="false"
                                     v-bind:buttons="mainButtons"
                                     v-bind:class-overrides="classOverrides"
@@ -270,7 +270,7 @@
                              style="display:flex; justify-content: space-between; align-items: baseline"
                         >
                             {{ translate('Add element') }}
-                            <button v-on:click="fetchElements"
+                            <button v-on:click="mode = list"
                                     v-bind:class="mainButtons['backToList']['class']"
                             >X</button>
                         </div>
@@ -280,7 +280,7 @@
                                     v-bind:save-url="storeUrl"
                                     v-bind:ajax-operations-url="ajaxOperationsUrl"
                                     v-on:submit-success="confirmCreationSuccess"
-                                    v-on:editing-canceled="fetchElements"
+                                    v-on:editing-canceled="mode = list"
                                     redirect-to-response-on-success="false"
                                     v-bind:buttons="mainButtons"
                                     v-bind:class-overrides="classOverrides"
@@ -298,7 +298,7 @@
                         ></button>
                         <button type="button"
                                 v-bind:class="mainButtons['cancelDeletion']['class']"
-                                v-on:click="fetchElements"
+                                v-on:click="mode = list"
                                 v-html="translate('Cancel')"
                         ></button>
                     </div>
@@ -307,8 +307,8 @@
                     <component
                             v-bind:is="activeCustomComponent.componentName"
                             v-bind="activeCustomComponent.props"
-                            v-on:submit-success="fetchElements"
-                            v-on:component-canceled="fetchElements"
+                            v-on:submit-success="fetchMode = 'update'; fetchElements"
+                            v-on:component-canceled="mode = list"
                     ></component>
                 </div>
 
@@ -395,6 +395,7 @@
                 showAllInOnePage: false,
                 initialLoading: true,
                 urlParameters: {},
+                fetchMode: 'list',
             }
         },
         mounted() {
@@ -407,6 +408,7 @@
                     this.urlParameters[keyvalue[0]] = keyvalue[1];
                 }
             }
+            this.fetchMode = 'initial';
             this.fetchElements();
         },
         computed: {
@@ -462,14 +464,17 @@
         methods: {
             confirmEditSuccess: function() {
                 this.successNotification(this.subjectName +' ' + this.translate('updated successfully'));
+                this.fetchMode = 'update';
                 this.fetchElements();
             },
             confirmCreationSuccess: function() {
                 this.successNotification(this.subjectName + ' ' + this.translate('created successfully'));
+                this.fetchMode = 'update';
                 this.fetchElements();
             },
             confirmDeletionSuccess: function() {
                 this.successNotification(this.subjectName + ' ' + this.translate('deleted'));
+                this.fetchMode = 'update';
                 this.fetchElements();
             },
             successNotification: function(content) {
@@ -544,6 +549,7 @@
                     this.disablePageWatch = true;
                     this.currentPage = 1;
                     this.disablePageWatch = false;
+                    this.fetchMode = 'sorting';
                     this.fetchElements(true);
                 }
             },
@@ -570,7 +576,8 @@
                     page: this.currentPage,
                     items_per_page: this.showAllInOnePage ? 99999999 : this.itemsPerPage,
                     sorting_field: this.sortingColumns[this.currentSortingColumn],
-                    sorting_direction: this.currentSortingDirection
+                    sorting_direction: this.currentSortingDirection,
+                    fetchMode: this.fetchMode,
                 };
                 for (var filterName in this.filters) {
                     if (this.filters.hasOwnProperty(filterName)) {
@@ -601,6 +608,7 @@
                                             this.disablePageWatch = true;
                                             this.currentPage = 1;
                                             this.disablePageWatch = false;
+                                            this.fetchMode = 'search';
                                             this.fetchElements(true);
                                         }, this.getFilterTimeoutByType(this.filters[filterName].type));
                                     }
@@ -664,6 +672,7 @@
                             }
                         }
                         this.mode = 'list';
+                        this.fetchMode = 'search';
                         this.positionedView = response.data.positionedView;
                     });
             },
@@ -721,12 +730,14 @@
                         Vue.set(this.filters[filter], 'value', this.filters[filter].default);
                     }
                 }
+                this.fetchMode = 'search';
                 this.fetchElements(true)
             },
             moveElementUp: function(id) {
                 this.elementTableClass = 'element-table-muted';
                 window.axios.post(this.ajaxOperationsUrl, {id: id, action: 'move', direction: -1})
                     .then((response) => {
+                        this.fetchMode = 'update';
                         this.fetchElements(true, true);
                         this.elementTableClass = '';
                     }).catch((error) => {this.elementTableClass = '';});
@@ -735,6 +746,7 @@
                 this.elementTableClass = 'element-table-muted';
                 window.axios.post(this.ajaxOperationsUrl, {id: id, action: 'move', direction: 1})
                     .then((response) => {
+                        this.fetchMode = 'update';
                         this.fetchElements(true, true);
                         this.elementTableClass = '';
                     }).catch((error) => {this.elementTableClass = '';});
@@ -745,6 +757,7 @@
                     action: action
                 }).then((response) => {
                     this.successNotification(response.data)
+                    this.fetchMode = 'update';
                     this.fetchElements(true, true);
                     this.elementTableClass = '';
                 }).catch((error) => {
@@ -788,6 +801,7 @@
         watch: {
             currentPage: function() {
                 if (!this.disablePageWatch) {
+                    this.fetchMode = 'pagination';
                     this.fetchElements(true);
                 }
             },
