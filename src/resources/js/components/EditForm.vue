@@ -226,7 +226,7 @@
             ajaxOperationsUrl: {type: String, default: ''},
             successCallback: {type: String},
             formTitle: {type: String},
-            showResponseMessage: {type: String, default: false},
+            showResponseMessage: {type: Boolean, default: false},
             redirectToResponseOnSuccess: {type: String},
             redirectToOnCancel: {type: String},
             buttons: {type: Object, default: () => {

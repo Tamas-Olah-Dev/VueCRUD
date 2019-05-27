@@ -45,7 +45,7 @@ class VueCRUDControllerBase
         $viewData = [
             'title'            => $this->getSubjectNamePlural(),
             'pageTitleContent' => $this->getSubjectNamePlural(),
-            'pageTitle'        => config('app.name').' - '.$this->getSubjectNamePlural(),
+            'pageTitle'        => $this->getSubjectNamePlural().' - '.config('app.name'),
             'columns'          => $this->getIndexColumns($positionedView),
             'sortingColumns'   => $this->getSortingColumns($positionedView),
             'sortingField'     => request()->get('sorting_field'),

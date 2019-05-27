@@ -357,7 +357,7 @@
             }},
             subjectName: {type: String, default: () => {return this.translate('Item')}},
             useSweetAlert: {type: Boolean, default: false},
-            defaultFilters: {type: Object, default: {}}
+            defaultFilters: {default: () => {return {}}}
         },
         data: function() {
             return {
@@ -408,11 +408,15 @@
                     keyvalue = queryparts[i].split('=');
                     this.urlParameters[keyvalue[0]] = keyvalue[1];
                 }
+                if (Object.keys(this.urlParameters).length > 0) {
+                    window.localStorage.removeItem(this.indexUrl+'_filters');
+                }
             }
             this.loadFilters(this.defaultFilters);
             for (let key in this.urlParameters) {
                 if (this.urlParameters.hasOwnProperty(key)) {
                     if (typeof(this.filters[key]) != 'undefined') {
+                        console.log(key);
                         Vue.set(this.filters[key], 'value', this.urlParameters[key]);
                     }
                 }
@@ -538,9 +542,11 @@
                         }
                     }
                 } else {
-                    for (var filter in this.filters) {
-                        if (this.filters.hasOwnProperty(filter)) {
-                            Vue.set(this.filters[filter], 'value', this.filters[filter].default);
+                    if (Object.keys(this.urlParameters).length == 0) {
+                        for (var filter in this.filters) {
+                            if (this.filters.hasOwnProperty(filter)) {
+                                Vue.set(this.filters[filter], 'value', this.filters[filter].default);
+                            }
                         }
                     }
                 }
