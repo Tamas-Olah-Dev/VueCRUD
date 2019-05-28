@@ -173,6 +173,11 @@
                                         v-bind:value="valuesetvalue" v-html="valuesetitem"
                                 ></option>
                             </select>
+                            <recaptcha-component v-if="data.kind == 'recaptcha'"
+                                                 :g-key="JSON.parse(data.props).key"
+                                                 v-model="subjectData[fieldname].value">
+
+                            </recaptcha-component>
                         </template>
                     </div>
                 </div>
