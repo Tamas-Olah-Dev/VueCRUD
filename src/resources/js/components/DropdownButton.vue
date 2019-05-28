@@ -2,9 +2,12 @@
     <div ref="container" style="position: relative">
         <button class="dropdown-button"
                 ref="mainButton"
+                role="dropdown"
                 v-bind:class="mainButtonClass"
+                v-bind:aria-expanded="openDropdown ? 'true' : 'false'"
                 :disabled="disabled"
                 v-on:click="openDropdown = !openDropdown"
+                v-on:keyup.esc="openDropdown = false"
         >
             <slot></slot>
             <span ref="caret"

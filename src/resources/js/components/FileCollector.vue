@@ -16,6 +16,8 @@
         >
             {{ filenameLabel(file) }}
             <span v-on:click="removeFile(index)"
+                  v-on:keydown.enter="removeFile(index)"
+                  role="button"
                   class="file-collector-remove-button">X</span>
         </span>
                 <span v-for="pendingFile in pendingFiles" v-html="spinnerSrc">
