@@ -118,7 +118,7 @@
                                 <template v-if="showMassControls">
                                     <div style="width: 100%; display: flex; justify-content: start; margin-bottom: 1em;">
                                         <dropdown-button :main-button-class="mainButtons['massOperations']['class']"
-                                                         :items="massOperations"
+                                                         :items="massOperationsForDropdown"
                                                          @clicked="handleMassOperation($event)"
                                                          :disabled="selectedElements.length == 0">{{ mainButtons['massOperations']['html'] + (selectedElements.length > 0 ? '&nbsp;('+selectedElements.length+')' : '') }}</dropdown-button>
                                     </div>
@@ -128,14 +128,20 @@
                                     <tr>
                                         <th v-if="showMassControls">
                                                 <span v-html="'✔'"
-                                                      role="button"
                                                       :title="translate('Select/deselect all')"
                                                       v-on:click="toggleSelectAll"
+                                                      v-on:keydown.enter="toggleSelectAll"
+                                                      v-on:keydown.space="toggleSelectAll"
+                                                      role="button"
                                                       style="cursor:pointer; font-size:1.7em; user-select: none"></span>
                                         </th>
                                         <th v-for="columnName, columnField in columns"
                                             v-bind:class="{'sorting-column': columnIsSorting(columnField)}"
-                                            v-on:click="setSorting(columnField)">
+                                            v-on:click="setSorting(columnField)"
+                                            v-on:keydown.enter="setSorting(columnField)"
+                                            v-on:keydown.space="setSorting(columnField)"
+                                            role="button"
+                                        >
                                             <span v-html="columnName"></span>
                                             <span style="margin-left: 3px"
                                                   v-if="columnIsSorting(columnField)"
@@ -148,7 +154,8 @@
                                     </thead>
                                     <tbody>
                                     <tr v-for="element, elementIndex in elements"
-                                        v-bind:style="{'background-color': selectedElements.indexOf(element.id) > -1 ? '#CAE1F6' : null}"
+                                        v-bind:style="elementRowStyle(element)"
+                                        v-bind:class="element.hasOwnProperty('row_class') ? element.row_class : null"
                                     >
                                         <td v-if="showMassControls">
                                             <label :for="element.id">
@@ -205,7 +212,7 @@
                                                          :items="exportOperations"
                                                          @clicked="handleExportOperation($event)"
                                                          :disabled="elements.length == 0">
-                                            {{ mainButtons['exportOperations']['html'] + (selectedElements.length > 0 ? '&nbsp;('+selectedElements.length+')' : '') }}
+                                            {{ mainButtons['exportOperations']['html'] }}
                                         </dropdown-button>
                                     </div>
                                 </template>
@@ -307,7 +314,7 @@
                     <component
                             v-bind:is="activeCustomComponent.componentName"
                             v-bind="activeCustomComponent.props"
-                            v-on:submit-success="fetchMode = 'update'; fetchElements"
+                            v-on:submit-success="this.selectedElements = []; fetchMode = 'update'; fetchElements"
                             v-on:component-canceled="mode = 'list'"
                     ></component>
                 </div>
@@ -426,6 +433,15 @@
             this.fetchElements();
         },
         computed: {
+            massOperationsForDropdown: function() {
+                let result = {};
+                for (let key in this.massOperations) {
+                    if (this.massOperations.hasOwnProperty(key)) {
+                        result[key] = this.massOperations[key].label;
+                    }
+                }
+                return result;
+            },
             showMassControls: function() {
                 return JSON.stringify(this.massOperations) != '{}';
             },
@@ -480,6 +496,19 @@
             },
         },
         methods: {
+            elementRowStyle: function(element) {
+                let result ={
+                    'border-left': this.selectedElements.indexOf(element.id) > -1 ? '6px solid #CAE1F6' : null
+                }
+                if (element.hasOwnProperty('row_background_color')) {
+                    result['background-color'] = element.row_background_color;
+                }
+                if (element.hasOwnProperty('row_color')) {
+                    result['color'] = element.row_color;
+                }
+
+                return result;
+            },
             confirmEditSuccess: function() {
                 this.successNotification(this.subjectName +' ' + this.translate('updated successfully'));
                 this.fetchMode = 'update';
@@ -772,18 +801,34 @@
                     }).catch((error) => {this.elementTableClass = '';});
             },
             handleMassOperation: function(action) {
-                window.axios.post(this.ajaxOperationsUrl, {
-                    selectedElements: this.selectedElements,
-                    action: action
-                }).then((response) => {
-                    this.successNotification(response.data)
-                    this.fetchMode = 'update';
-                    this.fetchElements(true, true);
-                    this.elementTableClass = '';
-                }).catch((error) => {
-                    this.errorNotification(error.response.data);
-                    this.elementTableClass = '';
-                });
+                if (this.massOperations[action].type == 'method') {
+                    let proceed = this.massOperations[action].confirm == null
+                        ? true
+                        : window.confirm(this.massOperations[action].confirm);
+                    if (proceed) {
+                        window.axios.post(this.ajaxOperationsUrl, {
+                            selectedElements: this.selectedElements,
+                            action: action
+                        }).then((response) => {
+                            this.successNotification(response.data)
+                            this.fetchMode = 'update';
+                            this.selectedElements = [];
+                            this.fetchElements(true, true);
+                            this.elementTableClass = '';
+                        }).catch((error) => {
+                            this.errorNotification(error.response.data);
+                            this.elementTableClass = '';
+                        });
+                    }
+                }
+                if (this.massOperations[action].type == 'component') {
+                    this.activeCustomComponent = {
+                        componentName: this.massOperations[action].component,
+                        props: {...this.massOperations[action].componentProps},
+                    }
+                    this.activeCustomComponent['props']['selectedElements'] = this.selectedElements
+                    this.mode = 'custom-component';
+                }
             },
             handleExportOperation: function(action) {
                 let selectedElements = this.selectedElements.length > 0

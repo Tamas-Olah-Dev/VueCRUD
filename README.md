@@ -188,17 +188,12 @@ If this function is defined on the model, the Details view will incorporate the 
 ```
 public function getVueCRUDMassFunctions()
 ```
-By overriding this we can provide mass operations that will appear in a dropdown above the table. These only work when at least one item is selected. The keys of this array are called via AJAX as a controller method, with a selectedElements parameter in the request containing the IDs of the selected elements. These methods should return a message string and will result in a reload of the list.  
+By overriding this we can provide mass operations that will appear in a dropdown above the table. These only work when at least one item is selected. The keys of this array are called via AJAX as a controller method, with a selectedElements parameter in the request containing the IDs of the selected elements. These methods should return a message string and will result in a reload of the list. The items are arrays as specified in the trait.  
 
 ```
 public function getVueCRUDExportFunctions()
 ```
 By overriding this we can provide export operations that will appear in a dropdown below the table. The keys of this array are called via AJAX as a controller method, with a selectedElements parameter in the request containing the IDs of the selected elements. 'exportCsv' and 'exportHTML' work out of the box, while exportXlsx is also provided but it needs the phpspreadsheet package. The `getVueCRUDHTMLExportTableStyle` method allows for customizing HTML styles applied in the export file, while the `getVueCRUDExportColumns` method allows for setting the fields to be shown. The three built-in export method can also be defined on the model, in which case they will provide the file content instead of the VueCRUDControllerBase class's own methods.     
-
-```
-public function getVueCRUDExportFunctions()
-```
-By overriding this we can provide export operations that will appear in a dropdown below the table. The keys of this array are called via AJAX as a controller method, with a selectedElements parameter in the request containing the IDs of the selected elements. 'exportCsv' and 'exportHTML' work out of the box, while exportXlsx is also provided but it needs the phpspreadsheet package.     
 
 ```
 public function getVueCRUDIndexLink()
@@ -207,6 +202,10 @@ This allows for generating index links to models. Its first parameter can contai
 
 The trait also provides the necessary routes. For those to be registered, the Modelname::setVueCRUDRoutes($subjectSlug = null, $urlBase = '/', $namePrefix = ''') method has to be called in web.php.
 The namePrefix parameter allows for defining multiple route groups to the same controller. We can define an admin view with full capabilities and a public view by using a different urlBase and something like 'public' as a namePrefix. In this case all controller methods are invoked with '_public' (so we can define an 'index_public' in the controller). When calling these methods, one can use the request()->merge() function to set special parameters that can be used in the model's VueCRUD methods (e.g we can merge ['publicview' => true] and check for it in shouldVueCRUDAddButtonBeDisplayed or any other display configuration method) 
+
+##### Customizations
+
+Models can have row_class, row_background_color and row_color fields defined and these will be assigned to the table rows (the first as a classname, the other two as inlin style definitions).
 
 ### Controllers
 Generated with the other scaffolding. The base controllers typically need no customizations, but (as detailed in other parts of this document) there are lots of ways to expand them. 

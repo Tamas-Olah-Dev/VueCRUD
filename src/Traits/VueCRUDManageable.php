@@ -110,8 +110,12 @@ trait VueCRUDManageable
 
     // an array of functionalities that can be applied to multiple selected items.
     // if this array is not empty, a selection column will be present on the model list
-    // keys are controller method names, while the values are the labels to show in the
-    // dropdown
+    // keys are controller method names, while the values are arrays containing the following values:
+    //  'type' => 'method' or 'component', depending on whether we want a simple ajax call to a controller method or to show a custom Vue.js component
+    //  'label' => The label to show on the button
+    //  'confirm' => null or a confirmation message to be shown before running the action
+    //  'component' => null, or a component name,
+    //  'componentProps' => null or an array of props passed to the component
     public static function getVueCRUDMassFunctions()
     {
         return [];

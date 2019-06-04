@@ -58,6 +58,9 @@
                 return this.openDropdown ? 'dropdown-button-caret-open' : ''
             },
         },
+        beforeDestroy: function() {
+            document.removeEventListener('click', this.handleClickOutside, true);
+        },
         methods: {
             handleClickOutside: function(e) {
                 const el = this.$refs.dropdown;
