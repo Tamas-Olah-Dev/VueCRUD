@@ -248,6 +248,9 @@ abstract class VueCRUDFormdatabuilder
                     $messages[$fieldId.'.'.$rulename] = $field->getMessages()[$rulename];
                 } else {
                     switch ($rulename) {
+                        case 'unique':
+                            $messages[$fieldId.'.unique'] = __('Already exists in database').$label;
+                            break;
                         case 'required':
                             $messages[$fieldId.'.required'] = __('Value missing').$label;
                             break;

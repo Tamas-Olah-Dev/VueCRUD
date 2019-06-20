@@ -3,7 +3,7 @@
         <div class="row">
             <div class="col-12">
                 <div v-if="mode == 'loading'" v-html="spinnerSrc" style="width:100%; display:flex; justify-content: center"></div>
-                <div v-if="mode == 'list' || mode == 'elements-loading'" class="row">
+                <div v-if="JSON.stringify(mainButtons) != '{}' && (mode == 'list' || mode == 'elements-loading')" class="row">
                     <div class="col-12 d-flex justify-content-between"
                          style="margin-bottom: 25px; padding: 0px"
                     >
@@ -109,6 +109,16 @@
                                             v-on:click="nextPage"
                                             v-html="mainButtons['nextPage']['html']"
                                     ></button>
+                                    <span style="margin-left: 1em">
+                                        <select class="form-control"
+                                                v-model="itemsPerPage">
+                                            <option v-for="option in itemsPerPageOptions"
+                                                    :value="option"
+                                                    v-html="option"
+                                            ></option>
+                                        </select>
+                                        {{ translate('Items/page') }}
+                                    </span>
                                 </template>
                             </div>
                         </div>
@@ -120,7 +130,10 @@
                                         <dropdown-button :main-button-class="mainButtons['massOperations']['class']"
                                                          :items="massOperationsForDropdown"
                                                          @clicked="handleMassOperation($event)"
-                                                         :disabled="selectedElements.length == 0">{{ mainButtons['massOperations']['html'] + (selectedElements.length > 0 ? '&nbsp;('+selectedElements.length+')' : '') }}</dropdown-button>
+                                                         :disabled="selectedElements.length == 0 || massOperationLoading">
+                                            <span v-if="massOperationLoading" v-html="spinnerSrc"></span>&nbsp;
+                                            {{ mainButtons['massOperations']['html'] + (selectedElements.length > 0 ? '&nbsp;('+selectedElements.length+')' : '') }}
+                                        </dropdown-button>
                                     </div>
                                 </template>
                                 <table v-show="mode != 'elements-loading'" class="table table-striped" v-bind:class="elementTableClass">
@@ -157,8 +170,11 @@
                                         v-bind:style="elementRowStyle(element)"
                                         v-bind:class="element.hasOwnProperty('row_class') ? element.row_class : null"
                                     >
-                                        <td v-if="showMassControls">
-                                            <label :for="element.id">
+                                        <td v-if="showMassControls" style="vertical-align: middle"
+                                        >
+                                            <label :for="element.id" style="margin:0px; padding:0px">
+                                                <span v-html="selectedElements.indexOf(element.id) > -1 ? '▣' : '▢'"
+                                                      style="cursor:pointer; font-size:1.7em; user-select: none"></span>
                                                 <input type="checkbox"
                                                        :value="element.id"
                                                        :id="element.id"
@@ -166,11 +182,14 @@
                                                        v-model="selectedElements"
                                                        style="opacity: 0; height:0px; width: 0px;"
                                                 >
-                                                <span v-html="selectedElements.indexOf(element.id) > -1 ? '✔' : '✅'"
-                                                      style="cursor:pointer; font-size:1.7em; user-select: none"></span>
                                             </label>
                                         </td>
-                                        <td v-for="columnName, columnField in columns" v-html="element[columnField]"></td>
+                                        <td v-for="columnName, columnField in columns">
+                                            <component v-if="typeof(element[columnField]) == 'string' && element[columnField].substr(0, 11) == 'component::'"
+                                                       :is="JSON.parse(element[columnField].substr(11)).component"
+                                                       v-bind="JSON.parse(element[columnField].substr(11)).componentProps"></component>
+                                            <span v-else v-html="element[columnField]"></span>
+                                        </td>
                                         <td v-if="allowOperations" style="white-space: nowrap">
                                             <button type="button" v-if="showButton('details')"
                                                     v-bind:class="buttons['details']['class']"
@@ -219,6 +238,14 @@
                             </template>
                         </div>
                     </div>
+                </div>
+                <div  v-if="mode == 'details-component'">
+                    <component :is="buttons['details']['component']"
+                               v-bind:subject-id="currentSubjectId"
+                               v-bind="buttons['details']['componentProps']"
+                               v-on:component-canceled="mode = 'list'"
+                    >
+                    </component>
                 </div>
                 <div  v-if="mode == 'details'">
                     <div class="row">
@@ -314,7 +341,8 @@
                     <component
                             v-bind:is="activeCustomComponent.componentName"
                             v-bind="activeCustomComponent.props"
-                            v-on:submit-success="this.selectedElements = []; fetchMode = 'update'; fetchElements"
+                            v-bind:selected-elements="selectedElements"
+                            v-on:submit-success="closeCustomComponent"
                             v-on:component-canceled="mode = 'list'"
                     ></component>
                 </div>
@@ -353,7 +381,6 @@
             autoFilter: {type: Boolean, default: false},
             nameProperty: {type: String, default: 'name'},
             idProperty: {type: String, default: 'id'},
-            itemsPerPage: {type: Number, default: 20},
             iconClasses: {type: Object, default: function() {
                 return {
                     "filter": "ti-filter",
@@ -364,10 +391,13 @@
             }},
             subjectName: {type: String, default: () => {return this.translate('Item')}},
             useSweetAlert: {type: Boolean, default: false},
-            defaultFilters: {default: () => {return {}}}
+            defaultFilters: {default: () => {return {}}},
+            itemsPerPageOptions: {type: Array, default: () => {return [20, 50, 100]}},
+            itemsPerPageDefault: {type: Number, default: 20}
         },
         data: function() {
             return {
+                itemsPerPage: 20,
                 mode: 'loading',
                 elements: {},
                 columns: {},
@@ -383,6 +413,7 @@
                 currentDeleteUrl: '',
                 currentAjaxOperationsUrl: '',
                 currentSubjectName: '',
+                currentSubjectId: null,
                 fetchTimeout: -1,
                 watches: {},
                 currentPage: 1,
@@ -404,9 +435,13 @@
                 initialLoading: true,
                 urlParameters: {},
                 fetchMode: 'list',
+                massOperationLoading: false,
             }
         },
         mounted() {
+            this.disablePageWatch = true;
+            this.itemsPerPage = this.itemsPerPageDefault;
+            this.disablePageWatch = false;
             let urlparts = window.location.href.split('?');
             let keyvalue = [];
             if (urlparts.length > 1) {
@@ -423,7 +458,6 @@
             for (let key in this.urlParameters) {
                 if (this.urlParameters.hasOwnProperty(key)) {
                     if (typeof(this.filters[key]) != 'undefined') {
-                        console.log(key);
                         Vue.set(this.filters[key], 'value', this.urlParameters[key]);
                     }
                 }
@@ -498,7 +532,7 @@
         methods: {
             elementRowStyle: function(element) {
                 let result ={
-                    'border-left': this.selectedElements.indexOf(element.id) > -1 ? '6px solid #CAE1F6' : null
+                    //'border-left': this.selectedElements.indexOf(element.id) > -1 ? '6px solid #CAE1F6' : null
                 }
                 if (element.hasOwnProperty('row_background_color')) {
                     result['background-color'] = element.row_background_color;
@@ -726,16 +760,23 @@
                     });
             },
             showDetails: function(elementId) {
-                this.mode = 'loading';
-                window.axios.get(
-                    this.replaceIdParameterWithElementIdInUrl(this.detailsUrl, elementId),
-                    {params: {token: Math.random().toString(36)}}
-                )
-                    .then((response) => {
-                        this.fields = response.data.fields;
-                        this.model = response.data.model;
-                        this.mode = 'details';
-                    });
+                if ((typeof(this.buttons['details']['isComponent']) == 'undefined')
+                    || (this.buttons['details']['isComponent'] == false))
+                {
+                    this.mode = 'loading';
+                    window.axios.get(
+                        this.replaceIdParameterWithElementIdInUrl(this.detailsUrl, elementId),
+                        {params: {token: Math.random().toString(36)}}
+                    )
+                        .then((response) => {
+                            this.fields = response.data.fields;
+                            this.model = response.data.model;
+                            this.mode = 'details';
+                        });
+                } else {
+                    this.currentSubjectId = elementId;
+                    this.mode="details-component";
+                }
             },
             editElement: function(elementId) {
                 this.mode = 'loading';
@@ -806,6 +847,7 @@
                         ? true
                         : window.confirm(this.massOperations[action].confirm);
                     if (proceed) {
+                        this.massOperationLoading = true;
                         window.axios.post(this.ajaxOperationsUrl, {
                             selectedElements: this.selectedElements,
                             action: action
@@ -815,9 +857,15 @@
                             this.selectedElements = [];
                             this.fetchElements(true, true);
                             this.elementTableClass = '';
+                            this.massOperationLoading = false;
                         }).catch((error) => {
-                            this.errorNotification(error.response.data);
+                            if (typeof(error.response.data.exception) != 'undefined') {
+                                this.errorNotification(error.response.data.message);
+                            } else {
+                                this.errorNotification(error.response.data);
+                            }
                             this.elementTableClass = '';
+                            this.massOperationLoading = false;
                         });
                     }
                 }
@@ -861,9 +909,20 @@
                         this.selectedElements.push(this.elements[i].id);
                     }
                 }
+            },
+            closeCustomComponent: function() {
+                this.selectedElements = [];
+                this.fetchMode = 'update';
+                this.fetchElements();
             }
         },
         watch: {
+            itemsPerPage: function() {
+                if (!this.disablePageWatch) {
+                    this.fetchMode = 'pagination';
+                    this.fetchElements(true);
+                }
+            },
             currentPage: function() {
                 if (!this.disablePageWatch) {
                     this.fetchMode = 'pagination';
