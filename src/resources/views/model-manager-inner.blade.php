@@ -24,4 +24,5 @@
                             "leftArrow" => "mdi mdi-arrow-left-thick",
                             "rightArrow" => "mdi mdi-arrow-right-thick"
                         ]) }}"
+               id-property="{{ $idProperty }}"
 ></model-manager>

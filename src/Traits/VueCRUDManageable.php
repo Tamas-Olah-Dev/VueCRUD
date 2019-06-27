@@ -236,6 +236,11 @@ trait VueCRUDManageable
         return $data;
     }
 
+    public static function getIdProperty()
+    {
+        return 'id';
+    }
+
     // an array of column head labels, keyed by the related field name on the model
     // e.g ['id' => 'ID']
     abstract public static function getVueCRUDIndexColumns();

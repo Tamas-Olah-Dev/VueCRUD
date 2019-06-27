@@ -57,8 +57,9 @@ class VueCRUDControllerBase
             'allowOperations'  => $class::shouldVueCRUDOperationsBeDisplayed(),
             'allowAdding'      => $class::shouldVueCRUDAddButtonBeDisplayed(),
             'positionedView'   => $positionedView,
-            'massOperations'   => (object)$class::getVueCRUDMassFunctions(),
-            'exportOperations' => (object)$class::getVueCRUDExportFunctions(),
+            'massOperations'   => (object) $class::getVueCRUDMassFunctions(),
+            'exportOperations' => (object) $class::getVueCRUDExportFunctions(),
+            'idProperty'       => $class::getIdProperty(),
         ];
         if (request()->isXmlHttpRequest()) {
             $elementData = static::getElements();
@@ -191,12 +192,16 @@ class VueCRUDControllerBase
     {
         $result = [
             'indexUrl'          => $this->validateRoute($this->getRouteName('index', $nameSuffix)),
-            'detailsUrl'        => $this->validateRoute($this->getRouteName('details', $nameSuffix), ['subject' => '___id___']),
+            'detailsUrl'        => $this->validateRoute($this->getRouteName('details', $nameSuffix),
+                ['subject' => '___id___']),
             'storeUrl'          => $this->validateRoute($this->getRouteName('store', $nameSuffix)),
             'createUrl'         => $this->validateRoute($this->getRouteName('create', $nameSuffix)),
-            'editUrl'           => $this->validateRoute($this->getRouteName('edit', $nameSuffix), ['subject' => '___id___']),
-            'deleteUrl'         => $this->validateRoute($this->getRouteName('delete', $nameSuffix), ['subject' => '___id___']),
-            'updateUrl'         => $this->validateRoute($this->getRouteName('update', $nameSuffix), ['subject' => '___id___']),
+            'editUrl'           => $this->validateRoute($this->getRouteName('edit', $nameSuffix),
+                ['subject' => '___id___']),
+            'deleteUrl'         => $this->validateRoute($this->getRouteName('delete', $nameSuffix),
+                ['subject' => '___id___']),
+            'updateUrl'         => $this->validateRoute($this->getRouteName('update', $nameSuffix),
+                ['subject' => '___id___']),
             'ajaxOperationsUrl' => $this->validateRoute($this->getRouteName('ajax_operations', $nameSuffix),
                 ['subject' => '___id___']),
         ];
@@ -452,7 +457,7 @@ class VueCRUDControllerBase
                 $class::getVueCRUDExportColumns()
             );
             $result = [];
-            $csv = fopen('php://temp/maxmemory:'. (5*1024*1024), 'r+');
+            $csv = fopen('php://temp/maxmemory:'.(5 * 1024 * 1024), 'r+');
             foreach ($tableData as $row) {
                 fputcsv($csv, $row, ';');
             }
@@ -462,7 +467,7 @@ class VueCRUDControllerBase
         }
         return response($content)->withHeaders([
             'Content-Type' => 'text/csv',
-            'filename' => utf8_decode($this->getSubjectNamePlural()).'-'.now()->format('Y-m-d_H-i-s').'.csv'
+            'filename'     => utf8_decode($this->getSubjectNamePlural()).'-'.now()->format('Y-m-d_H-i-s').'.csv',
         ]);
     }
 
@@ -480,9 +485,11 @@ class VueCRUDControllerBase
             $result = ['<table style="'.$styles['table'].'">'];
             foreach ($tableData as $index => $row) {
                 if ($index == 0) {
-                    $result[] = '<tr style="'.$styles['tr'].'"><th style="'.$styles['th'].'">'.implode('</th style="'.$styles['th'].'"><th>', $row).'</th>';
+                    $result[] = '<tr style="'.$styles['tr'].'"><th style="'.$styles['th'].'">'.implode('</th style="'.$styles['th'].'"><th>',
+                            $row).'</th>';
                 } else {
-                    $result[] = '<tr style="'.$styles['tr'].'"><td style="'.$styles['td'].'">'.implode('</td><td style="'.$styles['td'].'">', $row).'</td>';
+                    $result[] = '<tr style="'.$styles['tr'].'"><td style="'.$styles['td'].'">'.implode('</td><td style="'.$styles['td'].'">',
+                            $row).'</td>';
                 }
             }
             $result[] = '</table>';
@@ -490,9 +497,10 @@ class VueCRUDControllerBase
         }
         return response($content)->withHeaders([
             'Content-Type' => 'text/html',
-            'filename' => utf8_decode($this->getSubjectNamePlural()).'-'.now()->format('Y-m-d_H-i-s').'.html'
+            'filename'     => utf8_decode($this->getSubjectNamePlural()).'-'.now()->format('Y-m-d_H-i-s').'.html',
         ]);
     }
+
     //this function requires the PhpSpreadsheet library
     protected function exportXlsx()
     {
@@ -522,7 +530,7 @@ class VueCRUDControllerBase
         }
         return response($content)->withHeaders([
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'filename' => utf8_decode($this->getSubjectNamePlural()).'-'.now()->format('Y-m-d_H-i-s').'.xlsx'
+            'filename'     => utf8_decode($this->getSubjectNamePlural()).'-'.now()->format('Y-m-d_H-i-s').'.xlsx',
         ]);
     }
 

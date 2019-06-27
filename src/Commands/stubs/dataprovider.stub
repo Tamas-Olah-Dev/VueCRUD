@@ -22,4 +22,10 @@ class DummyClassVueCRUDDataprovider extends VueCRUDDataproviderBase implements I
 
         return $query;
     }
+
+    protected function getSortingField()
+    {
+        return request()->get('sorting_field', DummyClass::getIdProperty());
+    }
+
 }
