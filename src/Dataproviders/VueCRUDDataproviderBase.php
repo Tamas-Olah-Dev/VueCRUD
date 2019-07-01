@@ -43,6 +43,12 @@ class VueCRUDDataproviderBase
         return $query->orderBy($this->getSortingField(), $this->getSortingDirection());
     }
 
+    protected function getSortingField()
+    {
+        return request()->get('sorting_field', 'id');
+    }
+
+
     protected function getSortingDirection($default = 'asc')
     {
         return request()->get('sorting_direction', $default);
