@@ -17,6 +17,7 @@ abstract class VueCRUDIndexfilterBase
     public $value;
     public $default;
     public $containerClass;
+    public $tab = 'default';
 
     public function __construct($property, $label, $default, $value = null)
     {
@@ -131,6 +132,24 @@ abstract class VueCRUDIndexfilterBase
     public function getContainerClass(): string
     {
         return $this->containerClass;
+    }
+
+    /**
+     * @param string $tab
+     * @return VueCRUDIndexfilterBase
+     */
+    public function setTab(string $tab): VueCRUDIndexfilterBase
+    {
+        $this->tab = $tab;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTab(): string
+    {
+        return $this->tab;
     }
 
 }

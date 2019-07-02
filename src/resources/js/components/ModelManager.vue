@@ -17,7 +17,8 @@
                                 v-if="allowAdding"
                         ></button>
                     </div>
-                    <div v-if="JSON.stringify(filters) != '{}'" class="full-width-div model-manager-filter-container portlet"
+                    <div v-if="filtersExist"
+                         class="full-width-div model-manager-filter-container portlet"
                          v-bind:class="getClassOverrideOrDefaultClass('model-manager-filter-box', 'model-manager-filter-box')"
                     >
                         <div class="bg-inverse d-flex justify-content-between portlet-heading align-items-baseline"
@@ -33,47 +34,54 @@
                             ></button>
                         </div>
                         <div class="portlet-body model-manager-filters-list-container">
-                            <div class="row d-flex model-manager-filters-list">
-                                <div v-for="filterData, filterName in filters"
-                                     class="form-group m-1 model-manager-filter-block"
-                                     v-bind:class="filterData['containerClass']"
+                            <tabgroup :tabs="filterTabs" v-on:tab-changed="resetFilters">
+                                <template v-for="tabFilters, index in filterTabContents"
+                                          v-slot:[index]
                                 >
-                                    <label v-html="filterData['label']"></label>
-                                    <datepicker v-if="filterData['type'] == 'datepicker'"
-                                                locale="hu"
-                                                v-model="filterData['value']"
-                                    ></datepicker>
-                                    <input v-if="filterData['type'] == 'text'"
-                                           type="text"
-                                           class="form-control"
-                                           v-model="filterData['value']"
-                                    >
-                                    <select v-if="filterData['type'] == 'select'"
-                                            class="form-control"
-                                            v-model="filterData['value']">
-                                        <option v-for="data in filterData['valueset']"
-                                                v-bind:value="data.value"
-                                                v-html="data.label"
-                                        ></option>
-                                    </select>
-                                    <treeselect v-if="filterData['type'] == 'treeselect'"
-                                                v-bind="filterData['props']"
-                                                v-model="filterData['value']">
-                                    </treeselect>
-                                    <component v-if="filterData['type'] == 'custom-component'"
-                                               :is="filterData['component']"
-                                               v-bind="filterData['props']"
-                                               v-model="filterData['value']">
-                                    </component>
-                                </div>
-                            </div>
-                            <div v-if="!autoFilter" class="row d-flex justify-content-start p-1" style="min-width: 100%">
-                                <button class="col-3"
-                                        v-bind:class="mainButtons['search']['class']"
-                                        v-html="mainButtons['search']['html']"
-                                        v-on:click="saveFilterState(); currentPage = 1; fetchMode = 'search'; fetchElements(true)"
-                                ></button>
-                            </div>
+                                    <div class="row d-flex model-manager-filters-list">
+                                        <div v-for="filterData, filterName in tabFilters"
+                                             class="form-group m-1 model-manager-filter-block"
+                                             v-bind:class="filterData['containerClass']"
+                                        >
+                                            <label v-html="filterData['label']"></label>
+                                            <datepicker v-if="filterData['type'] == 'datepicker'"
+                                                        locale="hu"
+                                                        v-model="filterData['value']"
+                                            ></datepicker>
+                                            <input v-if="filterData['type'] == 'text'"
+                                                   type="text"
+                                                   class="form-control"
+                                                   v-model="filterData['value']"
+                                            >
+                                            <select v-if="filterData['type'] == 'select'"
+                                                    class="form-control"
+                                                    v-model="filterData['value']">
+                                                <option v-for="data in filterData['valueset']"
+                                                        v-bind:value="data.value"
+                                                        v-html="data.label"
+                                                ></option>
+                                            </select>
+                                            <treeselect v-if="filterData['type'] == 'treeselect'"
+                                                        v-bind="filterData['props']"
+                                                        v-model="filterData['value']">
+                                            </treeselect>
+                                            <component v-if="filterData['type'] == 'custom-component'"
+                                                       :is="filterData['component']"
+                                                       v-bind="filterData['props']"
+                                                       v-model="filterData['value']">
+                                            </component>
+                                        </div>
+                                    </div>
+                                    <div v-if="!autoFilter" class="row d-flex justify-content-start p-1" style="min-width: 100%">
+                                        <button class="col-3"
+                                                v-bind:class="mainButtons['search']['class']"
+                                                v-html="mainButtons['search']['html']"
+                                                v-on:click="saveFilterState(); currentPage = 1; fetchMode = 'search'; fetchElements(true)"
+                                        ></button>
+                                    </div>
+
+                                </template>
+                            </tabgroup>
                         </div>
                     </div>
                     <div class="portlet full-width-div">
@@ -467,6 +475,9 @@
             this.fetchElements();
         },
         computed: {
+            filtersExist: function() {
+                return !['{}', '[]'].includes(JSON.stringify(this.filters));
+            },
             massOperationsForDropdown: function() {
                 let result = {};
                 for (let key in this.massOperations) {
@@ -528,6 +539,38 @@
 
                 return result;
             },
+            filterTabs: function() {
+                if (!this.filtersExist) {
+                    return [];
+                }
+                let result = [];
+                for (let key in this.filters) {
+                    if (this.filters.hasOwnProperty(key)) {
+                        if (!result.includes(this.filters[key].tab)) {
+                            result.push(this.filters[key].tab);
+                        }
+                    }
+                }
+                return result;
+            },
+            filterTabContents: function() {
+                let result = {};
+                for (let key in this.filters) {
+                    if (this.filters.hasOwnProperty(key)) {
+                        if (!result.hasOwnProperty(this.filters[key].tab)) {
+                            result[this.filters[key].tab] = {};
+                        }
+                        result[this.filters[key].tab][key] = this.filters[key];
+                    }
+                }
+                let resultArray = [];
+                for (let key in result) {
+                    if (result.hasOwnProperty(key)) {
+                        resultArray.push(result[key]);
+                    }
+                }
+                return resultArray;
+            }
         },
         methods: {
             elementRowStyle: function(element) {
