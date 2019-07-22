@@ -101,7 +101,7 @@
                                         {{ translate('Single page') }}
                                     </label>
                                 </span>
-                                <template v-if="pageOptions.length > 1 && JSON.stringify(counts) != '{}'">
+                                <template v-if="JSON.stringify(counts) != '{}'">
                                     <span>{{ counts['start'] }}&nbsp;-&nbsp;{{ counts['end'] }}&nbsp;/&nbsp;{{ counts['filtered'] }}&nbsp;&nbsp;</span>
                                     <button v-bind:class="mainButtons['prevPage']['class']"
                                             v-on:click="previousPage"
@@ -175,6 +175,8 @@
                                     </thead>
                                     <tbody>
                                     <tr v-for="element, elementIndex in elements"
+                                        :key="elementIndex"
+                                        :ref="elementIndex"
                                         v-bind:style="elementRowStyle(element)"
                                         v-bind:class="element.hasOwnProperty('row_class') ? element.row_class : null"
                                     >
@@ -201,17 +203,17 @@
                                         <td v-if="allowOperations" style="white-space: nowrap">
                                             <button type="button" v-if="showButton('details')"
                                                     v-bind:class="buttons['details']['class']"
-                                                    v-on:click="showDetails(element[idProperty])"
+                                                    v-on:click="showDetails(element[idProperty], elementIndex)"
                                                     v-html="buttons['details']['html']"
                                             ></button>
                                             <button type="button" v-if="showButton('edit')"
                                                     v-bind:class="buttons['edit']['class']"
-                                                    v-on:click="editElement(element[idProperty])"
+                                                    v-on:click="editElement(element[idProperty], elementIndex)"
                                                     v-html="buttons['edit']['html']"
                                             ></button>
                                             <button type="button" v-if="showButton('delete')"
                                                     v-bind:class="buttons['delete']['class']"
-                                                    v-on:click="confirmElementDeletion(element[idProperty], element[nameProperty])"
+                                                    v-on:click="confirmElementDeletion(element[idProperty], element[nameProperty], elementIndex)"
                                                     v-html="buttons['delete']['html']"
                                             ></button>
                                             <button type="button" v-if="showButton('moveUp') && elementIndex > 0"
@@ -288,7 +290,7 @@
                              style="display:flex; justify-content: space-between; align-items: baseline"
                         >
                             {{ translate('Edit element') }}
-                            <button v-on:click="mode = 'list'"
+                            <button v-on:click="returnToList"
                                     v-bind:class="mainButtons['backToList']['class']"
                             >X</button>
                         </div>
@@ -298,7 +300,7 @@
                                     v-bind:save-url="currentUpdateUrl"
                                     v-bind:ajax-operations-url="currentAjaxOperationsUrl"
                                     v-on:submit-success="confirmEditSuccess"
-                                    v-on:editing-canceled="mode = 'list'"
+                                    v-on:editing-canceled="returnToList"
                                     redirect-to-response-on-success="false"
                                     v-bind:buttons="mainButtons"
                                     v-bind:class-overrides="classOverrides"
@@ -312,7 +314,7 @@
                              style="display:flex; justify-content: space-between; align-items: baseline"
                         >
                             {{ translate('Add element') }}
-                            <button v-on:click="mode = 'list'"
+                            <button v-on:click="returnToList"
                                     v-bind:class="mainButtons['backToList']['class']"
                             >X</button>
                         </div>
@@ -322,7 +324,7 @@
                                     v-bind:save-url="storeUrl"
                                     v-bind:ajax-operations-url="ajaxOperationsUrl"
                                     v-on:submit-success="confirmCreationSuccess"
-                                    v-on:editing-canceled="mode = 'list'"
+                                    v-on:editing-canceled="returnToList"
                                     redirect-to-response-on-success="false"
                                     v-bind:buttons="mainButtons"
                                     v-bind:class-overrides="classOverrides"
@@ -340,7 +342,7 @@
                         ></button>
                         <button type="button"
                                 v-bind:class="mainButtons['cancelDeletion']['class']"
-                                v-on:click="mode = 'list'"
+                                v-on:click="returnToList"
                                 v-html="translate('Cancel')"
                         ></button>
                     </div>
@@ -351,7 +353,7 @@
                             v-bind="activeCustomComponent.props"
                             v-bind:selected-elements="selectedElements"
                             v-on:submit-success="closeCustomComponent"
-                            v-on:component-canceled="mode = 'list'"
+                            v-on:component-canceled="returnToList"
                     ></component>
                 </div>
 
@@ -444,6 +446,7 @@
                 urlParameters: {},
                 fetchMode: 'list',
                 massOperationLoading: false,
+                currentElementIndex: -1,
             }
         },
         mounted() {
@@ -573,6 +576,15 @@
             }
         },
         methods: {
+            returnToList: function() {
+                this.mode = 'list';
+                this.scrollCurrentElementIntoView();
+            },
+            scrollCurrentElementIntoView: function() {
+                if (typeof(this.$refs[this.currentElementIndex]) != 'undefined') {
+                    this.$nextTick(() => this.$refs[this.currentElementIndex][0].scrollIntoView());
+                }
+            },
             elementRowStyle: function(element) {
                 let result ={
                     //'border-left': this.selectedElements.indexOf(element.id) > -1 ? '6px solid #CAE1F6' : null
@@ -614,7 +626,7 @@
                         this.showNotification = true;
                     window.setTimeout(() => {
                         this.showNotification = false;
-                    }, 3000);
+                }, 3000);
                 }
             },
             errorNotification: function(content) {
@@ -726,19 +738,19 @@
                     for (var filterName in this.filters) {
                         if (this.filters.hasOwnProperty(filterName)) {
                             this.watches[filterName] = this.$watch(
-                                'filters.'+filterName+'.value',
-                                (newValue, oldValue) => {
+                                    'filters.'+filterName+'.value',
+                                    (newValue, oldValue) => {
                                     if (newValue != oldValue) {
-                                        window.clearTimeout(this.fetchTimeout);
-                                        this.fetchTimeout = window.setTimeout(() => {
-                                            this.disablePageWatch = true;
-                                            this.currentPage = 1;
-                                            this.disablePageWatch = false;
-                                            this.fetchMode = 'search';
-                                            this.fetchElements(true);
-                                        }, this.getFilterTimeoutByType(this.filters[filterName].type));
-                                    }
-                                }, {deep: true});
+                                window.clearTimeout(this.fetchTimeout);
+                                this.fetchTimeout = window.setTimeout(() => {
+                                    this.disablePageWatch = true;
+                                this.currentPage = 1;
+                                this.disablePageWatch = false;
+                                this.fetchMode = 'search';
+                                this.fetchElements(true);
+                            }, this.getFilterTimeoutByType(this.filters[filterName].type));
+                            }
+                        }, {deep: true});
                         }
                     }
                 } else {
@@ -777,32 +789,33 @@
                 this.initialLoading = false;
                 window.axios.get(this.indexUrl, {params: filterData})
                     .then((response) => {
-                        this.title = response.data.title;
-                        this.elements = response.data.elements;
-                        this.counts = response.data.counts;
-                        document.getElementsByTagName('title')[0].innerHTML = response.data.pageTitle;
-                        this.sortingColumns = response.data.sortingColumns;
-                        this.currentSortingColumn = this.findSortingColumnKey(response.data.sortingField);
-                        this.currentSortingDirection = response.data.sortingDirection;
-                        this.massOperations = response.data.massOperations;
-                        this.exportOperations = response.data.exportOperations;
-                        this.buttons = response.data.buttons;
-                        if (this.positionedView != response.data.positionedView) {
-                            this.columns = response.data.columns;
-                        }
-                        if (!onlyElements) {
-                            this.mainButtons = response.data.mainButtons;
-                            this.columns = response.data.columns;
-                            if (JSON.stringify(this.filters) == '{}') {
-                                this.loadFilters(response.data.filters);
-                            }
-                        }
-                        this.positionedView = response.data.positionedView;
-                        this.mode = 'list';
-                        this.fetchMode = 'search';
-                    });
+                    this.title = response.data.title;
+                this.elements = response.data.elements;
+                this.counts = response.data.counts;
+                document.getElementsByTagName('title')[0].innerHTML = response.data.pageTitle;
+                this.sortingColumns = response.data.sortingColumns;
+                this.currentSortingColumn = this.findSortingColumnKey(response.data.sortingField);
+                this.currentSortingDirection = response.data.sortingDirection;
+                this.massOperations = response.data.massOperations;
+                this.exportOperations = response.data.exportOperations;
+                this.buttons = response.data.buttons;
+                if (this.positionedView != response.data.positionedView) {
+                    this.columns = response.data.columns;
+                }
+                if (!onlyElements) {
+                    this.mainButtons = response.data.mainButtons;
+                    this.columns = response.data.columns;
+                    if (JSON.stringify(this.filters) == '{}') {
+                        this.loadFilters(response.data.filters);
+                    }
+                }
+                this.positionedView = response.data.positionedView;
+                this.mode = 'list';
+                this.fetchMode = 'search';
+            });
             },
-            showDetails: function(elementId) {
+            showDetails: function(elementId, elementIndex) {
+                this.currentElementIndex = elementIndex;
                 if ((typeof(this.buttons['details']['isComponent']) == 'undefined')
                     || (this.buttons['details']['isComponent'] == false))
                 {
@@ -812,23 +825,25 @@
                         {params: {token: Math.random().toString(36)}}
                     )
                         .then((response) => {
-                            this.fields = response.data.fields;
-                            this.model = response.data.model;
-                            this.mode = 'details';
-                        });
+                        this.fields = response.data.fields;
+                    this.model = response.data.model;
+                    this.mode = 'details';
+                });
                 } else {
                     this.currentSubjectId = elementId;
                     this.mode="details-component";
                 }
             },
-            editElement: function(elementId) {
+            editElement: function(elementId, elementIndex) {
+                this.currentElementIndex = elementIndex;
                 this.mode = 'loading';
                 this.currentEditUrl = this.replaceIdParameterWithElementIdInUrl(this.editUrl, elementId);
                 this.currentUpdateUrl = this.replaceIdParameterWithElementIdInUrl(this.updateUrl, elementId);
                 this.currentAjaxOperationsUrl = this.replaceIdParameterWithElementIdInUrl(this.ajaxOperationsUrl, elementId);
                 this.mode = 'edit';
             },
-            confirmElementDeletion: function(elementId, elementName) {
+            confirmElementDeletion: function(elementId, elementName, elementIndex) {
+                this.currentElementIndex = elementIndex;
                 this.currentDeleteUrl = this.replaceIdParameterWithElementIdInUrl(this.deleteUrl, elementId);
                 this.currentSubjectName = elementName;
                 this.mode = 'delete-confirmation';

@@ -5,6 +5,7 @@
              :alt="imageAlt"
              :title="imageAlt"
              v-bind:style="{'max-height': maxThumbHeight}"
+             style="max-width:100%"
              v-on:click="toggleZoom">
         <div class="lightbox-zoomed"
              v-if="zoom"
@@ -13,7 +14,7 @@
             <img :src="imageUrl"
                  :alt="imageAlt"
                  :title="imageAlt"
-             >
+            >
             <div style="width: 100%; text-align: center; margin-top: 5px">
                 <a :href="imageUrl" target="_blank" v-html="newWindowLabel" style="color:white"></a>
             </div>
