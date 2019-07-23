@@ -160,11 +160,18 @@ trait VueCRUDManageable
          *      'componentName' => 'datePicker',
          *   ]
          */
-        return [
+        $result = [
             'details' => self::buildButtonFromConfigData('vuecrud.buttons.details'),
             'edit'   => self::buildButtonFromConfigData('vuecrud.buttons.edit'),
             'delete' => self::buildButtonFromConfigData('vuecrud.buttons.delete'),
         ];
+
+        if (method_exists(static::class, 'modifyModellistButtons')) {
+            $result = static::modifyModellistButtons($result);
+        }
+
+        return $result;
+
     }
 
     public static function getModelManagerMainButtons()
@@ -222,6 +229,10 @@ trait VueCRUDManageable
         ];
 
         $result['add']['html'] = $result['add']['html'].$subjectName;
+
+        if (method_exists(static::class, 'modifyModelManagerMainButtons')) {
+            $result = static::modifyModelManagerMainButtons($result);
+        }
 
         return $result;
     }

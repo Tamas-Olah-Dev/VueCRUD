@@ -296,6 +296,7 @@
                         </div>
                         <div class="portlet-body">
                             <edit-form
+                                    v-if="typeof(buttons['edit']['component']) == 'undefined'"
                                     v-bind:data-url="currentEditUrl"
                                     v-bind:save-url="currentUpdateUrl"
                                     v-bind:ajax-operations-url="currentAjaxOperationsUrl"
@@ -305,6 +306,13 @@
                                     v-bind:buttons="mainButtons"
                                     v-bind:class-overrides="classOverrides"
                             ></edit-form>
+                            <component
+                                    v-if="typeof(buttons['edit']['component']) != 'undefined'"
+                                    :is="buttons['edit']['component']"
+                                    v-bind="buttons['edit']['props']"
+                                    v-on:editing-canceled="returnToList"
+                            >
+                            </component>
                         </div>
                     </div>
                 </div>
@@ -320,6 +328,7 @@
                         </div>
                         <div class="portlet-body">
                             <edit-form
+                                    v-if="typeof(mainButtons['add']['component']) == 'undefined'"
                                     v-bind:data-url="createUrl"
                                     v-bind:save-url="storeUrl"
                                     v-bind:ajax-operations-url="ajaxOperationsUrl"
@@ -329,6 +338,14 @@
                                     v-bind:buttons="mainButtons"
                                     v-bind:class-overrides="classOverrides"
                             ></edit-form>
+                            <component
+                                    v-if="typeof(mainButtons['add']['component']) != 'undefined'"
+                                    :is="mainButtons['add']['component']"
+                                    v-bind="mainButtons['add']['props']"
+                                    v-on:editing-canceled="returnToList"
+                            >
+                            </component>
+
                         </div>
                     </div>
                 </div>
@@ -626,7 +643,7 @@
                         this.showNotification = true;
                     window.setTimeout(() => {
                         this.showNotification = false;
-                }, 3000);
+                    }, 3000);
                 }
             },
             errorNotification: function(content) {
@@ -738,19 +755,19 @@
                     for (var filterName in this.filters) {
                         if (this.filters.hasOwnProperty(filterName)) {
                             this.watches[filterName] = this.$watch(
-                                    'filters.'+filterName+'.value',
-                                    (newValue, oldValue) => {
+                                'filters.'+filterName+'.value',
+                                (newValue, oldValue) => {
                                     if (newValue != oldValue) {
-                                window.clearTimeout(this.fetchTimeout);
-                                this.fetchTimeout = window.setTimeout(() => {
-                                    this.disablePageWatch = true;
-                                this.currentPage = 1;
-                                this.disablePageWatch = false;
-                                this.fetchMode = 'search';
-                                this.fetchElements(true);
-                            }, this.getFilterTimeoutByType(this.filters[filterName].type));
-                            }
-                        }, {deep: true});
+                                        window.clearTimeout(this.fetchTimeout);
+                                        this.fetchTimeout = window.setTimeout(() => {
+                                            this.disablePageWatch = true;
+                                            this.currentPage = 1;
+                                            this.disablePageWatch = false;
+                                            this.fetchMode = 'search';
+                                            this.fetchElements(true);
+                                        }, this.getFilterTimeoutByType(this.filters[filterName].type));
+                                    }
+                                }, {deep: true});
                         }
                     }
                 } else {
@@ -789,30 +806,30 @@
                 this.initialLoading = false;
                 window.axios.get(this.indexUrl, {params: filterData})
                     .then((response) => {
-                    this.title = response.data.title;
-                this.elements = response.data.elements;
-                this.counts = response.data.counts;
-                document.getElementsByTagName('title')[0].innerHTML = response.data.pageTitle;
-                this.sortingColumns = response.data.sortingColumns;
-                this.currentSortingColumn = this.findSortingColumnKey(response.data.sortingField);
-                this.currentSortingDirection = response.data.sortingDirection;
-                this.massOperations = response.data.massOperations;
-                this.exportOperations = response.data.exportOperations;
-                this.buttons = response.data.buttons;
-                if (this.positionedView != response.data.positionedView) {
-                    this.columns = response.data.columns;
-                }
-                if (!onlyElements) {
-                    this.mainButtons = response.data.mainButtons;
-                    this.columns = response.data.columns;
-                    if (JSON.stringify(this.filters) == '{}') {
-                        this.loadFilters(response.data.filters);
-                    }
-                }
-                this.positionedView = response.data.positionedView;
-                this.mode = 'list';
-                this.fetchMode = 'search';
-            });
+                        this.title = response.data.title;
+                        this.elements = response.data.elements;
+                        this.counts = response.data.counts;
+                        document.getElementsByTagName('title')[0].innerHTML = response.data.pageTitle;
+                        this.sortingColumns = response.data.sortingColumns;
+                        this.currentSortingColumn = this.findSortingColumnKey(response.data.sortingField);
+                        this.currentSortingDirection = response.data.sortingDirection;
+                        this.massOperations = response.data.massOperations;
+                        this.exportOperations = response.data.exportOperations;
+                        this.buttons = response.data.buttons;
+                        if (this.positionedView != response.data.positionedView) {
+                            this.columns = response.data.columns;
+                        }
+                        if (!onlyElements) {
+                            this.mainButtons = response.data.mainButtons;
+                            this.columns = response.data.columns;
+                            if (JSON.stringify(this.filters) == '{}') {
+                                this.loadFilters(response.data.filters);
+                            }
+                        }
+                        this.positionedView = response.data.positionedView;
+                        this.mode = 'list';
+                        this.fetchMode = 'search';
+                    });
             },
             showDetails: function(elementId, elementIndex) {
                 this.currentElementIndex = elementIndex;
@@ -825,10 +842,10 @@
                         {params: {token: Math.random().toString(36)}}
                     )
                         .then((response) => {
-                        this.fields = response.data.fields;
-                    this.model = response.data.model;
-                    this.mode = 'details';
-                });
+                            this.fields = response.data.fields;
+                            this.model = response.data.model;
+                            this.mode = 'details';
+                        });
                 } else {
                     this.currentSubjectId = elementId;
                     this.mode="details-component";
