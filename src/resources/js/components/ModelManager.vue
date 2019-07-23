@@ -309,6 +309,7 @@
                             <component
                                     v-if="typeof(buttons['edit']['component']) != 'undefined'"
                                     :is="buttons['edit']['component']"
+                                    :subject-id="currentSubjectId"
                                     v-bind="buttons['edit']['props']"
                                     v-on:editing-canceled="returnToList"
                             >
@@ -341,6 +342,7 @@
                             <component
                                     v-if="typeof(mainButtons['add']['component']) != 'undefined'"
                                     :is="mainButtons['add']['component']"
+                                    subject-id="-1"
                                     v-bind="mainButtons['add']['props']"
                                     v-on:editing-canceled="returnToList"
                             >
@@ -853,6 +855,7 @@
             },
             editElement: function(elementId, elementIndex) {
                 this.currentElementIndex = elementIndex;
+                this.currentSubjectId = elementId;
                 this.mode = 'loading';
                 this.currentEditUrl = this.replaceIdParameterWithElementIdInUrl(this.editUrl, elementId);
                 this.currentUpdateUrl = this.replaceIdParameterWithElementIdInUrl(this.updateUrl, elementId);

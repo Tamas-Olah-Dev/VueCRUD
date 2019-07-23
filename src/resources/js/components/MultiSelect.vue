@@ -6,7 +6,7 @@
                       class="multi-select-item-span"
                       :key="index"
                 >
-                    {{ valueset[item] }}
+                    {{ item.label }}
                     <span class="multi-select-remove-button"
                           v-on:click="removeItem(index)"
                     >X</span>
@@ -36,7 +36,7 @@
                  v-html="subject.label"
                  v-on:mouseover="dropdownSelectedIndex = index"
                  v-bind:class="{'multi-select-selected': dropdownSelectedIndex == index}"
-                 v-on:click="addItem(subject.id)"></div>
+                 v-on:click="addItem(subject)"></div>
         </div>
     </div>
 </template>
@@ -44,9 +44,11 @@
 <script>
     export default {
         props: {
-            valueset: {type: Object, default: () => {}},
+            valueset: {type: Array, default: () => []},
             value: {type: Array, default: () => []},
-            allowAddingNewItem: {type: String, default: 'true'}
+            allowAddingNewItem: {type: Boolean, default: false},
+            idProperty: {type: String, default: 'id'},
+            labelProperty: {type: String, default: 'name'},
         },
         data: function() {
             return {
@@ -61,7 +63,7 @@
                 let result = [];
                 for (let index in this.valueset) {
                     if (this.valueset.hasOwnProperty(index)) {
-                        result.push({id: index, label: this.valueset[index]});
+                        result.push(this.transformItem(this.valueset[index]));
                     }
                 }
 
@@ -76,15 +78,22 @@
             },
             filteredAvailableItems: function() {
                 return this.items.filter((item) => {
-                    return item.label.includes(this.filterText)
-                        && this.selectedItemIds.indexOf(item.id) == -1;
+                    return item.uppercaseLabel.includes(this.filterText.toUpperCase())
+                        && this.selectedItemIds.indexOf(item[this.idProperty]) == -1;
                 });
             },
             selectedItemIds: function() {
-                return this.selectedItems.map(item => item.id);
+                return this.selectedItems.map(item => item[this.idProperty]);
             }
         },
         methods: {
+            transformItem: function(originalItem) {
+                return {
+                    id: originalItem[this.idProperty],
+                    label: originalItem[this.labelProperty],
+                    uppercaseLabel: originalItem[this.labelProperty].toUpperCase()
+                };
+            },
             handleInputFocus: function() {
                 if (this.allowAddingNewItem != 'true') {
                     this.openDropdown = !this.openDropdown;
@@ -117,33 +126,33 @@
                     if (this.filterText != '') {
                         this.addNewItem(this.filterText);
                         this.filterText = '';
-                        this.$emit('input', this.selectedItems);
+                        this.$emit('input', this.selectedItemIds);
                         return;
                     }
                 }
                 if (typeof(this.filteredAvailableItems[this.dropdownSelectedIndex]) == 'undefined') {
                     return;
                 }
-                this.addItem(this.filteredAvailableItems[this.dropdownSelectedIndex].id);
+                this.addItem(this.filteredAvailableItems[this.dropdownSelectedIndex]);
             },
             addNewItem: function(item) {
-                this.selectedItems.push({
-                    id: -1,
-                    label: item
-                });
+                let newItem = {};
+                newItem[this.idProperty] = -1;
+                newItem[this.labelProperty] = item;
+                this.selectedItems.push(newItem);
                 this.openDropdown = false;
-                this.$emit('input', this.selectedItems);
+                this.$emit('input', this.selectedItemIds);
             },
             addItem: function(item) {
                 this.selectedItems.push(item);
                 this.filterText = '';
                 this.dropdownSelectedIndex = -1;
                 this.openDropdown = false;
-                this.$emit('input', this.selectedItems);
+                this.$emit('input', this.selectedItemIds);
             },
             removeItem: function(index) {
                 this.selectedItems.splice(index, 1);
-                this.$emit('input', this.selectedItems);
+                this.$emit('input', this.selectedItemIds);
             },
             handleClickOutside: function(e) {
                 const el = this.$refs.dropdown;
@@ -164,8 +173,14 @@
 
         },
         watch: {
-            filterText: function() {
-                this.dropdownSelectedIndex = -1;
+            filterText: function(value) {
+                if (value == '') {
+                    this.dropdownSelectedIndex = -1;
+                } else {
+                    if ((!this.allowAddingNewItem) && (this.filteredAvailableItems.length > 0)) {
+                        this.dropdownSelectedIndex = 0;
+                    }
+                }
             },
             shouldShowDropdown: function() {
                 if (this.shouldShowDropdown) {
@@ -176,9 +191,9 @@
             },
             value: function() {
                 this.selectedItems = [];
-                for (var index = 0; index < this.value.length; index++) {
-                    this.selectedItems.push(this.value[index]);
-                }
+                this.selectedItems = this.valueset.filter((item) => {
+                    return this.value.includes(item[this.idProperty])
+                }).map((item) => this.transformItem(item));
             }
         }
     }
@@ -207,17 +222,17 @@
         margin: 5px;
         margin-top: 20px;
         border-radius: 5px;
-        width: 99%;
+        width: 98%;
     }
     .multi-select-item-span {
-        padding: 2px;
+        padding: 4px;
         padding-left: 5px;
         padding-right: 5px;
-        border-radius: 5px;
-        box-shadow: 2px 3px lightgrey;
-        /*background-color: lightcyan;*/
+        /*border-radius: 2px;*/
+        box-shadow: 3px 3px lightgrey;
+        background-color: #3e9cb9;
         margin: 3px;
-        color: black;
+        color: white;
     }
     .multi-select-remove-button {
         margin-left: 10px;
