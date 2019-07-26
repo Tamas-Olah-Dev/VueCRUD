@@ -163,14 +163,15 @@
                     this.openDropdown = false;
                 }
             },
-
+            parseValue: function() {
+                this.selectedItems = [];
+                this.selectedItems = this.valueset.filter((item) => {
+                    return this.value.includes(item[this.idProperty])
+                }).map(item => this.transformItem(item));
+            }
         },
         mounted: function() {
-            this.selectedItems = [];
-            for (var index = 0; index < this.value.length; index++) {
-                this.selectedItems.push(this.value[index]);
-            }
-
+            this.parseValue();
         },
         watch: {
             filterText: function(value) {
@@ -190,10 +191,7 @@
                 }
             },
             value: function() {
-                this.selectedItems = [];
-                this.selectedItems = this.valueset.filter((item) => {
-                    return this.value.includes(item[this.idProperty])
-                }).map((item) => this.transformItem(item));
+                this.parseValue();
             }
         }
     }
@@ -255,6 +253,7 @@
         border-top: none;
         box-shadow: 5px 5px darkgrey;
         background-color: white;
+        position:fixed;
     }
     .multi-select-dropdown > div {
         cursor:pointer;
