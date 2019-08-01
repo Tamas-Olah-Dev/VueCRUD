@@ -197,6 +197,7 @@
                                         <td v-for="columnName, columnField in columns">
                                             <component v-if="typeof(element[columnField]) == 'string' && element[columnField].substr(0, 11) == 'component::'"
                                                        :is="JSON.parse(element[columnField].substr(11)).component"
+                                                       :key="element[idProperty] + '-' + columnName"
                                                        v-bind:subject="element"
                                                        v-bind="JSON.parse(element[columnField].substr(11)).componentProps"></component>
                                             <span v-else v-html="element[columnField]"></span>
@@ -410,7 +411,6 @@
             allowAdding: {type: Boolean, default: true},
             autoFilter: {type: Boolean, default: false},
             nameProperty: {type: String, default: 'name'},
-            idProperty: {type: String, default: 'id'},
             iconClasses: {type: Object, default: function() {
                 return {
                     "filter": "ti-filter",
@@ -467,6 +467,7 @@
                 fetchMode: 'list',
                 massOperationLoading: false,
                 currentElementIndex: -1,
+                idProperty: 'id',
             }
         },
         mounted() {
@@ -673,21 +674,23 @@
             },
             restoreFilterState: function() {
                 let filterState = JSON.parse(window.localStorage.getItem(this.indexUrl+'_filters'));
-                if (filterState !== null) {
-                    for (var filterName in this.filters) {
-                        if (filterState.hasOwnProperty(filterName)) {
-                            Vue.set(this.filters[filterName], 'value', filterState[filterName]);
+                try {
+                    if (filterState !== null) {
+                        for (var filterName in this.filters) {
+                            if (filterState.hasOwnProperty(filterName)) {
+                                Vue.set(this.filters[filterName], 'value', filterState[filterName]);
+                            }
                         }
-                    }
-                } else {
-                    if (Object.keys(this.urlParameters).length == 0) {
-                        for (var filter in this.filters) {
-                            if (this.filters.hasOwnProperty(filter)) {
-                                Vue.set(this.filters[filter], 'value', this.filters[filter].default);
+                    } else {
+                        if (Object.keys(this.urlParameters).length == 0) {
+                            for (var filter in this.filters) {
+                                if (this.filters.hasOwnProperty(filter)) {
+                                    Vue.set(this.filters[filter], 'value', this.filters[filter].default);
+                                }
                             }
                         }
                     }
-                }
+                } catch (error) {}
             },
             columnIsSorting: function(columnField) {
                 return typeof(this.sortingColumns[columnField]) != 'undefined';
@@ -830,6 +833,7 @@
                             }
                         }
                         this.positionedView = response.data.positionedView;
+                        this.idProperty = response.data.idProperty;
                         this.mode = 'list';
                         this.fetchMode = 'search';
                     });
@@ -894,11 +898,13 @@
                 }
             },
             resetFilters: function() {
+                let newFilters = {};
                 for (var filter in this.filters) {
-                    if (this.filters.hasOwnProperty(filter)) {
-                        Vue.set(this.filters[filter], 'value', this.filters[filter].default);
-                    }
+                    newFilters[filter] = {...this.filters[filter]}
+                    newFilters[filter].value = newFilters[filter].default;
                 }
+                this.filters = newFilters;
+                this.saveFilterState();
                 this.fetchMode = 'search';
                 this.fetchElements(true)
             },

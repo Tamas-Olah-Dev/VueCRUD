@@ -1,6 +1,6 @@
 <template>
     <label :for="'checkbox-'+uid">
-        <input type="checkbox" v-model="state" :name="'checkbox-'+uid">
+        <input type="checkbox" v-model="state" :name="'checkbox-'+uid" :id="'checkbox-'+uid">
         <span style="margin-left:.5em">
             <slot></slot>
             <span v-html="labelContent"></span>
@@ -16,7 +16,8 @@
             url: {type: String},
             action: {type: String},
             value: {type: Boolean, default: false},
-            labelContent: {type: String, default: ''}
+            labelContent: {type: String, default: ''},
+            componentId: {}
         },
         data: function() {
             return {
@@ -27,18 +28,22 @@
         },
         mounted() {
             this.state = this.value;
-            this.$watch('state', function() {
-                window.axios.post(this.url, {
-                    action: this.action,
-                    subject: this.subject,
-                    state: this.state
-                }).then((response) => {
-                    this.$emit('input', this.state);
-                }).catch((error) => {
-                    console.log(error.response);
-                    alert(error.response.data);
+            if (!this.initialized) {
+                this.initialized = true;
+                this.$watch('state', function() {
+                    window.axios.post(this.url, {
+                        action: this.action,
+                        subject: this.subject,
+                        state: this.state,
+                        componentId: this.componentId
+                    }).then((response) => {
+                        this.$emit('input', this.state);
+                    }).catch((error) => {
+                        console.log(error.response);
+                        alert(error.response.data);
+                    });
                 });
-            });
+            }
         },
     }
 </script>

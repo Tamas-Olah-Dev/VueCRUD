@@ -249,7 +249,7 @@ trait VueCRUDManageable
 
     public static function getIdProperty()
     {
-        return 'id';
+        return (new static())->getKeyName();
     }
 
     // an array of column head labels, keyed by the related field name on the model

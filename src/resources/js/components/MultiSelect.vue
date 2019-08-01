@@ -1,7 +1,7 @@
 <template>
     <div class="multi-select-main"  ref="container">
         <div class="multi-select-container">
-            <div class="multi-select-selected-container">
+            <div class="multi-select-selected-container" v-if="multiple">
                 <span v-for="item, index in selectedItems"
                       class="multi-select-item-span"
                       :key="index"
@@ -14,10 +14,13 @@
             </div>
             <div style="position:relative">
                 <input type="text" class="multi-select-input"
+                       v-bind:class="inputClass"
+                       ref="input"
                        v-model="filterText"
+                       v-bind:style="{'color': invalidItem ? 'red' : 'black'}"
                        v-on:keyup.arrow-down="moveDropdownSelection(1)"
                        v-on:keyup.arrow-up="moveDropdownSelection(-1)"
-                       v-on:keyup.escape="filterText = ''"
+                       v-on:keyup.escape="resetFilterTextIfNeeded"
                        v-on:keyup.enter="addSelectedFromDropdownOrInput"
                 >
                 <span ref="caret"
@@ -32,7 +35,7 @@
         <div class="multi-select-dropdown" v-show="shouldShowDropdown" ref="dropdown">
             <div v-for="subject, index in filteredAvailableItems"
                  :key="index"
-                 :ref="index"
+                 ref="index"
                  v-html="subject.label"
                  v-on:mouseover="dropdownSelectedIndex = index"
                  v-bind:class="{'multi-select-selected': dropdownSelectedIndex == index}"
@@ -45,17 +48,20 @@
     export default {
         props: {
             valueset: {type: Array, default: () => []},
-            value: {type: Array, default: () => []},
+            value: {},
             allowAddingNewItem: {type: Boolean, default: false},
             idProperty: {type: String, default: 'id'},
             labelProperty: {type: String, default: 'name'},
+            multiple: {type: Boolean, default: true},
+            inputClass: {type: String, default: 'form-control'}
         },
         data: function() {
             return {
                 selectedItems: [],
                 filterText: '',
                 dropdownSelectedIndex: -1,
-                openDropdown: false
+                openDropdown: false,
+                invalidItem: false,
             }
         },
         computed: {
@@ -73,20 +79,67 @@
                 return this.shouldShowDropdown ? 'multi-select-dropdown-caret-open' : ''
             },
             shouldShowDropdown: function() {
-                return this.filteredAvailableItems.length > 0
-                    && (this.filterText != '' || this.openDropdown == true);
+                if (this.multiple) {
+                    return this.filteredAvailableItems.length > 0
+                        && (this.filterText != '' || this.openDropdown == true);
+                } else {
+                    let currentLabel = this.selectedItems.length > 0
+                        ? this.selectedItems[0]['label']
+                        : '';
+                    return this.filteredAvailableItems.length > 0
+                        && (this.filterText != currentLabel || this.openDropdown == true);
+                }
             },
             filteredAvailableItems: function() {
-                return this.items.filter((item) => {
-                    return item.uppercaseLabel.includes(this.filterText.toUpperCase())
-                        && this.selectedItemIds.indexOf(item[this.idProperty]) == -1;
-                });
+                if (this.multiple) {
+                    return this.items.filter((item) => {
+                        return item.uppercaseLabel.includes(this.filterText.toUpperCase())
+                            && this.selectedItemIds.indexOf(item['id']) == -1;
+                    });
+                } else {
+                    return this.items.filter((item) => {
+                        return item.uppercaseLabel.includes(this.filterText.toUpperCase());
+                    });
+                }
             },
             selectedItemIds: function() {
                 return this.selectedItems.map(item => item[this.idProperty]);
+            },
+            emittedValue: function() {
+                if (this.multiple) {
+                    return this.selectedItems.map(item => item['id']);
+                }
+                return this.selectedItems.length > 0
+                    ? this.selectedItems[0]['id']
+                    : null;
             }
         },
         methods: {
+            resetFilterTextIfNeeded: function() {
+                if (this.multiple) {
+                    this.filterText = '';
+                } else {
+                    if (this.selectedItems.length > 0) {
+                        this.filterText = this.selectedItems[0]['label'];
+                    } else {
+                        this.filterText = ''
+                    }
+                }
+                this.invalidItem = false;
+            },
+            activeInput: function() {
+                return window.document.activeElement;
+            },
+            pushToSelectedItems: function(item) {
+                if (!this.multiple) {
+                    this.selectedItems = [];
+                }
+                this.selectedItems.push(item);
+                if (!this.multiple) {
+                    this.filterText = item.label;
+                }
+                this.invalidItem = false;
+            },
             transformItem: function(originalItem) {
                 return {
                     id: originalItem[this.idProperty],
@@ -103,7 +156,7 @@
                 if (direction < 0) {
                     if (this.dropdownSelectedIndex > 0) {
                         this.dropdownSelectedIndex--;
-                        let element = this.$refs[this.dropdownSelectedIndex][0];
+                        let element = this.$refs['index'][this.dropdownSelectedIndex];
                         if (element.offsetTop < element.parentElement.scrollTop) {
                             element.parentElement.scrollTop = element.offsetTop;
                         }
@@ -111,9 +164,9 @@
                 } else {
                     if (this.dropdownSelectedIndex < this.filteredAvailableItems.length - 1) {
                         this.dropdownSelectedIndex++;
-                        let element = this.$refs[this.dropdownSelectedIndex][0];
+                        let element = this.$refs['index'][this.dropdownSelectedIndex];
                         if (element.offsetTop + element.clientHeight > (element.parentElement.scrollTop + element.parentElement.clientHeight)) {
-                            element.parentElement.scrollTop = element.parentElement.scrollTop + element.clientHeight;
+                            element.parentElement.scrollTop = element.parentElement.scrollTop + element.clientHeight + 3;
                         }
                     }
                 }
@@ -126,7 +179,7 @@
                     if (this.filterText != '') {
                         this.addNewItem(this.filterText);
                         this.filterText = '';
-                        this.$emit('input', this.selectedItemIds);
+                        this.$emit('input', this.emittedValue);
                         return;
                     }
                 }
@@ -139,26 +192,31 @@
                 let newItem = {};
                 newItem[this.idProperty] = -1;
                 newItem[this.labelProperty] = item;
-                this.selectedItems.push(newItem);
+                this.pushToSelectedItems(newItem);
                 this.openDropdown = false;
-                this.$emit('input', this.selectedItemIds);
+                this.$emit('input', this.emittedValue);
             },
             addItem: function(item) {
-                this.selectedItems.push(item);
-                this.filterText = '';
+                this.pushToSelectedItems(item);
+                if (this.multiple) {
+                    this.filterText = '';
+                } else {
+                    this.filterText = this.selectedItems[0]['label'];
+                    this.invalidItem = false;
+                }
                 this.dropdownSelectedIndex = -1;
                 this.openDropdown = false;
-                this.$emit('input', this.selectedItemIds);
+                this.$emit('input', this.emittedValue);
             },
             removeItem: function(index) {
                 this.selectedItems.splice(index, 1);
-                this.$emit('input', this.selectedItemIds);
+                this.$emit('input', this.emittedValue);
             },
             handleClickOutside: function(e) {
                 const el = this.$refs.dropdown;
                 const caretel = this.$refs.caret;
                 if ((!el.contains(e.target)) && ((!caretel.contains(e.target)))) {
-                    this.filterText = '';
+                    this.resetFilterTextIfNeeded();
                     this.dropdownSelectedIndex = -1;
                     this.openDropdown = false;
                 }
@@ -166,8 +224,13 @@
             parseValue: function() {
                 this.selectedItems = [];
                 this.selectedItems = this.valueset.filter((item) => {
-                    return this.value.includes(item[this.idProperty])
+                    return this.multiple
+                        ? this.value.includes(item[this.idProperty])
+                        : item[this.idProperty] == this.value;
                 }).map(item => this.transformItem(item));
+                if (!this.multiple) {
+                    this.filterText = this.selectedItems.length > 0 ? this.selectedItems[0].label : '';
+                }
             }
         },
         mounted: function() {
@@ -175,11 +238,25 @@
         },
         watch: {
             filterText: function(value) {
-                if (value == '') {
-                    this.dropdownSelectedIndex = -1;
+                if (this.multiple) {
+                    if (value == '') {
+                        this.dropdownSelectedIndex = -1;
+                    } else {
+                        if ((!this.allowAddingNewItem) && (this.filteredAvailableItems.length > 0)) {
+                            this.dropdownSelectedIndex = 0;
+                        }
+                    }
                 } else {
-                    if ((!this.allowAddingNewItem) && (this.filteredAvailableItems.length > 0)) {
-                        this.dropdownSelectedIndex = 0;
+                    let currentLabel = this.selectedItems.length > 0
+                        ? this.selectedItems[0]['label']
+                        : '';
+                    if (value != currentLabel) {
+                        if (this.filteredAvailableItems.length == 0) {
+                            this.selectedItems = [];
+                            this.$emit('input', null);
+                            this.invalidItem = true;
+                        }
+                        this.openDropdown = true;
                     }
                 }
             },
@@ -191,6 +268,9 @@
                 }
             },
             value: function() {
+                this.parseValue();
+            },
+            valueset: function() {
                 this.parseValue();
             }
         }
@@ -204,7 +284,7 @@
         display: flex;
         flex-direction:column;
         flex-wrap: wrap;
-        border: 1px solid darkgrey;
+        /*border: 1px solid darkgrey;*/
         width: 100%;
         max-width: 100%;
     }
@@ -218,7 +298,7 @@
     .multi-select-input {
         order: 9999;
         margin: 5px;
-        margin-top: 20px;
+        /*margin-top: 20px;*/
         border-radius: 5px;
         width: 98%;
     }
@@ -245,7 +325,7 @@
     }
     .multi-select-dropdown {
         z-index: 1000;
-        width: 100%;
+        width: 80%;
         padding: 5px;
         max-height: 15em;
         overflow-y: scroll;
@@ -266,7 +346,7 @@
         cursor:pointer;
         position:absolute;
         z-index: 100;
-        right: .7em;
+        right: 2.5%;
         bottom: .3em;
         font-size: 1.3em;
         transition: transform 200ms ease-in-out;
