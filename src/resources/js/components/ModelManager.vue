@@ -197,8 +197,6 @@
                                         <td v-for="columnName, columnField in columns">
                                             <component v-if="typeof(element[columnField]) == 'string' && element[columnField].substr(0, 11) == 'component::'"
                                                        :is="JSON.parse(element[columnField].substr(11)).component"
-                                                       :key="element[idProperty] + '-' + columnName"
-                                                       v-bind:subject="element"
                                                        v-bind="JSON.parse(element[columnField].substr(11)).componentProps"></component>
                                             <span v-else v-html="element[columnField]"></span>
                                         </td>
@@ -207,32 +205,52 @@
                                                     v-bind:class="buttons['details']['class']"
                                                     v-on:click="showDetails(element[idProperty], elementIndex)"
                                                     v-html="buttons['details']['html']"
+                                                    :title="buttons['details']['title'] || ''"
                                             ></button>
-                                            <button type="button" v-if="showButton('edit')"
+                                            <button type="button"
+                                                    v-if="showButton('edit') && (typeof(element['vuecrud_edit_allowed']) == 'undefined' || element['vuecrud_edit_allowed'] == true)"
                                                     v-bind:class="buttons['edit']['class']"
                                                     v-on:click="editElement(element[idProperty], elementIndex)"
                                                     v-html="buttons['edit']['html']"
+                                                    :title="buttons['edit']['title'] || ''"
                                             ></button>
-                                            <button type="button" v-if="showButton('delete')"
+                                            <button type="button"
+                                                    v-if="showButton('delete') && (typeof(element['vuecrud_delete_allowed']) == 'undefined' || element['vuecrud_delete_allowed'] == true)"
                                                     v-bind:class="buttons['delete']['class']"
                                                     v-on:click="confirmElementDeletion(element[idProperty], element[nameProperty], elementIndex)"
                                                     v-html="buttons['delete']['html']"
+                                                    :title="buttons['delete']['title'] || ''"
                                             ></button>
                                             <button type="button" v-if="showButton('moveUp') && elementIndex > 0"
                                                     v-bind:class="buttons['moveUp']['class']"
                                                     v-on:click="moveElementUp(element[idProperty])"
                                                     v-html="buttons['moveUp']['html']"
+                                                    :title="buttons['moveUp']['title'] || ''"
                                             ></button>
                                             <button type="button" v-if="showButton('moveDown') && elementIndex < elements.length - 1"
                                                     v-bind:class="buttons['moveDown']['class']"
                                                     v-on:click="moveElementDown(element[idProperty])"
                                                     v-html="buttons['moveDown']['html']"
+                                                    :title="buttons['moveDown']['title'] || ''"
                                             ></button>
+                                            <ajax-button v-for="ajaxButton, ajaxButtonKey in ajaxButtons"
+                                                         v-bind:class="ajaxButton['class']"
+                                                         v-bind:subject="element"
+                                                         :key="element[idProperty]+'-'+ajaxButton['props']['action']"
+                                                         v-bind="ajaxButton['props']"
+                                                         v-bind:title="ajaxButton['title'] || ''"
+                                                         v-on:submit-failed="alert($event);returnToList()"
+                                                         v-on:submit-success="confirmEditSuccess($event)"
+                                                         v-html="ajaxButton['html']"
+                                            ></ajax-button>
                                             <button type="button" v-for="customComponentButton, customComponentButtonKey in customComponentButtons"
                                                     v-bind:class="customComponentButton['class']"
                                                     v-on:click="activateCustomComponent(customComponentButtonKey)"
-                                                    v-html="customComponentButton['html']">
-                                            </button>
+                                                    v-html="customComponentButton['html']"
+                                                    v-on:component-canceled="returnToList"
+                                                    v-on:submit-success="confirmEditSuccess"
+                                                    :title="customComponentButton['title'] || ''"
+                                            ></button>
                                         </td>
                                     </tr>
                                     </tbody>
@@ -287,7 +305,9 @@
                     </div>
                 </div>
                 <div  v-if="mode == 'edit'">
-                    <div class="portlet full-width-div">
+                    <div class="portlet full-width-div"
+                         v-if="typeof(buttons['edit']['component']) == 'undefined'"
+                    >
                         <div class="portlet-heading bg-primary"
                              style="display:flex; justify-content: space-between; align-items: baseline"
                         >
@@ -298,7 +318,6 @@
                         </div>
                         <div class="portlet-body">
                             <edit-form
-                                    v-if="typeof(buttons['edit']['component']) == 'undefined'"
                                     v-bind:data-url="currentEditUrl"
                                     v-bind:save-url="currentUpdateUrl"
                                     v-bind:ajax-operations-url="currentAjaxOperationsUrl"
@@ -308,19 +327,22 @@
                                     v-bind:buttons="mainButtons"
                                     v-bind:class-overrides="classOverrides"
                             ></edit-form>
-                            <component
-                                    v-if="typeof(buttons['edit']['component']) != 'undefined'"
-                                    :is="buttons['edit']['component']"
-                                    :subject-id="currentSubjectId"
-                                    v-bind="buttons['edit']['props']"
-                                    v-on:editing-canceled="returnToList"
-                            >
-                            </component>
                         </div>
                     </div>
+                    <component
+                            v-if="typeof(buttons['edit']['component']) != 'undefined'"
+                            :is="buttons['edit']['component']"
+                            :subject-id="currentSubjectId"
+                            v-bind="buttons['edit']['props']"
+                            v-on:submit-success="confirmEditSuccess"
+                            v-on:editing-canceled="returnToList"
+                    >
+                    </component>
                 </div>
                 <div  v-if="mode == 'create'">
-                    <div class="portlet full-width-div">
+                    <div class="portlet full-width-div"
+                         v-if="typeof(mainButtons['add']['component']) == 'undefined'"
+                    >
                         <div class="portlet-heading bg-primary"
                              style="display:flex; justify-content: space-between; align-items: baseline"
                         >
@@ -331,7 +353,6 @@
                         </div>
                         <div class="portlet-body">
                             <edit-form
-                                    v-if="typeof(mainButtons['add']['component']) == 'undefined'"
                                     v-bind:data-url="createUrl"
                                     v-bind:save-url="storeUrl"
                                     v-bind:ajax-operations-url="ajaxOperationsUrl"
@@ -341,17 +362,17 @@
                                     v-bind:buttons="mainButtons"
                                     v-bind:class-overrides="classOverrides"
                             ></edit-form>
-                            <component
-                                    v-if="typeof(mainButtons['add']['component']) != 'undefined'"
-                                    :is="mainButtons['add']['component']"
-                                    subject-id="-1"
-                                    v-bind="mainButtons['add']['props']"
-                                    v-on:editing-canceled="returnToList"
-                            >
-                            </component>
-
                         </div>
                     </div>
+                    <component
+                            v-if="typeof(mainButtons['add']['component']) != 'undefined'"
+                            :is="mainButtons['add']['component']"
+                            subject-id="-1"
+                            v-bind="mainButtons['add']['props']"
+                            v-on:submit-success="confirmCreationSuccess"
+                            v-on:editing-canceled="returnToList"
+                    >
+                    </component>
                 </div>
                 <div v-if="mode == 'delete-confirmation'">
                     <div class="alert alert-danger">{{ translate('Are you sure you want to delete this element') }}? <br><span v-html="currentSubjectName"></span></div>
@@ -411,6 +432,7 @@
             allowAdding: {type: Boolean, default: true},
             autoFilter: {type: Boolean, default: false},
             nameProperty: {type: String, default: 'name'},
+            idProperty: {type: String, default: 'id'},
             iconClasses: {type: Object, default: function() {
                 return {
                     "filter": "ti-filter",
@@ -467,7 +489,6 @@
                 fetchMode: 'list',
                 massOperationLoading: false,
                 currentElementIndex: -1,
-                idProperty: 'id',
             }
         },
         mounted() {
@@ -557,7 +578,21 @@
                 let result = {};
                 for (var i in this.buttons) {
                     if ((this.buttons.hasOwnProperty(i)) && (typeof(this.buttons[i].componentName) != 'undefined')) {
-                        result[i] = this.buttons[i];
+                        if (this.buttons[i].componentName != 'ajax-button') {
+                            result[i] = this.buttons[i];
+                        }
+                    }
+                }
+
+                return result;
+            },
+            ajaxButtons: function() {
+                let result = {};
+                for (var i in this.buttons) {
+                    if ((this.buttons.hasOwnProperty(i)) && (typeof(this.buttons[i].componentName) != 'undefined')) {
+                        if (this.buttons[i].componentName == 'ajax-button') {
+                            result[i] = this.buttons[i];
+                        }
                     }
                 }
 
@@ -619,18 +654,30 @@
 
                 return result;
             },
-            confirmEditSuccess: function() {
-                this.successNotification(this.subjectName +' ' + this.translate('updated successfully'));
+            confirmEditSuccess: function(payload) {
+                if (typeof(payload) == 'undefined') {
+                    this.successNotification(this.subjectName + ' ' + this.translate('updated successfully'));
+                } else {
+                    this.successNotification(payload);
+                }
                 this.fetchMode = 'update';
                 this.fetchElements();
             },
-            confirmCreationSuccess: function() {
-                this.successNotification(this.subjectName + ' ' + this.translate('created successfully'));
+            confirmCreationSuccess: function(payload) {
+                if (typeof(payload) == 'undefined') {
+                    this.successNotification(this.subjectName + ' ' + this.translate('created successfully'));
+                } else {
+                    this.successNotification(payload);
+                }
                 this.fetchMode = 'update';
                 this.fetchElements();
             },
-            confirmDeletionSuccess: function() {
-                this.successNotification(this.subjectName + ' ' + this.translate('deleted'));
+            confirmDeletionSuccess: function(payload) {
+                if (typeof(payload) == 'undefined') {
+                    this.successNotification(this.subjectName + ' ' + this.translate('deleted'));
+                } else {
+                    this.successNotification(payload);
+                }
                 this.fetchMode = 'update';
                 this.fetchElements();
             },
@@ -674,23 +721,21 @@
             },
             restoreFilterState: function() {
                 let filterState = JSON.parse(window.localStorage.getItem(this.indexUrl+'_filters'));
-                try {
-                    if (filterState !== null) {
-                        for (var filterName in this.filters) {
-                            if (filterState.hasOwnProperty(filterName)) {
-                                Vue.set(this.filters[filterName], 'value', filterState[filterName]);
-                            }
+                if (filterState !== null) {
+                    for (var filterName in this.filters) {
+                        if (filterState.hasOwnProperty(filterName)) {
+                            Vue.set(this.filters[filterName], 'value', filterState[filterName]);
                         }
-                    } else {
-                        if (Object.keys(this.urlParameters).length == 0) {
-                            for (var filter in this.filters) {
-                                if (this.filters.hasOwnProperty(filter)) {
-                                    Vue.set(this.filters[filter], 'value', this.filters[filter].default);
-                                }
+                    }
+                } else {
+                    if (Object.keys(this.urlParameters).length == 0) {
+                        for (var filter in this.filters) {
+                            if (this.filters.hasOwnProperty(filter)) {
+                                Vue.set(this.filters[filter], 'value', this.filters[filter].default);
                             }
                         }
                     }
-                } catch (error) {}
+                }
             },
             columnIsSorting: function(columnField) {
                 return typeof(this.sortingColumns[columnField]) != 'undefined';
@@ -833,7 +878,6 @@
                             }
                         }
                         this.positionedView = response.data.positionedView;
-                        this.idProperty = response.data.idProperty;
                         this.mode = 'list';
                         this.fetchMode = 'search';
                     });
@@ -898,13 +942,11 @@
                 }
             },
             resetFilters: function() {
-                let newFilters = {};
                 for (var filter in this.filters) {
-                    newFilters[filter] = {...this.filters[filter]}
-                    newFilters[filter].value = newFilters[filter].default;
+                    if (this.filters.hasOwnProperty(filter)) {
+                        Vue.set(this.filters[filter], 'value', this.filters[filter].default);
+                    }
                 }
-                this.filters = newFilters;
-                this.saveFilterState();
                 this.fetchMode = 'search';
                 this.fetchElements(true)
             },
