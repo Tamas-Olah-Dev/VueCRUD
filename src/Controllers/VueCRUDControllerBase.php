@@ -231,6 +231,8 @@ class VueCRUDControllerBase
         $classMassOperations = array_keys($class::getVueCRUDOptionalAjaxFunctions());
 
         return array_merge($classMassOperations, [
+            'storeProfilePicture',
+            'removeProfilePicture',
             'trixStoreAttachment',
             'trixRemoveAttachment',
             'storePublicAttachment',

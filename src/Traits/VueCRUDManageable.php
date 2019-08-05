@@ -88,13 +88,20 @@ trait VueCRUDManageable
     {
         return array_merge(
             self::getVueCRUDMassFunctions(),
-            self::getVueCRUDExportFunctions()
+            self::getVueCRUDExportFunctions(),
+            self::getVueCRUDAdditionalAjaxFunctions()
         );
     }
 
     /** The following methods provide sensible defaults,
      * but they are to be overridden as needed.
      * */
+
+
+    public static function getVueCRUDAdditionalAjaxFunctions()
+    {
+        return [];
+    }
 
     public static function shouldVueCRUDOperationsBeDisplayed()
     {
