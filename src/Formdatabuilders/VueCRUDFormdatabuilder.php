@@ -32,6 +32,12 @@ abstract class VueCRUDFormdatabuilder
         if (method_exists($this, $customGetterMethodName)) {
             return $this->$customGetterMethodName();
         }
+        if (method_exists($this, 'getFormfieldValue')) {
+            $result = $this->getFormfieldValue($fieldId);
+            if ($result !== false) {
+                return $result;
+            }
+        }
 
         return $this->getDefaultOrSubjectValue($fieldId);
     }

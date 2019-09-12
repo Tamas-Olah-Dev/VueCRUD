@@ -1,0 +1,5 @@
+filecollector lightbox
+gyártó slug?
+trix wrapper value mutate
+trix wrapper első írásnál visszaugrik
+model manager notification opacity meg formázás

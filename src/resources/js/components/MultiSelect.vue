@@ -23,6 +23,11 @@
                        v-on:keyup.escape="resetFilterTextIfNeeded"
                        v-on:keyup.enter="addSelectedFromDropdownOrInput"
                 >
+                <span ref="clear"
+                      v-if="filterText != ''"
+                      v-on:click="clear"
+                      class="multi-select-clear-button"
+                >&#x274C;</span>
                 <span ref="caret"
                       v-on:click="openDropdown = !openDropdown"
                       class="multi-select-dropdown-caret"
@@ -115,6 +120,10 @@
             }
         },
         methods: {
+            clear: function() {
+                this.removeItem(0);
+                this.filterText = '';
+            },
             resetFilterTextIfNeeded: function() {
                 if (this.multiple) {
                     this.filterText = '';
@@ -297,7 +306,7 @@
     }
     .multi-select-input {
         order: 9999;
-        margin: 5px;
+        margin: 0px;
         /*margin-top: 20px;*/
         border-radius: 5px;
         width: 98%;
@@ -346,10 +355,18 @@
         cursor:pointer;
         position:absolute;
         z-index: 100;
-        right: 2.5%;
-        bottom: .3em;
+        right: 4%;
+        bottom: .25em;
         font-size: 1.3em;
         transition: transform 200ms ease-in-out;
+    }
+    .multi-select-clear-button {
+        cursor:pointer;
+        position:absolute;
+        z-index: 100;
+        right: 8%;
+        bottom: .3em;
+        font-size: 1.2em;
     }
     .multi-select-dropdown-caret-open {
         transform: rotate(-90deg);
