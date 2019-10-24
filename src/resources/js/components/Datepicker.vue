@@ -114,38 +114,7 @@
         mounted() {
             this.todaysDate = new Date();
             if (typeof(this.value) != 'undefined') {
-                if (this.dateRegex.test(this.value)) {
-                    var datetimeparts = this.value.split(' ');
-                    var dateparts = datetimeparts[0].split('-');
-                    this.year = parseInt(dateparts[0]);
-                    this.month = parseInt(dateparts[1]) - 1;
-                    this.day = parseInt(dateparts[2]);
-                    if (datetimeparts.length == 2) {
-                        var timeparts = datetimeparts[1].split(':');
-                        this.hour = parseInt(timeparts[0]);
-                        this.minute = parseInt(timeparts[1]);
-                        this.second = parseInt(timeparts[2]);
-                    } else {
-                        this.hour = 0;
-                        this.minute = 0;
-                        this.second = 0;
-                    }
-                    this.dateValue = new Date(this.year, this.month, this.day, this.hour, this.minute, this.second);
-                } else {
-                    if ((typeof(this.value) == 'object') && (this.value instanceof Date)) {
-                        this.year = this.value.getFullYear();
-                        this.month = this.value.getMonth();
-                        this.day = this.value.getDate();
-                        this.hour = this.value.getHours();
-                        this.minute = this.value.getMinutes();
-                        this.second = this.value.getSeconds();
-                        this.dateValue = this.value;
-                        //this.$emit('input', this.year+'-'+(this.month+1)+'-'+this.day)
-                        this.valueIsObject = true;
-                    } else {
-                        this.gotoToday();
-                    }
-                }
+                this.parseValue(this.value);
             } else {
                 this.gotoToday();
             }
@@ -171,7 +140,41 @@
             },
         },
         methods: {
+            parseValue: function(value) {
+                if (this.dateRegex.test(value)) {
+                    var datetimeparts = value.split(' ');
+                    var dateparts = datetimeparts[0].split('-');
+                    this.year = parseInt(dateparts[0]);
+                    this.month = parseInt(dateparts[1]) - 1;
+                    this.day = parseInt(dateparts[2]);
+                    if (datetimeparts.length == 2) {
+                        var timeparts = datetimeparts[1].split(':');
+                        this.hour = parseInt(timeparts[0]);
+                        this.minute = parseInt(timeparts[1]);
+                        this.second = parseInt(timeparts[2]);
+                    } else {
+                        this.hour = 0;
+                        this.minute = 0;
+                        this.second = 0;
+                    }
+                    this.dateValue = new Date(this.year, this.month, this.day, this.hour, this.minute, this.second);
+                } else {
+                    if ((typeof(value) == 'object') && (value instanceof Date)) {
+                        this.year = value.getFullYear();
+                        this.month = value.getMonth();
+                        this.day = value.getDate();
+                        this.hour = value.getHours();
+                        this.minute = value.getMinutes();
+                        this.second = value.getSeconds();
+                        this.dateValue = value;
+                        //this.$emit('input', this.year+'-'+(this.month+1)+'-'+this.day)
+                        this.valueIsObject = true;
+                    } else {
+                        this.gotoToday();
+                    }
+                }
 
+            },
             gotoToday: function() {
                 this.dateValue = new Date();
                 this.year = this.dateValue.getFullYear();
@@ -268,6 +271,9 @@
             }
         },
         watch: {
+            value: function(value) {
+                this.parseValue(value);
+            },
             year: function() {
                 this.calculateDateValue();
             },
