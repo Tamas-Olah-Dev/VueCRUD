@@ -67,6 +67,7 @@
                                    v-model="subjectData[fieldname].value"
                                    v-bind:placeholder="subjectData[fieldname].placeholder"
                                    v-bind:class="data.class"
+                                   autocomplete="off"
                                    type="password"
                             >
                             <number-field v-if="data.kind == 'numberfield'"
@@ -235,11 +236,11 @@
             redirectToResponseOnSuccess: {type: String},
             redirectToOnCancel: {type: String},
             buttons: {type: Object, default: () => {
-                return {
-                    'save': {'class': 'btn-outline-primary', 'html': 'Save'},
-                    'cancel': {'class': 'btn-outline-secondary', 'html': 'Cancel'},
-                }
-            }},
+                    return {
+                        'save': {'class': 'btn-outline-primary', 'html': 'Save'},
+                        'cancel': {'class': 'btn-outline-secondary', 'html': 'Cancel'},
+                    }
+                }},
             formDisabled: {type: Boolean, default: false},
             extraUrlParameters: {type: Object, default: () => {return {}}}
         },

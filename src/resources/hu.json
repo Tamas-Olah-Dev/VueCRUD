@@ -64,5 +64,7 @@
   "Operations on the selected items": "Műveletek a kijelölt elemekkel",
   "Export items": "Exportálás",
   "Export as CSV": "Exportálás CSV formátumban",
-  "Export as HTML": "Exportálás HTML formátumban"
+  "Export as HTML": "Exportálás HTML formátumban",
+  "Search": "Keresés",
+  "Export all, not just search results": "Minden exportálása (nem csak a keresési eredményeké)"
 }

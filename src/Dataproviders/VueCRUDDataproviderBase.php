@@ -18,7 +18,7 @@ class VueCRUDDataproviderBase
     public function __construct(Collection $filters = null)
     {
         if ($filters == null) {
-            $filters = request()->all();
+            $filters = collect(request()->all());
         }
         $this->filters = $filters;
     }
@@ -109,7 +109,7 @@ class VueCRUDDataproviderBase
     protected function addQueryFilters($query, $subjectClass)
     {
         foreach ($subjectClass::getVueCRUDIndexFilters() as $property => $vueCRUDIndexFilter) {
-            if (request()->has($property)) {
+            if ($this->filters->has($property)) {
                 $query = $vueCRUDIndexFilter->addFilterToQuery($query, $property);
             } else {
                 $query = $vueCRUDIndexFilter->addFilterToQuery($query);

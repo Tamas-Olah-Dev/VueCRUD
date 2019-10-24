@@ -263,6 +263,12 @@
                                                          :disabled="elements.length == 0">
                                             {{ mainButtons['exportOperations']['html'] }}
                                         </dropdown-button>
+                                        <div style="margin-left: 10px">
+                                            <label>
+                                                <input type="checkbox" v-model="exportAll">
+                                                <span>{{ translate('Export all, not just search results') }}</span>
+                                            </label>
+                                        </div>
                                     </div>
                                 </template>
                             </template>
@@ -434,13 +440,13 @@
             nameProperty: {type: String, default: 'name'},
             idProperty: {type: String, default: 'id'},
             iconClasses: {type: Object, default: function() {
-                return {
-                    "filter": "ti-filter",
-                    "list": "ti-list",
-                    "leftArrow": "ti-angle-double-left",
-                    "rightArrow": "ti-angle-double-right"
-                }
-            }},
+                    return {
+                        "filter": "ti-filter",
+                        "list": "ti-list",
+                        "leftArrow": "ti-angle-double-left",
+                        "rightArrow": "ti-angle-double-right"
+                    }
+                }},
             subjectName: {type: String, default: () => {return this.translate('Item')}},
             useSweetAlert: {type: Boolean, default: false},
             defaultFilters: {default: () => {return {}}},
@@ -449,6 +455,7 @@
         },
         data: function() {
             return {
+                exportAll: false,
                 itemsPerPage: 20,
                 mode: 'loading',
                 elements: {},
@@ -1009,12 +1016,12 @@
                 let selectedElements = this.selectedElements.length > 0
                     ? this.selectedElements
                     : this.elements.map((item) => {return item.id});
-                window.axios.post(this.ajaxOperationsUrl, {
-                    exportIds: selectedElements,
-                    action: action,
-                    sorting_field: this.sortingColumns[this.currentSortingColumn],
-                    sorting_direction: this.currentSortingDirection
-                }, {responseType: 'blob'}).then((response) => {
+                let filterData = this.exportAll ? {} : this.getFilterData();
+                filterData['exportIds'] = selectedElements;
+                filterData['action'] = action;
+                filterData['sorting_field'] = this.sortingColumns[this.currentSortingColumn];
+                filterData['sorting_direction'] = this.currentSortingDirection;
+                window.axios.post(this.ajaxOperationsUrl, filterData, {responseType: 'blob'}).then((response) => {
                     var blob = new Blob([response.data], { type: response.headers['Content-Type'] });
                     var filename = response.headers['filename'];
                     var link = document.createElement('a');

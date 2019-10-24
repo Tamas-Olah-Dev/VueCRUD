@@ -540,7 +540,7 @@ class VueCRUDControllerBase
     {
         $dataproviderClass = 'App\\Dataproviders\\'.class_basename(static::SUBJECT_CLASS).'VueCRUDDataprovider';
 
-        return (new $dataproviderClass)->getQuery()->get();
+        return (new $dataproviderClass(collect(request()->all())))->getQuery()->get();
     }
 
     protected function generateTableFromModelList($list, $columns)

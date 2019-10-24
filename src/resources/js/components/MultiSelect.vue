@@ -8,6 +8,7 @@
                 >
                     {{ item.label }}
                     <span class="multi-select-remove-button"
+                          v-if="allowRemove"
                           v-on:click="removeItem(index)"
                     >X</span>
                 </span>
@@ -17,6 +18,7 @@
                        v-bind:class="inputClass"
                        ref="input"
                        v-model="filterText"
+                       :placeholder="placeholderLabel"
                        v-bind:style="{'color': invalidItem ? 'red' : 'black'}"
                        v-on:keyup.arrow-down="moveDropdownSelection(1)"
                        v-on:keyup.arrow-up="moveDropdownSelection(-1)"
@@ -43,7 +45,8 @@
                  ref="index"
                  v-html="subject.label"
                  v-on:mouseover="dropdownSelectedIndex = index"
-                 v-bind:class="{'multi-select-selected': dropdownSelectedIndex == index}"
+                 v-bind:class="itemClass(subject, index)"
+                 :title="subject.disabledTitle"
                  v-on:click="addItem(subject)"></div>
         </div>
     </div>
@@ -58,7 +61,15 @@
             idProperty: {type: String, default: 'id'},
             labelProperty: {type: String, default: 'name'},
             multiple: {type: Boolean, default: true},
-            inputClass: {type: String, default: 'form-control'}
+            inputClass: {type: String, default: 'form-control'},
+            labels: {type: Object, default: () => {
+                    return {
+                        'No options': 'No options',
+                        'Select...': 'Select...'
+                    }
+                }},
+            allowRemove: {type: Boolean, default: true},
+            respectDisabledAttribute: {type: Boolean, default: false}
         },
         data: function() {
             return {
@@ -70,6 +81,18 @@
             }
         },
         computed: {
+            placeholderLabel: function() {
+                if (this.valueset.length == 0) {
+                    return this.labels['No options'];
+                }
+                if ((this.value == null)
+                    || (this.value == -1)
+                    || ((Array.isArray(this.value)) && (this.value.length == 0)))
+                {
+                    return this.labels['Select...'];
+                }
+                return '';
+            },
             items: function() {
                 let result = [];
                 for (let index in this.valueset) {
@@ -120,6 +143,18 @@
             }
         },
         methods: {
+            itemClass: function(item, index) {
+                let result = [];
+                if (this.dropdownSelectedIndex == index) {
+                    result.push('multi-select-selected');
+                }
+                if ((this.respectDisabledAttribute)
+                    && (item.hasOwnProperty('disabled'))
+                    && (item.disabled)) {
+                    result = ['multi-select-item-disabled']
+                }
+                return result;
+            },
             clear: function() {
                 this.removeItem(0);
                 this.filterText = '';
@@ -152,8 +187,10 @@
             transformItem: function(originalItem) {
                 return {
                     id: originalItem[this.idProperty],
-                    label: originalItem[this.labelProperty],
-                    uppercaseLabel: originalItem[this.labelProperty].toUpperCase()
+                    label: originalItem[this.labelProperty].toString(),
+                    uppercaseLabel: originalItem[this.labelProperty].toString().toUpperCase(),
+                    disabled: typeof(originalItem.disabled) != 'undefined' ? originalItem.disabled : false,
+                    disabledTitle: typeof(originalItem.disabled_title) != 'undefined' ? originalItem.disabled_title : '',
                 };
             },
             handleInputFocus: function() {
@@ -166,18 +203,26 @@
                     if (this.dropdownSelectedIndex > 0) {
                         this.dropdownSelectedIndex--;
                         let element = this.$refs['index'][this.dropdownSelectedIndex];
-                        if (element.offsetTop < element.parentElement.scrollTop) {
-                            element.parentElement.scrollTop = element.offsetTop;
+                        if (element != null) {
+                            if (element.offsetTop < element.parentElement.scrollTop) {
+                                element.parentElement.scrollTop = element.offsetTop;
+                            }
                         }
                     }
                 } else {
                     if (this.dropdownSelectedIndex < this.filteredAvailableItems.length - 1) {
                         this.dropdownSelectedIndex++;
                         let element = this.$refs['index'][this.dropdownSelectedIndex];
-                        if (element.offsetTop + element.clientHeight > (element.parentElement.scrollTop + element.parentElement.clientHeight)) {
-                            element.parentElement.scrollTop = element.parentElement.scrollTop + element.clientHeight + 3;
+                        if (element != null) {
+                            if (element.offsetTop + element.clientHeight > (element.parentElement.scrollTop + element.parentElement.clientHeight)) {
+                                element.parentElement.scrollTop = element.parentElement.scrollTop + element.clientHeight + 3;
+                            }
                         }
                     }
+                }
+                if ((this.respectDisabledAttribute)
+                    && (this.filteredAvailableItems[this.dropdownSelectedIndex].disabled)) {
+                    this.moveDropdownSelection(direction);
                 }
             },
             addSelectedFromDropdownOrInput: function() {
@@ -206,6 +251,9 @@
                 this.$emit('input', this.emittedValue);
             },
             addItem: function(item) {
+                if ((this.respectDisabledAttribute) && (item.disabled)) {
+                    return;
+                }
                 this.pushToSelectedItems(item);
                 if (this.multiple) {
                     this.filterText = '';
@@ -233,9 +281,16 @@
             parseValue: function() {
                 this.selectedItems = [];
                 this.selectedItems = this.valueset.filter((item) => {
-                    return this.multiple
-                        ? this.value.includes(item[this.idProperty])
-                        : item[this.idProperty] == this.value;
+                    if ((typeof(this.value) != 'undefined') && (this.value != null)) {
+                        if ((this.respectDisabledAttribute)
+                            && (typeof(item.disabled) != 'undefined')
+                            && (item.disabled)) {
+                            return false;
+                        }
+                        return this.multiple
+                            ? this.value.includes(item[this.idProperty])
+                            : item[this.idProperty] == this.value;
+                    }
                 }).map(item => this.transformItem(item));
                 if (!this.multiple) {
                     this.filterText = this.selectedItems.length > 0 ? this.selectedItems[0].label : '';
@@ -309,7 +364,8 @@
         margin: 0px;
         /*margin-top: 20px;*/
         border-radius: 5px;
-        width: 98%;
+        width: 100%;
+        padding-right:40px;
     }
     .multi-select-item-span {
         padding: 4px;
@@ -342,7 +398,7 @@
         border-top: none;
         box-shadow: 5px 5px darkgrey;
         background-color: white;
-        position:fixed;
+        position:absolute;
     }
     .multi-select-dropdown > div {
         cursor:pointer;
@@ -355,21 +411,25 @@
         cursor:pointer;
         position:absolute;
         z-index: 100;
-        right: 4%;
-        bottom: .25em;
-        font-size: 1.3em;
+        right: 17px;
+        bottom: -3px;
+        font-size: 2em;
         transition: transform 200ms ease-in-out;
     }
     .multi-select-clear-button {
         cursor:pointer;
         position:absolute;
         z-index: 100;
-        right: 8%;
-        bottom: .3em;
-        font-size: 1.2em;
+        right: 35px;
+        bottom: -6px;
+        font-size: 2em;
     }
     .multi-select-dropdown-caret-open {
         transform: rotate(-90deg);
+    }
+    .multi-select-item-disabled {
+        cursor: not-allowed !important;
+        color: darkgrey;
     }
 
 </style>
