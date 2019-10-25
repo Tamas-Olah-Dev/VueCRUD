@@ -217,39 +217,40 @@
                                             <span v-else v-html="element[columnField]"></span>
                                         </td>
                                         <td v-if="allowOperations" style="white-space: nowrap; text-align: right">
-                                            <button type="button" v-if="showButton('details')"
+                                            <button type="button" v-if="showButton('details', element)"
                                                     v-bind:class="buttons['details']['class']"
                                                     v-on:click="showDetails(element[idProperty], elementIndex)"
                                                     v-html="buttons['details']['html']"
                                                     :title="buttons['details']['title'] || ''"
                                             ></button>
                                             <button type="button"
-                                                    v-if="showButton('edit') && (typeof(element['vuecrud_edit_allowed']) == 'undefined' || element['vuecrud_edit_allowed'] == true)"
+                                                    v-if="showButton('edit', element) && (typeof(element['vuecrud_edit_allowed']) == 'undefined' || element['vuecrud_edit_allowed'] == true)"
                                                     v-bind:class="buttons['edit']['class']"
                                                     v-on:click="editElement(element[idProperty], elementIndex)"
                                                     v-html="buttons['edit']['html']"
                                                     :title="buttons['edit']['title'] || ''"
                                             ></button>
                                             <button type="button"
-                                                    v-if="showButton('delete') && (typeof(element['vuecrud_delete_allowed']) == 'undefined' || element['vuecrud_delete_allowed'] == true)"
+                                                    v-if="showButton('delete', element) && (typeof(element['vuecrud_delete_allowed']) == 'undefined' || element['vuecrud_delete_allowed'] == true)"
                                                     v-bind:class="buttons['delete']['class']"
                                                     v-on:click="confirmElementDeletion(element[idProperty], element[nameProperty], elementIndex)"
                                                     v-html="buttons['delete']['html']"
                                                     :title="buttons['delete']['title'] || ''"
                                             ></button>
-                                            <button type="button" v-if="showButton('moveUp') && elementIndex > 0"
+                                            <button type="button" v-if="showButton('moveUp', element) && elementIndex > 0"
                                                     v-bind:class="buttons['moveUp']['class']"
                                                     v-on:click="moveElementUp(element[idProperty])"
                                                     v-html="buttons['moveUp']['html']"
                                                     :title="buttons['moveUp']['title'] || ''"
                                             ></button>
-                                            <button type="button" v-if="showButton('moveDown') && elementIndex < elements.length - 1"
+                                            <button type="button" v-if="showButton('moveDown', element) && elementIndex < elements.length - 1"
                                                     v-bind:class="buttons['moveDown']['class']"
                                                     v-on:click="moveElementDown(element[idProperty])"
                                                     v-html="buttons['moveDown']['html']"
                                                     :title="buttons['moveDown']['title'] || ''"
                                             ></button>
                                             <ajax-button v-for="ajaxButton, ajaxButtonKey in ajaxButtons"
+                                                         v-if="showAjaxButton(ajaxButton, element)"
                                                          v-bind:class="ajaxButton['class']"
                                                          v-bind:subject="element"
                                                          :key="element[idProperty]+'-'+ajaxButton['props']['action']"
@@ -259,9 +260,11 @@
                                                          v-on:submit-success="confirmEditSuccess($event)"
                                                          v-html="ajaxButton['html']"
                                             ></ajax-button>
-                                            <button type="button" v-for="customComponentButton, customComponentButtonKey in customComponentButtons"
+                                            <button type="button"
+                                                    v-for="customComponentButton, customComponentButtonKey in customComponentButtons"
+                                                    v-if="showCustomComponentButton(customComponentButton, element)"
                                                     v-bind:class="customComponentButton['class']"
-                                                    v-on:click="activateCustomComponent(customComponentButtonKey)"
+                                                    v-on:click="activateCustomComponent(customComponentButtonKey, elementIndex)"
                                                     v-html="customComponentButton['html']"
                                                     v-on:component-canceled="returnToList"
                                                     v-on:submit-success="confirmEditSuccess($event)"
@@ -416,6 +419,7 @@
                             v-bind:is="activeCustomComponent.componentName"
                             v-bind="activeCustomComponent.props"
                             v-bind:selected-elements="selectedElements"
+                            v-bind:subject="currentElement"
                             v-on:submit-success="closeCustomComponent"
                             v-on:component-canceled="returnToList"
                     ></component>
@@ -652,6 +656,12 @@
                     }
                 }
                 return resultArray;
+            },
+            currentElement: function() {
+                if (typeof(this.elements[this.currentElementIndex]) != 'undefined') {
+                    return this.elements[this.currentElementIndex];
+                }
+                return null;
             }
         },
         methods: {
@@ -782,10 +792,34 @@
                     this.fetchElements(true);
                 }
             },
-            showButton: function(button) {
-                return this.buttons.hasOwnProperty(button);
+            showAjaxButton: function(ajaxButton, element) {
+                if ((ajaxButton.hasOwnProperty('vuecrud_show_button'))
+                    && (typeof(element[ajaxButton['vuecrud_show_button']]) != 'undefined')) {
+                    return element[ajaxButton['vuecrud_show_button']] === true;
+                }
+                return true;
             },
-            activateCustomComponent: function(key) {
+            showCustomComponentButton: function(button, element) {
+                if ((button.hasOwnProperty('vuecrud_show_button'))
+                    && (typeof(element[button['vuecrud_show_button']]) != 'undefined')) {
+                    return element[button['vuecrud_show_button']] === true;
+                }
+                return true;
+            },
+            showButton: function(button, element) {
+                if (!this.buttons.hasOwnProperty(button)) {
+                    return false;
+                }
+                if ((this.buttons[button].hasOwnProperty('vuecrud_show_button'))
+                    && (typeof(element[this.buttons[button]['vuecrud_show_button']]) != 'undefined')) {
+                    return element[this.buttons[button]['vuecrud_show_button']] === true;
+                }
+                return true;
+            },
+            activateCustomComponent: function(key, index) {
+                if (typeof(index) != 'undefined') {
+                    this.currentElementIndex = index;
+                }
                 this.activeCustomComponent = this.customComponentButtons[key];
                 this.mode = 'custom-component';
             },
