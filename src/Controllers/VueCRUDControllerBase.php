@@ -486,12 +486,17 @@ class VueCRUDControllerBase
             $styles = $class::getVueCRUDHTMLExportTableStyle();
             $result = ['<table style="'.$styles['table'].'">'];
             foreach ($tableData as $index => $row) {
+                $transformedRow = collect($row)->map(function($item) {
+                    return $this->createHTMLFromDataRowElement($item);
+                })->all();
                 if ($index == 0) {
-                    $result[] = '<tr style="'.$styles['tr'].'"><th style="'.$styles['th'].'">'.implode('</th style="'.$styles['th'].'"><th>',
-                            $row).'</th>';
+                    $result[] = '<tr style="'.$styles['tr'].'"><th style="'.$styles['th'].'">'
+                        .implode('</th style="'.$styles['th'].'"><th>', $transformedRow)
+                        .'</th>';
                 } else {
-                    $result[] = '<tr style="'.$styles['tr'].'"><td style="'.$styles['td'].'">'.implode('</td><td style="'.$styles['td'].'">',
-                            $row).'</td>';
+                    $result[] = '<tr style="'.$styles['tr'].'"><td style="'.$styles['td'].'">'
+                        .implode('</td><td style="'.$styles['td'].'">', $transformedRow)
+                        .'</td>';
                 }
             }
             $result[] = '</table>';
@@ -501,6 +506,22 @@ class VueCRUDControllerBase
             'Content-Type' => 'text/html',
             'filename'     => utf8_decode($this->getSubjectNamePlural()).'-'.now()->format('Y-m-d_H-i-s').'.html',
         ]);
+    }
+
+    protected function createHTMLFromDataRowElement($element)
+    {
+        if ($this->isHTTPUrl($element)) {
+            return '<a target="_blank" href="'.$element.'">'.$element.'</a>';
+        }
+
+        return $element;
+    }
+
+    private function isHTTPUrl($string)
+    {
+        return (mb_substr($string, 0, 7) == 'http://')
+            || (mb_substr($string, 0, 8) == 'https://');
+
     }
 
     //this function requires the PhpSpreadsheet library
@@ -518,7 +539,11 @@ class VueCRUDControllerBase
             $sheet = $result->getActiveSheet();
             foreach ($tableData as $row => $rowData) {
                 foreach ($rowData as $column => $columnData) {
-                    $sheet->setCellValueByColumnAndRow($column + 1, $row + 1, $columnData);
+                    $sheet->getColumnDimensionByColumn($column)->setAutoSize(true);
+                    $sheet->setCellValueByColumnAndRow($column + 1, $row + 1, str_ireplace('<br>', ", ", $columnData));
+                    if ($this->isHTTPUrl($columnData)) {
+                        $sheet->getCellByColumnAndRow($column + 1, $row + 1)->getHyperlink()->setUrl($columnData);
+                    }
                     if ($row == 0) {
                         $sheet->getCellByColumnAndRow($column + 1, $row + 1)->getStyle()->getFont()->setBold(true);
                     }

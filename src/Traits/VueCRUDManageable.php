@@ -152,7 +152,7 @@ trait VueCRUDManageable
             'table' => 'border: 1px solid darkgrey; min-width: 600px;',
             'th' => '',
             'tr' => '',
-            'td' => 'border: 1px solid lightgrey',
+            'td' => 'border: 1px solid lightgrey; padding: 3px',
         ];
     }
 
