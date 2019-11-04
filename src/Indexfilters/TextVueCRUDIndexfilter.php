@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class TextVueCRUDIndexfilter extends VueCRUDIndexfilterBase implements IVueCRUDIndexfilter
 {
+    protected $useHaving = false;
+
     public function __construct($property, $label, $default, $value = null)
     {
         parent::__construct($property, $label, $default, $value);
@@ -27,7 +29,13 @@ class TextVueCRUDIndexfilter extends VueCRUDIndexfilterBase implements IVueCRUDI
         if ((string) $this->value == '') {
             return $query;
         }
+        return $this->useHaving
+            ? $this->addAsHaving($query)
+            : $this->addAsWhere($query);
+    }
 
+    protected function addAsWhere($query)
+    {
         if (is_array($this->property)) {
             return $query->where(function($query) {
                 foreach ($this->property as $field) {
@@ -43,5 +51,32 @@ class TextVueCRUDIndexfilter extends VueCRUDIndexfilterBase implements IVueCRUDI
                 '%'.$this->value.'%'
             );
         }
+    }
+
+    protected function addAsHaving($query)
+    {
+        if (is_array($this->property)) {
+            $raws = [];
+            foreach ($this->property as $field) {
+                $raws[] = $field.' like "%'.$this->value.'%" ';
+            }
+            return $query->havingRaw(' ('.implode(' OR ', $raws).') ');
+        } else {
+            return $query->having(
+                $this->property,
+                'like',
+                '%'.$this->value.'%'
+            );
+        }
+    }
+
+    /**
+     * @param bool $useHaving
+     * @return TextVueCRUDIndexfilter
+     */
+    public function setUseHaving(bool $useHaving): TextVueCRUDIndexfilter
+    {
+        $this->useHaving = $useHaving;
+        return $this;
     }
 }

@@ -98,16 +98,20 @@
                                 <span v-bind:class="iconClasses.list"></span>
                                 <span v-html="totalLabel"></span>
                             </div>
+                            <div>
+                                <input type="text"
+                                       class="form-control"
+                                       :placeholder="translate('Highlight')"
+                                       v-on:keyup.esc="inlineSearchText = ''"
+                                       v-model="inlineSearchText"
+                                >
+                            </div>
                             <div class="model-manager-paging-controls"
                                  v-if="typeof(counts['total']) != 'undefined'"
                             >
                                 <span v-if="pageOptions.length > 1 || showAllInOnePage"
                                       style="flex-basis: 60%;"
                                 >
-                                    <label v-if="false">
-                                        <input type="checkbox" v-model="showAllInOnePage">
-                                        {{ translate('Single page') }}
-                                    </label>
                                 </span>
                                 <template v-if="JSON.stringify(counts) != '{}'">
                                     <span>{{ counts['start'] }}&nbsp;-&nbsp;{{ counts['end'] }}&nbsp;/&nbsp;{{ counts['filtered'] }}&nbsp;&nbsp;</span>
@@ -118,7 +122,7 @@
                                     ></button>
                                     <select class="form-control model-manager-page-select"
                                             v-model="currentPage"
-                                            style="max-width: 5em; height: 2.3em;"
+                                            style="max-width: 5.5em; height: 2.3em; min-width: 5.5em"
                                     >
                                         <option v-for="p in pageOptions"
                                                 v-bind:value="p"
@@ -132,7 +136,7 @@
                                     ></button>
                                     <span style="margin-left: 1em; white-space: nowrap; display: flex; align-items: center;">
                                         <select class="form-control"
-                                                style="max-width: 5em; height: 2.3em; margin-right: 3px"
+                                                style="max-width: 5.5em; height: 2.3em; margin-right: 3px; min-width: 5.5em"
                                                 v-model="itemsPerPage">
                                             <option v-for="option in itemsPerPageOptions"
                                                     :value="option"
@@ -214,7 +218,10 @@
                                             <component v-if="typeof(element[columnField]) == 'string' && element[columnField].substr(0, 11) == 'component::'"
                                                        :is="JSON.parse(element[columnField].substr(11)).component"
                                                        v-bind="JSON.parse(element[columnField].substr(11)).componentProps"></component>
-                                            <span v-else v-html="element[columnField]"></span>
+                                            <span v-else
+                                                  v-html="element[columnField]"
+                                                  v-bind:class="{'highlighted-td': fieldContainsInlineSearchText(element[columnField])}"
+                                            ></span>
                                         </td>
                                         <td v-if="allowOperations" style="white-space: nowrap; text-align: right">
                                             <button type="button" v-if="showButton('details', element)"
@@ -516,6 +523,7 @@
                 fetchMode: 'list',
                 massOperationLoading: false,
                 currentElementIndex: -1,
+                inlineSearchText: '',
             }
         },
         mounted() {
@@ -665,6 +673,12 @@
             }
         },
         methods: {
+            fieldContainsInlineSearchText: function(content) {
+                if (this.inlineSearchText == '') {
+                    return false;
+                }
+                return content.toString().toLocaleLowerCase().includes(this.inlineSearchText.toLocaleLowerCase());
+            },
             returnToList: function() {
                 this.mode = 'list';
                 this.scrollCurrentElementIntoView();
@@ -828,7 +842,7 @@
                     return 1;
                 }
                 if (type == 'text') {
-                    return 500;
+                    return 800;
                 }
 
                 return 1;
@@ -857,25 +871,29 @@
 
                 return result;
             },
+            searchElements: function() {
+                this.disablePageWatch = true;
+                this.currentPage = 1;
+                this.disablePageWatch = false;
+                this.fetchMode = 'search';
+                this.fetchElements(true);
+            },
             loadFilters: function(filters) {
                 this.filters = {...filters};
                 if (this.autoFilter) {
-                    for (var filterName in this.filters) {
+                    for (let filterName in this.filters) {
                         if (this.filters.hasOwnProperty(filterName)) {
                             this.watches[filterName] = this.$watch(
                                 'filters.'+filterName+'.value',
                                 (newValue, oldValue) => {
                                     if (newValue != oldValue) {
                                         window.clearTimeout(this.fetchTimeout);
-                                        this.fetchTimeout = window.setTimeout(() => {
-                                            this.disablePageWatch = true;
-                                            this.currentPage = 1;
-                                            this.disablePageWatch = false;
-                                            this.fetchMode = 'search';
-                                            this.fetchElements(true);
-                                        }, this.getFilterTimeoutByType(this.filters[filterName].type));
+                                        this.fetchTimeout = window.setTimeout(
+                                            this.searchElements,
+                                            this.getFilterTimeoutByType(this.filters[filterName].type)
+                                        );
                                     }
-                                }, {deep: true});
+                                }, {deep: true, immediate: true});
                         }
                     }
                 } else {
@@ -1168,5 +1186,8 @@
     }
     .model-manager-page-select {
         width: 5em;
+    }
+    .highlighted-td {
+        background-color: yellow;
     }
 </style>
