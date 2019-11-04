@@ -543,6 +543,7 @@ class VueCRUDControllerBase
                     $sheet->setCellValueByColumnAndRow($column + 1, $row + 1, str_ireplace('<br>', ", ", $columnData));
                     if ($this->isHTTPUrl($columnData)) {
                         $sheet->getCellByColumnAndRow($column + 1, $row + 1)->getHyperlink()->setUrl($columnData);
+
                     }
                     if ($row == 0) {
                         $sheet->getCellByColumnAndRow($column + 1, $row + 1)->getStyle()->getFont()->setBold(true);
