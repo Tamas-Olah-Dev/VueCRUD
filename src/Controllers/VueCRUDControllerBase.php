@@ -4,6 +4,7 @@ namespace Datalytix\VueCRUD\Controllers;
 
 use Illuminate\Routing\Route;
 use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\Style\Color;
 
 class VueCRUDControllerBase
 {
@@ -540,10 +541,11 @@ class VueCRUDControllerBase
             foreach ($tableData as $row => $rowData) {
                 foreach ($rowData as $column => $columnData) {
                     $sheet->getColumnDimensionByColumn($column)->setAutoSize(true);
+                    $sheet->getColumnDimensionByColumn($column + 1)->setAutoSize(true);
                     $sheet->setCellValueByColumnAndRow($column + 1, $row + 1, str_ireplace('<br>', ", ", $columnData));
                     if ($this->isHTTPUrl($columnData)) {
                         $sheet->getCellByColumnAndRow($column + 1, $row + 1)->getHyperlink()->setUrl($columnData);
-
+                        $sheet->getStyleByColumnAndRow($column + 1, $row + 1)->getFont()->setColor(new Color(Color::COLOR_BLUE));
                     }
                     if ($row == 0) {
                         $sheet->getCellByColumnAndRow($column + 1, $row + 1)->getStyle()->getFont()->setBold(true);
