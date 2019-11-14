@@ -457,7 +457,8 @@ class VueCRUDControllerBase
         } else {
             $tableData = $this->generateTableFromModelList(
                 $this->getExportData(),
-                $class::getVueCRUDExportColumns()
+                $class::getVueCRUDExportColumns(),
+                true
             );
             $result = [];
             $csv = fopen('php://temp/maxmemory:'.(5 * 1024 * 1024), 'r+');
@@ -514,7 +515,9 @@ class VueCRUDControllerBase
         if ($this->isHTTPUrl($element)) {
             return '<a target="_blank" href="'.$element.'">'.$element.'</a>';
         }
-
+        if ($this->isHyperlink($element)) {
+            return $element;
+        }
         return $element;
     }
 
@@ -522,7 +525,11 @@ class VueCRUDControllerBase
     {
         return (mb_substr($string, 0, 7) == 'http://')
             || (mb_substr($string, 0, 8) == 'https://');
+    }
 
+    private function isHyperlink($string)
+    {
+        return strpos($string, 'href="') !== false;
     }
 
     //this function requires the PhpSpreadsheet library
@@ -546,6 +553,16 @@ class VueCRUDControllerBase
                     if ($this->isHTTPUrl($columnData)) {
                         $sheet->getCellByColumnAndRow($column + 1, $row + 1)->getHyperlink()->setUrl($columnData);
                         $sheet->getStyleByColumnAndRow($column + 1, $row + 1)->getFont()->setColor(new Color(Color::COLOR_BLUE));
+                    }
+                    if ($this->isHyperlink($columnData)) {
+                        $content = strip_tags($columnData);
+                        $sheet->setCellValueByColumnAndRow($column + 1, $row + 1, str_ireplace('<br>', ", ", $content));
+                        $matches = [];
+                        preg_match('/href\=\"(.*?)\"/miu', $columnData, $matches);
+                        if (isset($matches[1])) {
+                            $sheet->getCellByColumnAndRow($column + 1, $row + 1)->getHyperlink()->setUrl($matches[1]);
+                            $sheet->getStyleByColumnAndRow($column + 1, $row + 1)->getFont()->setColor(new Color(Color::COLOR_BLUE));
+                        }
                     }
                     if ($row == 0) {
                         $sheet->getCellByColumnAndRow($column + 1, $row + 1)->getStyle()->getFont()->setBold(true);
@@ -571,14 +588,18 @@ class VueCRUDControllerBase
         return (new $dataproviderClass(collect(request()->all())))->getQuery()->get();
     }
 
-    protected function generateTableFromModelList($list, $columns)
+    protected function generateTableFromModelList($list, $columns, $stripHTML = false)
     {
         $result = [];
         $result[] = array_values($columns);
         foreach ($list as $element) {
             $row = [];
             foreach ($columns as $field => $label) {
-                $row[] = $element->$field;
+                if ($stripHTML) {
+                    $row[] = strip_tags($element->$field);
+                } else {
+                    $row[] = $element->$field;
+                }
             }
             $result[] = $row;
         }
