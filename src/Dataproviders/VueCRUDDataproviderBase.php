@@ -38,7 +38,7 @@ class VueCRUDDataproviderBase
         return $query->skip(($page - 1) * $itemsPerPage )->take($itemsPerPage);
     }
 
-    protected function addSortingToQuery($query)
+    public function addSortingToQuery($query)
     {
         return $query->orderBy($this->getSortingField(), $this->getSortingDirection());
     }
