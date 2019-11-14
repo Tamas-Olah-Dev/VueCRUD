@@ -555,8 +555,8 @@ class VueCRUDControllerBase
                         $sheet->getStyleByColumnAndRow($column + 1, $row + 1)->getFont()->setColor(new Color(Color::COLOR_BLUE));
                     }
                     if ($this->isHyperlink($columnData)) {
-                        $content = strip_tags($columnData);
-                        $sheet->setCellValueByColumnAndRow($column + 1, $row + 1, str_ireplace('<br>', ", ", $content));
+                        $content = strip_tags(str_ireplace('<br>', ', ', $columnData));
+                        $sheet->setCellValueByColumnAndRow($column + 1, $row + 1, $content);
                         $matches = [];
                         preg_match('/href\=\"(.*?)\"/miu', $columnData, $matches);
                         if (isset($matches[1])) {

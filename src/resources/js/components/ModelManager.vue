@@ -412,12 +412,12 @@
                         <button type="button"
                                 v-bind:class="mainButtons['confirmDeletion']['class']"
                                 v-on:click="deleteElement"
-                                v-html="translate('Yes')"
+                                v-html="translate(mainButtons['confirmDeletion']['translationLabel'])"
                         ></button>
                         <button type="button"
                                 v-bind:class="mainButtons['cancelDeletion']['class']"
                                 v-on:click="returnToList"
-                                v-html="translate('Cancel')"
+                                v-html="translate(mainButtons['cancel']['html'])"
                         ></button>
                     </div>
                 </div>
@@ -677,7 +677,10 @@
                 if (this.inlineSearchText == '') {
                     return false;
                 }
-                return content.toString().toLocaleLowerCase().includes(this.inlineSearchText.toLocaleLowerCase());
+                let t = document.createElement('DIV');
+                t.innerHTML = content;
+                let strippedContent = t.textContent || t.innerText || content;
+                return strippedContent.toString().toLocaleLowerCase().includes(this.inlineSearchText.toLocaleLowerCase());
             },
             returnToList: function() {
                 this.mode = 'list';
