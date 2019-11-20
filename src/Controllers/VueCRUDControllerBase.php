@@ -596,7 +596,8 @@ class VueCRUDControllerBase
             $row = [];
             foreach ($columns as $field => $label) {
                 if ($stripHTML) {
-                    $row[] = strip_tags($element->$field);
+                    $content = strip_tags(str_ireplace('<br>', ', ', $element->$field));
+                    $row[] = $content;
                 } else {
                     $row[] = $element->$field;
                 }

@@ -1,5 +1,5 @@
 <template>
-    <div class="full-width-div container-fluid">
+    <div class="full-width-div container-fluid" style="margin-bottom: 60px">
         <div class="row full-width-div model-manager-container">
             <div class="col-12 full-width-div">
                 <div v-if="mode == 'loading'" v-html="spinnerSrc" style="width:100%; display:flex; justify-content: center"></div>
@@ -214,7 +214,10 @@
                                                 >
                                             </label>
                                         </td>
-                                        <td v-for="columnName, columnField in columns">
+                                        <td v-for="columnName, columnField in columns"
+                                            v-bind:class="'vuecrud-'+columnField+'-td'"
+                                            v-bind:style="elementCellStyle(element, columnField)"
+                                        >
                                             <component v-if="typeof(element[columnField]) == 'string' && element[columnField].substr(0, 11) == 'component::'"
                                                        :is="JSON.parse(element[columnField].substr(11)).component"
                                                        v-bind="JSON.parse(element[columnField].substr(11)).componentProps"></component>
@@ -703,6 +706,11 @@
                 }
 
                 return result;
+            },
+            elementCellStyle: function(element, columnField) {
+                return (typeof(element['vuecrud_'+columnField+'_cellstyle']) == 'undefined')
+                    ? ''
+                    : element['vuecrud_'+columnField+'_cellstyle'];
             },
             confirmEditSuccess: function(payload) {
                 if ((typeof(payload) == 'undefined') || (typeof(payload) == 'object')) {

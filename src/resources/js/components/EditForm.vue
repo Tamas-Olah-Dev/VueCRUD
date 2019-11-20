@@ -395,19 +395,6 @@
 
                 return [];
             },
-            translate: function(string) {
-                if ((typeof(window.laravelLocale) != 'undefined')
-                    && (typeof(window.laravelLocales[window.laravelLocale]) != 'undefined')) {
-                    if (typeof(window.laravelLocales[window.laravelLocale][string]) != 'undefined') {
-                        return window.laravelLocales[window.laravelLocale][string];
-                    }
-                }
-                if (typeof(this.$root.translate) != 'undefined') {
-                    return this.$root.translate(string);
-                }
-
-                return string;
-            },
             errorExists: function(fieldname) {
                 return this.errors.hasOwnProperty(fieldname) && Array.isArray(this.errors[fieldname]);
             },
