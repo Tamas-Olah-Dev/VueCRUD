@@ -516,6 +516,9 @@ class VueCRUDControllerBase
             return '<a target="_blank" href="'.$element.'">'.$element.'</a>';
         }
         if ($this->isHyperlink($element)) {
+            if (strpos($element, '_blank') === false) {
+                $element = str_ireplace('<a ', '<a target="_blank" ', $element);
+            }
             return $element;
         }
         return $element;
