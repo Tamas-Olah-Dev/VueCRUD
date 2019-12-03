@@ -68,7 +68,7 @@ trait hasPosition
 
             foreach ($itemsAbove as $item) {
                 $item->update([
-                    $positionField => intval($item->position) - 1,
+                    $positionField => intval($item->$positionField) - 1,
                 ]);
             }
         });
@@ -118,7 +118,7 @@ trait hasPosition
                 ->get();
             $step = $position < $this->$positionField ? 1 : -1;
             foreach ($affectedElements as $affectedElement) {
-                $affectedElement->update([$positionField => $affectedElement->position + $step]);
+                $affectedElement->update([$positionField => $affectedElement->$positionField + $step]);
             }
             $this->update([$positionField => $position]);
         });
@@ -145,7 +145,7 @@ trait hasPosition
         }
         $transactionResult = \DB::transaction(function() use ($element) {
             $positionField = static::getPositionField();
-            $position = $element->position;
+            $position = $element->$positionField;
             $element->update([$positionField => $this->$positionField]);
             $this->update([$positionField => $position]);
         });
