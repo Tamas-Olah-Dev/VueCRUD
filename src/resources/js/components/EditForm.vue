@@ -8,7 +8,6 @@
              v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-title-container', 'edit-form-form-title-container')"
         ><h4 v-html="formTitle"></h4></div>
         <div v-if="formDisabled" class="disabled-overlay"></div>
-        <h6 style="margin-bottom: 15px" v-html="translate('Fields marked with * are mandatory')"></h6>
         <form role="form" class="margin-b-20"  v-on:submit.prevent="submitForm"  v-if="loaded"
               v-bind:class="getClassOverrideOrDefaultClass('edit-form-form', 'edit-form-form')"
         >
@@ -19,7 +18,7 @@
                      class="form-step-header"
                      v-bind:class="formHeadClass(step)"
                      v-html="config.stepLabels[step]"></div>
-                <div class="w-full row" style="position:relative; display:flex; flex-wrap: wrap"
+                <div class="row" style="position:relative"
                      v-bind:class="getClassOverrideOrDefaultClass('edit-form-step-body', 'edit-form-step-body')"
                 >
                     <div v-if="currentStep != step" class="disabled-overlay"></div>
@@ -33,6 +32,16 @@
                                 <span class="edit-form-label-tooltip" v-if="typeof(data.helpTooltip) != 'undefined'" v-html="data.helpTooltip"></span>
                                 <span v-if="errorExists(fieldname)" class="text-danger validation-error-label-message" v-html="errors[fieldname][0]"></span>
                             </label>
+                            <div v-if="data.kind == 'color'"
+                                 style="display: flex; align-items:center; justify-content: center">
+                                <input class="form-control"
+                                       type="text"
+                                       v-bind:value="subjectData[fieldname].value">
+                                <input class="form-control" type="color"
+                                       v-model="subjectData[fieldname].value"
+                                       style="width: 3em; padding: 0px"
+                                >
+                            </div>
                             <input v-if="data.kind == 'input' && data.type != 'password'  && data.type != 'number'"
                                    v-model="subjectData[fieldname].value"
                                    v-bind:placeholder="subjectData[fieldname].placeholder"
@@ -68,14 +77,13 @@
                                    v-model="subjectData[fieldname].value"
                                    v-bind:placeholder="subjectData[fieldname].placeholder"
                                    v-bind:class="data.class"
-                                   autocomplete="off"
                                    type="password"
                             >
                             <number-field v-if="data.kind == 'numberfield'"
                                           editable="true"
-                                          input-class="form-control col-12 w-full"
+                                          input-class="form-control col-12"
                                           show-currency-label="true"
-                                          container-class="col-12 w-full"
+                                          container-class="col-12"
                                           v-model="subjectData[fieldname].value"
                                           v-bind="JSON.parse(data.props)"
                             ></number-field>
@@ -185,16 +193,16 @@
                 </div>
             </div>
         </form>
-        <div class="row w-full" v-if="false">
-            <div class="alert alert-danger col col-12 w-full"
+        <div class="row" v-if="false">
+            <div class="alert alert-danger col col-12"
                  v-for="error in errors" v-html="error[0]"></div>
         </div>
-        <div class="row w-full" v-if="resultMessage != ''">
-            <div class="alert col col-12 w-full"
+        <div class="row" v-if="resultMessage != ''">
+            <div class="alert col col-12"
                  v-bind:class="resultMessageClass"
                  v-html="resultMessage"></div>
         </div>
-        <div class="row w-full" v-if="!formDisabled"
+        <div class="row" v-if="!formDisabled"
              v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-buttons-container', 'edit-form-form-buttons-container')"
         >
             <div v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-button-container', 'col')"
@@ -394,6 +402,19 @@
                 }
 
                 return [];
+            },
+            translate: function(string) {
+                if ((typeof(window.laravelLocale) != 'undefined')
+                    && (typeof(window.laravelLocales[window.laravelLocale]) != 'undefined')) {
+                    if (typeof(window.laravelLocales[window.laravelLocale][string]) != 'undefined') {
+                        return window.laravelLocales[window.laravelLocale][string];
+                    }
+                }
+                if (typeof(this.$root.translate) != 'undefined') {
+                    return this.$root.translate(string);
+                }
+
+                return string;
             },
             errorExists: function(fieldname) {
                 return this.errors.hasOwnProperty(fieldname) && Array.isArray(this.errors[fieldname]);
