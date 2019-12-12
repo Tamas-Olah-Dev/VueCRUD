@@ -35,6 +35,7 @@
                             ></button>
                         </div>
                         <div class="portlet-body model-manager-filters-list-container"
+                             v-on:keyup.enter="saveFilterState(); currentPage = 1; fetchMode = 'search'; fetchElements(true)"
                              v-bind:class="getClassOverrideOrDefaultClass('model-manager-filters-body', 'model-manager-filters-body')"
                         >
                             <tabgroup :tabs="filterTabs" v-on:tab-changed="resetFilters">
