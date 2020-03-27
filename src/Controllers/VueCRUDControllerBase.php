@@ -573,7 +573,8 @@ class VueCRUDControllerBase
                 }
             }
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($result);
-            $tmpfile = storage_path('app'.DIRECTORY_SEPARATOR.now()->format('YmdHis').str_random(32));
+            $tmpfile = storage_path('app'.DIRECTORY_SEPARATOR.now()->format('YmdHis')
+                .\Illuminate\Support\Str::random(32));
             $writer->save($tmpfile);
             $content = file_get_contents($tmpfile);
             unlink($tmpfile);

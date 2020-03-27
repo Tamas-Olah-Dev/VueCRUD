@@ -40,7 +40,7 @@
                                  v-bind:id="fieldname+'-richtext-trixeditor'"
                                  v-bind:trix-id="fieldname+'-richtext-trixeditor'"
                                  :ref="fieldname+'-editor'"
-                                 style="min-height:300px; height: 100%"
+                                 style="min-height:300px; height: 100%; overflow-y:scroll"
                     ></trix-editor>
                 </div>
                 <div v-show="viewMode == 'code'"  style="height: 85%">
@@ -120,17 +120,17 @@
             if (this.ajaxOperationsUrl != '') {
                 window.addEventListener("trix-attachment-add", (event) => {
                     if (event.srcElement.id == this.fieldname+'-richtext-trixeditor') {
-                    this.uploadAttachment(event);
-                }
-            });
+                        this.uploadAttachment(event);
+                    }
+                });
                 window.addEventListener("trix-attachment-remove", (event) => {
                     if (event.srcElement.id == this.fieldname+'-richtext-trixeditor') {
-                    this.removeAttachment(event);
-                }
-            });
+                        this.removeAttachment(event);
+                    }
+                });
             };
             window.setTimeout(() => {this.trixReady = true}, 1000);
-            if (this.value = '') {
+            if (this.value == '') {
                 this.valueInitialized = true;
             }
         },
@@ -142,11 +142,11 @@
                     content: this.$refs[this.fieldname+'-content'].value
                 }).then((response) => {
                     let features = "menubar=no,location=no,resizable=yes,scrollbars=yes,status=yes";
-                let previewWindow = window.open('', '_blank', features);
-                let doc = previewWindow.document.open();
-                doc.write(response.data);
-                doc.close;
-            })
+                    let previewWindow = window.open('', '_blank', features);
+                    let doc = previewWindow.document.open();
+                    doc.write(response.data);
+                    doc.close;
+                })
             },
             updateValue: function() {
 
@@ -179,7 +179,7 @@
                     "trixStoreAttachment"
                 ).then((response) => {
                     event.attachment.setAttributes({url: response.data.url});
-            }, (error) => {})
+                }, (error) => {})
             },
             removeAttachment: function(event) {
                 this.removeUploadedPublicFile(
@@ -303,5 +303,7 @@
         display: flex;
         flex-direction: column;
     }
-
+    trix-editor {
+        background-color: white;
+    }
 </style>

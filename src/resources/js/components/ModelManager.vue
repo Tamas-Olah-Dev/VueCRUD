@@ -221,6 +221,8 @@
                                         >
                                             <component v-if="typeof(element[columnField]) == 'string' && element[columnField].substr(0, 11) == 'component::'"
                                                        :is="JSON.parse(element[columnField].substr(11)).component"
+                                                       v-bind:subject="element"
+                                                       :key="element[idProperty]+'-'+element[columnField]"
                                                        v-bind="JSON.parse(element[columnField].substr(11)).componentProps"></component>
                                             <span v-else
                                                   v-html="element[columnField]"

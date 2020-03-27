@@ -193,9 +193,9 @@
                 </div>
             </div>
         </form>
-        <div class="row" v-if="false">
+        <div class="row" v-if="nonFormErrorKeys.length > 0">
             <div class="alert alert-danger col col-12"
-                 v-for="error in errors" v-html="error[0]"></div>
+                 v-for="key in nonFormErrorKeys" v-html="errors[key][0]"></div>
         </div>
         <div class="row" v-if="resultMessage != ''">
             <div class="alert col col-12"
@@ -317,6 +317,11 @@
                 }
 
                 return result;
+            },
+            nonFormErrorKeys: function() {
+                return Object.keys(this.errors).filter((key) => {
+                    return typeof(this.subjectData[key]) == 'undefined';
+                });
             }
         },
         methods: {

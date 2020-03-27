@@ -66,5 +66,7 @@
   "Export as CSV": "Exportálás CSV formátumban",
   "Export as HTML": "Exportálás HTML formátumban",
   "Search": "Keresés",
-  "Export all, not just search results": "Minden exportálása (nem csak a keresési eredményeké)"
+  "Export all, not just search results": "Minden exportálása (nem csak a keresési eredményeké)",
+  "Items/page": "Elem/oldal",
+  "Highlight": "Kiemelés"
 }
