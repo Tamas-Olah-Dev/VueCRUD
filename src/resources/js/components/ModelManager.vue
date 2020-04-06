@@ -79,7 +79,7 @@
                                         </div>
                                     </div>
                                     <div v-if="!autoFilter" class="row p-1" style="min-width: 100%; display: flex; justify-content: start">
-                                        <button style="width: 33%"
+                                        <button style=""
                                                 v-bind:class="mainButtons['search']['class']"
                                                 v-html="mainButtons['search']['html']"
                                                 v-on:click="saveFilterState(); currentPage = 1; fetchMode = 'search'; fetchElements(true)"

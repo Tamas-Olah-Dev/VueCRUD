@@ -505,6 +505,7 @@
                     });
             },
             cancelEditing: function() {
+                this.errors = {};
                 this.subjectData = {};
                 this.$emit('editing-canceled');
                 if (typeof(this.redirectToOnCancel) != 'undefined') {

@@ -67,8 +67,8 @@ class VueCRUDDataproviderBase
     public function getCounts()
     {
         $result = [
-            'filtered' => $this->getQuery()->count(),
-            'total' => $this->getBaseQuery()->count(),
+            'filtered' => $this->getQuery()->count($this->getCountedColumn()),
+            'total' => $this->getBaseQuery()->count($this->getCountedColumn()),
             'start' => ($this->getPage() - 1) * $this->getItemsPerPage() + 1,
         ];
         $result['start'] = $result['filtered'] > 0 ? $result['start'] : 0;
@@ -117,5 +117,11 @@ class VueCRUDDataproviderBase
         }
 
         return $query;
+    }
+
+    public function getCountedColumn()
+    {
+        //override this if count fails with '*', like for joined queries
+        return '*';
     }
 }
