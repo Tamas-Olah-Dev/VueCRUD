@@ -67,8 +67,8 @@ class VueCRUDDataproviderBase
     public function getCounts()
     {
         $result = [
-            'filtered' => $this->getQuery()->count($this->getCountedColumn()),
-            'total' => $this->getBaseQuery()->count($this->getCountedColumn()),
+            'filtered' => \DB::query()->fromSub($this->getQuery(), 'vuecrudfiltered')->count(),
+            'total' => \DB::query()->fromSub($this->getBaseQuery(), 'vuecrudtotal')->count(),
             'start' => ($this->getPage() - 1) * $this->getItemsPerPage() + 1,
         ];
         $result['start'] = $result['filtered'] > 0 ? $result['start'] : 0;
