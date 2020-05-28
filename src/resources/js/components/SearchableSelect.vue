@@ -63,8 +63,6 @@
 </template>
 
 <script>
-    import isArray from "../../vendor/minton/js/plugins/moment/src/lib/utils/is-array";
-
     export default {
         props: {
             valueset: {type: Array, default: () => []},
@@ -97,7 +95,7 @@
         },
         computed: {
             selectedItemLabel: function() {
-                if ((this.value == null) || ((isArray(this.value)) && (this.value.length == 0))) {
+                if ((this.value == null) || ((Array.isArray(this.value)) && (this.value.length == 0))) {
                     return '';
                 }
                 if (this.value == this.undefinedValue) {

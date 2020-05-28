@@ -23,7 +23,7 @@
                           v-show="dateValue != null"
                           class="vuedatepicker-clear-button"
                     >X</span>
-                    <span class="input-group-text"
+                    <span class="input-group-text vuedatepicker-calendar-icon"
                           v-on:click="toggleDatepickerDropdown"
                           style="padding:5px; cursor:pointer"
                     >
@@ -259,6 +259,16 @@
             },
             calculateDateValue: function() {
                 this.dateValue = new Date(this.year, this.month, this.day, this.hour, this.minute, this.second);
+                if (this.dateValue.getFullYear() != this.year) {
+                    this.month = 0;
+                    this.day = 1;
+                    this.dateValue = new Date(this.year, this.month, this.day, this.hour, this.minute, this.second);
+                } else {
+                    if (this.dateValue.getMonth() != this.month) {
+                        this.day = 1;
+                        this.dateValue = new Date(this.year, this.month, this.day, this.hour, this.minute, this.second);
+                    }
+                }
                 this.dateLabel = this.year + '-' + (this.month + 1).toString().padStart(2, 0) + '-' + this.day.toString().padStart(2, 0);
                 this.emitInput();
             },
@@ -399,6 +409,7 @@
     }
     .vuedatepicker-input {
         background-color:white !important;
+        flex-grow: 1;
     }
 
     .vuedatepicker-inputs-container {
@@ -440,11 +451,24 @@
     }
     .vue-datepicker-inputgroup-append {
         width: 100%;
+        display:flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        align-items: center;
     }
     .vuedatepicker-clear-button {
-        margin-left: -3em;
-        padding-right: 1em;
-        margin-top: .5em;
         cursor:pointer;
+        position:absolute;
+        right:2.5rem;
+        padding-right: .5rem;
+    }
+    .vuedatepicker-calendar-icon {
+        width: 2em;
+        border-left: 1px solid darkgrey;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        right: 1px;
+        position: absolute;
     }
 </style>

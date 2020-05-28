@@ -1,14 +1,15 @@
 <template>
     <div style="display: flex; justify-content: space-between; align-items: center">
         <div class="image-picker-input-container">
-            <label for="selected-file" style="display:flex; max-width: 80%">{{ formElementLabel }}
-                <input id="selected-file"
+            <label :for="'selected-file-'+fieldname" style="display:flex; max-width: 80%">{{ formElementLabel }}
+                <input :id="'selected-file-'+fieldname"
                        type="file"
                        accept="image/jpeg,image/png"
                        v-on:change="fileSelected"
                        style="height:0px; width:0px; opacity:0">
                 <input class="form-control"
                        type="text"
+                       style="background-color: lightgray"
                        readonly
                        v-model="selectedFileLabel"
                 >
@@ -16,14 +17,14 @@
                 >...</span>
             </label>
             <span class="input-group-text image-picker-browse-button"
-                  style="margin-bottom: .5rem; cursor: pointer"
+                  style="cursor: pointer"
                   v-if="value != '' && value != null"
                   v-on:click.self="$emit('input', ''); selectedFileLabel = ''"
             >X</span>
 
         </div>
         <div class="image-picker-preview-container">
-            <img v-if="value != '' && value != null " :src="value">
+            <img v-if="value != '' && value != null " :src="value" :key="'imgpreview-'+fieldname">
         </div>
     </div>
 </template>
@@ -36,6 +37,7 @@
             uploadUrl: {type: String},
             defaultFileLabel: {type: String},
             value: {type: String},
+            fieldname: {type: String, default: 'fieldname'},
             formElementLabel: {type: String, default: ''}
         },
         data: function() {
@@ -101,7 +103,15 @@
         height:6em;
         max-height:6em;
     }
+    .image-picker-browse-button {
+        padding: 3px;
+        border: 1px solid lightgray;
+        border-radius: .25rem;
+        width: 2rem;
+        text-align: center;
+    }
     .image-picker-browse-button:hover {
         font-weight: bold;
+        background-color: lightgray;
     }
 </style>
