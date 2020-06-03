@@ -104,6 +104,13 @@
                                               v-bind:ajax-operations-url="ajaxOperationsUrl"
                                 ></trix-wrapper>
                             </div>
+                            <div v-if="data.kind == 'text' && data.type == 'richtext-quill'" v-bind:class="data.class" style="min-height:95%; height:95%; margin-bottom: 2em">
+                                <quill-wrapper v-model="subjectData[fieldname].value"
+                                               v-bind:fieldname="fieldname"
+                                               v-bind="JSON.parse(data.props)"
+                                               v-bind:ajax-operations-url="ajaxOperationsUrl"
+                                ></quill-wrapper>
+                            </div>
                             <select v-if="data.kind == 'select' && (data.type == null || data.type == 'yesno' || data.type == 'custom')"
                                     v-model="subjectData[fieldname].value"
                                     v-bind:style="subjectData[fieldname].value == -1 ? {'color': 'lightgray'} : {}"
@@ -129,6 +136,8 @@
                                           v-model="subjectData[fieldname].value"
                                           v-bind:upload-url="ajaxOperationsUrl"
                                           v-bind:class-overrides="classOverrides"
+                                          :key="fieldname"
+                                          :fieldname="fieldname"
                             ></image-picker>
                             <span v-if="data.kind == 'radio'">
                                 <p v-for="valuesetvalue, valuesetitem in data.valuesetSorted">

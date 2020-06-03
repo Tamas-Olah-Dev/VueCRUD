@@ -44,6 +44,14 @@ For translations to work, there are three things needed:
 with the second row repeated for every language the app has. 
 
 # Noteworthy
+To use QuillJS as a rich text editor, we have to
+
+1) npm install quill
+2) add window.Quill = require('quill'); to the base JS file
+3) add the following imports to the main scss:
+    - @import '../../node_modules/quill/dist/quill.core';
+    - @import '../../node_modules/quill/dist/quill.snow';
+
 
 When using the Trix rich text editor, attachments are saved and removed in the public drive automatically as they are added to and removed from the rich text component.
  https://laravel.com/docs/5.8/filesystem#the-public-disk
