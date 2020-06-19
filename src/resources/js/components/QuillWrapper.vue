@@ -15,15 +15,25 @@
                 </div>
             </div>
         </div>
+        <input style="opacity:0; width: 0px; height: 0px;"
+               type="file"
+               :ref="'quill-attachment-'+customId"
+               multiple="false"
+               v-on:change="storeAttachment">
     </div>
 </template>
 
 <script>
+    import {fileUploadMixin} from './mixins/fileUploadMixin.js'
+    import {translateMixin} from './mixins/translateMixin.js'
+    import {spinner} from './mixins/spinner.js'
     export default {
+        mixins: [fileUploadMixin, spinner, translateMixin],
         props: {
             value: {type: String, default: ''},
             customId: {type: String, default: Math.floor(Math.random() * 100000).toString()},
-            colors: {type: Array, default: () => {return [];}}
+            colors: {type: Array, default: () => {return [];}},
+            ajaxOperationsUrl: {type: String, default: ''}
         },
         data: function () {
             return {
@@ -32,6 +42,7 @@
                 innerValue: null,
                 innerValueCopy: null,
                 showCodePopup: false,
+                attachment: null,
             }
         },
         mounted() {
@@ -39,6 +50,17 @@
             this.resetQuill();
         },
         methods: {
+            storeAttachment: function(event) {
+                if (event.target.files.length > 0) {
+                    this.uploadPublicFileToVueCRUDController(
+                        this.ajaxOperationsUrl,
+                        event.target.files[0],
+                        "trixStoreAttachment"
+                    ).then((response) => {
+                        this.quill.insertText(0, this.translate('Letöltés'), 'link', response.data.url);
+                    }, (error) => {})
+                }
+            },
             storeCodeChanges: function() {
                 //this.setValueAsRootHTML(this.innerValueCopy);
                 this.quill.clipboard.dangerouslyPasteHTML(this.innerValueCopy);
@@ -56,20 +78,15 @@
                 this.innerValueCopy = this.innerValue;
                 this.showCodePopup = true;
             },
+            showAttachmentPopup: function() {
+                this.$refs['quill-attachment-'+this.customId].click();
+            },
             setValueAsRootHTML: function(value) {
                 value = typeof(value) == 'undefined' ? this.value : value;
                 this.$refs['quill-container'].innerHTML = value;
                 this.innerValue = value;
             },
             resetQuill: function() {
-                // this.$refs['quill-main-container'].querySelector('.quill-wrapper-quill-container').remove();
-                // let node = document.createElement('DIV');
-                // node.setAttribute('id', 'quill-container-'+this.customId);
-                // node.setAttribute('ref', 'quill-container');
-                // node.setAttribute('key', 'quill-container-'+this.customId);
-                // node.classList.add('quill-wrapper-quill-container');
-                // this.$refs['quill-main-container'].appendChild(node);
-                // this.setValueAsRootHTML();
                 this.quill = new Quill('#quill-container-'+this.customId, {
                     theme: 'snow',
                     modules: {
@@ -86,11 +103,14 @@
                                 [{ 'color': this.colors }, { 'background': this.colors }],          // dropdown with defaults from theme
                                 [{ 'align': [] }],
                                 ['code-view'],
+                                ['image'],
+                                ['attachment'],
 
                                 ['clean']                                         // remove formatting button
                             ],
                             handlers: {
-                                'code-view': this.showCodeEditorPopup
+                                'code-view': this.showCodeEditorPopup,
+                                'attachment': this.showAttachmentPopup
                             }
                         }
                     }
@@ -121,4 +141,14 @@
     button.ql-code-view::after {
         content: '@'
     }
+    button.ql-attachment::after {
+        content: '🗎'
+    }
+    .ql-editor {
+        min-height: 300px;
+        max-height: 500px;
+        overflow-y: auto;
+        padding-bottom: 2rem;
+    }
+
 </style>

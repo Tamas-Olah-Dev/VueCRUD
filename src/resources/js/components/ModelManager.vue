@@ -229,7 +229,7 @@
                                                   v-bind:class="{'highlighted-td': fieldContainsInlineSearchText(element[columnField])}"
                                             ></span>
                                         </td>
-                                        <td v-if="allowOperations" style="white-space: nowrap; text-align: right">
+                                        <td v-if="allowOperations" style="white-space: nowrap; text-align: right" class="model-manager-operations-td">
                                             <button type="button" v-if="showButton('details', element)"
                                                     v-bind:class="buttons['details']['class']"
                                                     v-on:click="showDetails(element[idProperty], elementIndex)"
@@ -282,6 +282,7 @@
                                                     v-on:component-canceled="returnToList"
                                                     v-on:submit-success="confirmEditSuccess($event)"
                                                     :title="customComponentButton['title'] || ''"
+                                                    v-bind:subject="element"
                                             ></button>
                                         </td>
                                     </tr>
