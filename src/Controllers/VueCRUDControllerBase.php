@@ -327,14 +327,14 @@ class VueCRUDControllerBase
             $filename,
             base64_decode(Str::after(request()->get('fileData'), ';base64,'))
         );
-
-        return storage_path('app'
-            .DIRECTORY_SEPARATOR
-            .'public'
-            .DIRECTORY_SEPARATOR
-            .'attachments'
-            .DIRECTORY_SEPARATOR
-            .basename($filename));
+        return '/attachments/'.basename($filename);
+//        return storage_path('app'
+//            .DIRECTORY_SEPARATOR
+//            .'public'
+//            .DIRECTORY_SEPARATOR
+//            .'attachments'
+//            .DIRECTORY_SEPARATOR
+//            .basename($filename));
     }
 
     protected function generatePublicFilename($originalName)
