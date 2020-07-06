@@ -57,8 +57,13 @@
                         event.target.files[0],
                         "trixStoreAttachment"
                     ).then((response) => {
-                        this.quill.insertText(0, this.translate('Letöltés'), 'link', response.data.url);
-                    }, (error) => {})
+                        var range = this.quill.getSelection();
+                        if (range) {
+                            this.quill.insertText(range.index, this.translate('Letöltés'), 'link', response.data.url);
+                        }
+                    }, (error) => {
+                        console.log(error);
+                    })
                 }
             },
             storeCodeChanges: function() {
