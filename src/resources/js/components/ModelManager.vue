@@ -1037,6 +1037,7 @@
                         Vue.set(this.filters[filter], 'value', this.filters[filter].default);
                     }
                 }
+                this.saveFilterState();
                 this.fetchMode = 'search';
                 this.fetchElements(true)
             },

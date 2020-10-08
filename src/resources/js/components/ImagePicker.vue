@@ -38,7 +38,8 @@
             defaultFileLabel: {type: String},
             value: {type: String},
             fieldname: {type: String, default: 'fieldname'},
-            formElementLabel: {type: String, default: ''}
+            formElementLabel: {type: String, default: ''},
+            additionalFileTypes: {type: Array, default: () => {return []}}
         },
         data: function() {
             return {
@@ -47,6 +48,11 @@
                 allowedFileTypes: ['image/png', 'image/jpeg'],
                 defaultValue: null
             }
+        },
+        created() {
+            this.additionalFileTypes.forEach((type) => {
+                this.allowedFileTypes.push(type);
+            })
         },
         mounted() {
             this.defaultValue = this.value;
