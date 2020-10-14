@@ -11,6 +11,32 @@
         <form role="form" class="margin-b-20"  v-on:submit.prevent="submitForm"  v-if="loaded"
               v-bind:class="getClassOverrideOrDefaultClass('edit-form-form', 'edit-form-form')"
         >
+            <div class="row" v-if="!formDisabled"
+                 style="margin-bottom: 1rem"
+                 v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-buttons-container', 'edit-form-form-buttons-container')"
+            >
+                <div v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-button-container', 'col')"
+                >
+                    <button type="button"
+                            v-bind:class="buttons['save']['class']"
+                            v-on:click="submitForm"
+                            v-bind:disabled="loading"
+                    >
+                        <span v-if="loading" class="button-loading-indicator" v-html="spinnerSrc"></span>
+                        <span v-if="currentStep != lastStep" v-html="buttons['proceed']['html']"></span>
+                        <span v-if="currentStep == lastStep" v-html="buttons['save']['html']"></span>
+                    </button>
+                </div>
+                <div v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-button-container', 'col')"
+                >
+                    <button type="button"
+                            v-bind:class="buttons['cancel']['class']"
+                            v-on:click="cancelEditing"
+                            v-html="buttons['cancel']['html']"
+                    ></button>
+                </div>
+            </div>
+
             <div v-for="step in stepsToRender"
                  v-bind:class="getClassOverrideOrDefaultClass('edit-form-step', 'edit-form-step')"
             >
@@ -96,6 +122,7 @@
                             <div v-if="data.kind == 'text' && data.type == 'static'"
                             >
                                 <div v-html="subjectData[fieldname].staticValue"></div>
+                                <input v-bind:value="subjectData[fieldname].value" type="hidden">
                             </div>
                             <div v-if="data.kind == 'text' && data.type == 'richtext-trix'" v-bind:class="data.class" style="min-height:95%; height:95%; margin-bottom: 2em">
                                 <trix-wrapper v-model="subjectData[fieldname].value"
@@ -167,6 +194,12 @@
                                           v-model="subjectData[fieldname].value"
                                           v-bind:class-overrides="classOverrides"
                             ></multi-select>
+                            <searchable-select v-if="data.kind == 'searchable-select'"
+                                               v-bind="JSON.parse(data.props)"
+                                               :valueset="data.valuesetSorted"
+                                               v-model="subjectData[fieldname].value"
+                                               v-bind:class-overrides="classOverrides"
+                            ></searchable-select>
                             <treeselect v-if="data.kind == 'vue-treeselect'"
                                         v-bind="JSON.parse(data.props)"
                                         :options="data.valuesetSorted"
@@ -444,6 +477,7 @@
             },
             getFormData: function() {
                 this.loaded = false;
+                this.$emit('edit-form-loading');
                 window.axios.get(this.dataUrl, {params: this.extraUrlParameters})
                     .then((response) => {
                         this.subjectData = this.removeConfigFromSubjectData(response.data);
@@ -451,6 +485,7 @@
                         this.currentStep = this.config.mode == 'creating' ? 1 : this.lastStep;
                         this.loaded = true;
                         this.dirty = false;
+                        this.$emit('edit-form-loaded');
                     })
                     .catch((error) => {
                     });
