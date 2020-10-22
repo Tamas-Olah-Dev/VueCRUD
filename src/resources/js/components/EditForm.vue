@@ -570,10 +570,17 @@
                     .replace(/^-+/, '') // Trim - from start of text
                     .replace(/-+$/, '') // Trim - from end of text
             },
-            generateSlug: function(field, fieldname) {
-                let sourceText = this.subjectData[field].value;
-                this.subjectData[fieldname].value = this.slugify(sourceText);
+            generateSlug: function(fields, fieldname) {
+                let sourceText = '';
+                fields.forEach((field) => {
+                    if (this.subjectData[field].kind == 'select') {
+                        sourceText = sourceText + this.subjectData[field].valueset[this.subjectData[field].value] + ' ';
+                    } else {
+                        sourceText = sourceText + this.subjectData[field].value + ' ';
+                    }
+                })
 
+                this.subjectData[fieldname].value = this.slugify(sourceText.trim());
             }
         },
         watch: {

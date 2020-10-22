@@ -15,11 +15,12 @@ class SlugVueCRUDFormfield extends VueCRUDFormfield
         parent::__construct($properties);
         $this->kind = 'slug';
         $this->type = 'slug';
+        $this->customOptions['source'] = [];
     }
 
     public function addSourceFieldName($fieldname)
     {
-        $this->customOptions['source'] = $fieldname;
+        $this->customOptions['source'][] = $fieldname;
 
         return $this;
     }
