@@ -6,7 +6,7 @@ use App\Formdatabuilders\DummyClassVueCRUDFormdatabuilder;
 use App\Http\Requests\SaveDummyClassVueCRUDRequest;
 use App\Dataproviders\DummyClassVueCRUDDataprovider;
 use Datalytix\VueCRUD\Interfaces\ICRUDController;
-use App\DummyClass;
+use App\DummyModelsPrefixDummyClass;
 use Datalytix\VueCRUD\Controllers\VueCRUDControllerBase;
 
 class DummyClassVueCRUDController extends VueCRUDControllerBase implements ICRUDController

@@ -2,7 +2,7 @@
 
 namespace App\Dataproviders;
 
-use App\DummyClass;
+use App\DummyModelsPrefixDummyClass;
 use Illuminate\Support\Collection;
 use Datalytix\VueCRUD\Dataproviders\VueCRUDDataproviderBase;
 use Datalytix\VueCRUD\Dataproviders\IVueCRUDDataprovider;

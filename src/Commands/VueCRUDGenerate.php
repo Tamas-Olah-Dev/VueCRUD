@@ -23,6 +23,7 @@ class VueCRUDGenerate extends GeneratorCommand
      */
     protected $description = 'Generates the necessary classes for a model to be handled with VueCRUD';
 
+    protected $modelsPrefix = '';
 
     protected function loadStub($name)
     {
@@ -67,7 +68,7 @@ class VueCRUDGenerate extends GeneratorCommand
 
     protected function replaceSlug($stub, $slug)
     {
-        return str_replace('DummySlug', $slug, $stub);
+        return str_replace('DummyModelsPrefix', $this->modelsPrefix, str_replace('DummySlug', $slug, $stub));
     }
 
     protected function buildController($name)
@@ -130,7 +131,7 @@ class VueCRUDGenerate extends GeneratorCommand
             return false;
         }
         if (file_exists(app_path('Models'))) {
-            $name = 'Models\\'.$name;
+            $this->modelsPrefix = 'Models\\';
         }
         $this->makeDirectory($this->getControllerName($name, true));
         $this->files->put($this->getControllerName($name, true), $this->buildController($name));

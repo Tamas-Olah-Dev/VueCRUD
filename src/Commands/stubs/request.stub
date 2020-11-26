@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Formdatabuilders\DummyClassVueCRUDFormdatabuilder;
-use App\DummyClass;
+use App\DummyModelsPrefixDummyClass;
 use Datalytix\VueCRUD\Requests\VueCRUDRequestBase;
 
 class SaveDummyClassVueCRUDRequest extends VueCRUDRequestBase

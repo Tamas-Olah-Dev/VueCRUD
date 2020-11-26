@@ -4,7 +4,7 @@
 namespace App\Formdatabuilders;
 
 
-use App\DummyClass;
+use App\DummyModelsPrefixDummyClass;
 use Datalytix\VueCRUD\Formdatabuilders\VueCRUDFormdatabuilder;
 
 class DummyClassVueCRUDFormdatabuilder extends VueCRUDFormdatabuilder
