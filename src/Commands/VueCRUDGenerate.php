@@ -14,7 +14,7 @@ class VueCRUDGenerate extends GeneratorCommand
      *
      * @var string
      */
-    protected $signature = 'vuecrud:generate {model}';
+    protected $signature = 'vuecrud:generate {model} {--force}';
 
     /**
      * The console command description.
