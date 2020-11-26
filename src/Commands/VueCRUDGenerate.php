@@ -129,7 +129,9 @@ class VueCRUDGenerate extends GeneratorCommand
 
             return false;
         }
-
+        if (file_exists(app_path('Models'))) {
+            $name = 'Models\\'.$name;
+        }
         $this->makeDirectory($this->getControllerName($name, true));
         $this->files->put($this->getControllerName($name, true), $this->buildController($name));
         $this->makeDirectory($this->getRequestName($name, true));
