@@ -68,7 +68,12 @@ class VueCRUDGenerate extends GeneratorCommand
 
     protected function replaceSlug($stub, $slug)
     {
-        return str_replace('DummyModelsPrefix', $this->modelsPrefix, str_replace('DummySlug', $slug, $stub));
+        return str_replace('DummySlug', $slug, $stub);
+    }
+
+    protected function replaceModelpath($stub)
+    {
+        return str_replace('DummyModelsPrefix', $this->modelsPrefix, $stub);
     }
 
     protected function buildController($name)
@@ -78,6 +83,7 @@ class VueCRUDGenerate extends GeneratorCommand
 
         $stub = $this->replaceSlug($stub, $slug);
         $stub = $this->replaceClass($stub, $name);
+        $stub = $this->replaceModelpath($stub);
 
         return $stub;
     }
@@ -85,22 +91,28 @@ class VueCRUDGenerate extends GeneratorCommand
     protected function buildRequest($name)
     {
         $stub = $this->files->get($this->loadStub('request'));
+        $stub = $this->replaceNamespace($stub, $name)->replaceClass($stub, $name);
+        $stub = $this->replaceModelpath($stub);
 
-        return $this->replaceNamespace($stub, $name)->replaceClass($stub, $name);
+        return $stub;
     }
 
     protected function buildFormdatabuilder($name)
     {
         $stub = $this->files->get($this->loadStub('formdatabuilder'));
+        $stub = $this->replaceNamespace($stub, $name)->replaceClass($stub, $name);
+        $stub = $this->replaceModelpath($stub);
 
-        return $this->replaceNamespace($stub, $name)->replaceClass($stub, $name);
+        return $stub;
     }
 
     protected function buildDataprovider($name)
     {
         $stub = $this->files->get($this->loadStub('dataprovider'));
+        $stub = $this->replaceNamespace($stub, $name)->replaceClass($stub, $name);
+        $stub = $this->replaceModelpath($stub);
 
-        return $this->replaceNamespace($stub, $name)->replaceClass($stub, $name);
+        return $stub;
     }
 
 
