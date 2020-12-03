@@ -59,12 +59,12 @@ trait VueCRUDManageable
 
     public static function getVueCRUDControllerClassname()
     {
-        return 'App\\Http\\Controllers\\'.class_basename(static::class).'VueCRUDController';
+        return '\\App\\Http\\Controllers\\'.class_basename(static::class).'VueCRUDController';
     }
 
     public static function getVueCRUDFormdatabuilderClassname()
     {
-        return 'App\\Formdatabuilders\\'.class_basename(static::class).'VueCRUDFormdatabuilder';
+        return '\\App\\Formdatabuilders\\'.class_basename(static::class).'VueCRUDFormdatabuilder';
     }
 
     public static function getVueCRUDControllerMethod($operation)
