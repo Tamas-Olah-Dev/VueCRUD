@@ -13,7 +13,16 @@ class ColorVueCRUDFormfield extends VueCRUDFormfield
     public function __construct($properties = [])
     {
         parent::__construct($properties);
-        $this->kind = 'color';
-        $this->type = 'text';
+        $this->kind = 'custom-component';
+        $this->type = 'color-picker';
     }
+
+    public function setPresets($presets)
+    {
+        //an array of ['label' => 'Label', 'value' => '#aaaaaa'] items
+        $this->setProps(['presets' => $presets], true);
+
+        return $this;
+    }
+
 }
