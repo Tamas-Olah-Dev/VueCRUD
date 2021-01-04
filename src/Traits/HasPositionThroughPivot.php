@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Datalytix\VueCRUD\Traits;
+namespace App\Traits;
 
 
 use Illuminate\Database\Eloquent\Builder;
@@ -60,13 +60,14 @@ trait HasPositionThroughPivot
         static::addGlobalScope('withPosition', function(Builder $builder) {
             $model = new static();
             $selects = static::getPositioningPivotModelFields();
-            $selects[] = static::getPositioningPivotForeignKey();
+            $pivotkey = 'pivot_'.static::getPositioningPivotForeignKey();
+            $selects[] = \DB::raw(static::getPositioningPivotForeignKey().' as '.$pivotkey);
             return $builder->joinSub(
                 static::getPositioningPivotModelclass()::select($selects),
                 '_ptr',
                 $model->getTable().'.'.$model->getKeyName(),
                 '=',
-                '_ptr.'.static::getPositioningPivotForeignKey()
+                '_ptr.'.$pivotkey
             );
         });
     }
@@ -129,7 +130,7 @@ trait HasPositionThroughPivot
         $restrictions = $restrictions === null ? $this->buildRestrictions() : $restrictions;
         return $query->when(count($restrictions) > 0, function ($query) use ($restrictions) {
             foreach ($restrictions as $field => $value) {
-                $query = $query->where($field, '=', $value);
+                $query = $query->where(\DB::raw($field), '=', $value);
             }
         });
     }
