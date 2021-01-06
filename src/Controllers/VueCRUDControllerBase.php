@@ -69,6 +69,11 @@ class VueCRUDControllerBase
             $viewData['counts'] = $elementData->counts;
             return response()->json($viewData);
         }
+        $backlink = null;
+        if (request()->has('referer')) {
+            $backlink = unserialize(base64_decode(request()->get('referer')));
+        }
+        $viewData['backlink'] = $backlink;
         $viewData['defaultFilters'] = $filters;
         $viewData = array_merge($viewData, $this->getCRUDUrls($nameSuffix));
 

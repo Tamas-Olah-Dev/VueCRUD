@@ -285,4 +285,38 @@ trait VueCRUDManageable
         $subjectSlug = $subjectSlug === null ? self::getSubjectSlug() : $subjectSlug;
         return route(self::getVueCRUDRouteName('index', $subjectSlug, $nameSuffix), $filters);
     }
+
+
+    /**
+     * @param $indexParameters
+     * @return string
+     * When we want an url to manage sub-items of an item, this method can generate
+     * a string that can be passed in that url as a 'referer' query parameter.
+     * This allows for showing a breadcrumb-like back link on the management page of the sub-items
+     *
+     * Example: we have pages with blocks. Blocks have a page_id, and for that we set up an invisible select
+     * filter so that we can generate an url for every page that leads to the blocks of the page
+     * (vuecrud_block_index?page_id=xx)
+     *
+     * If we call this method and add to the link above a 'referer' parameter with its value,
+     * we can render a link that leads back to the pages management page.
+     *
+     * We can pass in mandatory filter parameters, so if the blocks have a similar sub-item link to
+     * for example items, we can pass in ['page_id'], and the result will point to the
+     * index of block belonging to the page we navigated here from.
+     */
+    public static function getVueCRUDBackreferenceParameterValue($indexParameters)
+    {
+        $params = [];
+        foreach ($indexParameters as $indexParameter) {
+            if (request()->has($indexParameter)) {
+                $params[$indexParameter] = request()->get($indexParameter);
+            }
+        }
+        return base64_encode(serialize([
+            'url' => route('vuecrud_'.static::SUBJECT_SLUG.'_index', $params),
+            'label' => __('Back to').' '.mb_strtolower(__(static::SUBJECT_NAME_PLURAL))
+        ]));
+    }
+
 }
