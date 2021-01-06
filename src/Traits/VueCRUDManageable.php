@@ -324,8 +324,8 @@ trait VueCRUDManageable
         // a customization hook that allows specifying the backlink explained in the
         // comments of getVueCRUDBackreferenceParameterValue
         // if there is no referer, we can still generate link data here, and the controller
-        // will be able to use it. The same base64 encoded and serialized format has to be used
-        // as in getVueCRUDBackreferenceParameterValue.
+        // will be able to use it. The same arra format has to be used
+        // as in getVueCRUDBackreferenceParameterValue, but without b64 encoding and serialization.
 
         return null;
     }
