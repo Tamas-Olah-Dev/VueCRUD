@@ -392,7 +392,7 @@
                         </div>
                         <div class="portlet-body">
                             <edit-form
-                                    v-bind:data-url="createUrl"
+                                    v-bind:data-url="createUrlWithFilters"
                                     v-bind:save-url="storeUrl"
                                     v-bind:ajax-operations-url="ajaxOperationsUrl"
                                     v-on:submit-success="confirmCreationSuccess"
@@ -563,7 +563,18 @@
         },
         computed: {
             filtersExist: function() {
-                return !['{}', '[]'].includes(JSON.stringify(this.filters));
+                if (['{}', '[]'].includes(JSON.stringify(this.filters))) {
+                    return false;
+                }
+                if (typeof this.filters === 'object') {
+                    return Object.keys(this.filters).filter((k) => {
+                        return !this.filters[k].containerClass.includes('hidden');
+                    }).length > 0;
+                }
+                return this.filters.filter((f) => {
+                    return !f.containerClass.includes('hidden');
+                }).length > 0;
+
             },
             massOperationsForDropdown: function() {
                 let result = {};
@@ -677,6 +688,15 @@
                     return this.elements[this.currentElementIndex];
                 }
                 return null;
+            },
+            createUrlWithFilters: function() {
+                let urlparts = window.location.href.split('?');
+                let suffix = '';
+                if (urlparts.length > 1) {
+                    suffix = '?'+urlparts[1]
+                }
+
+                return this.createUrl+suffix;
             }
         },
         methods: {
