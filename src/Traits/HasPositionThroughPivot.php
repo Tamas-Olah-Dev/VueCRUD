@@ -53,7 +53,7 @@ trait HasPositionThroughPivot
     }
 
 
-    public static function bootHasPositionThroughRelation()
+    public static function bootHasPositionThroughPivot()
     {
         static::addGlobalScope('withPosition', function(Builder $builder) {
             $model = new static();
