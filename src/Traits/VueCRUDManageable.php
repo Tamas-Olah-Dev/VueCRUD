@@ -319,4 +319,15 @@ trait VueCRUDManageable
         ]));
     }
 
+    public static function getVueCRUDParentIndexLink()
+    {
+        // a customization hook that allows specifying the backlink explained in the
+        // comments of getVueCRUDBackreferenceParameterValue
+        // if there is no referer, we can still generate link data here, and the controller
+        // will be able to use it. The same base64 encoded and serialized format has to be used
+        // as in getVueCRUDBackreferenceParameterValue.
+
+        return null;
+    }
+
 }
