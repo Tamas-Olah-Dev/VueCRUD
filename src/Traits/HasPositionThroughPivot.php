@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 trait HasPositionThroughPivot
 {
-
+    public $pivotModelRestrictions = [];
     /**
      * @return array
      * this function returns a list of fields that are used as restrictions when changing position
@@ -26,11 +26,33 @@ trait HasPositionThroughPivot
     }
 
 
+    //in some extreme situations it can be helpful to provide a specific model query
+    //like when we are using descendant classes but want to position using the base
+    public static function getBaseQuery()
+    {
+        return static::query();
+    }
+
+    // as there can be multiple pivot models, we need to know which ones are we working with on ajax requests
+    // and during positioning.
+    // the controller will pass every query field to setPivotModelRestrictions, and the task of the
+    // filterDataForPivotModelRestrictions function is to only keep those that are actually needed to select
+    // the currently needed pivot model
+    // e.g. when an article belongs to multiple pages, we will only need the page_id to know which pivot
+    // model we want to find in article_page
+
+    abstract public static function filterDataForPivotModelRestrictions($data);
+
+    public function setPivotModelRestrictions($pivotModelRestrictions)
+    {
+        $this->pivotModelRestrictions = static::filterDataForPivotModelRestrictions($pivotModelRestrictions);
+    }
+
     public function getPivotModel()
     {
         return static::getPositioningPivotModelclass()::query()
-            ->where(static::getPositioningPivotForeignKey(), '=', $this->{static::getPositioningPivotForeignKey()})
-            ->where($this->buildRestrictions())
+            ->where(static::getPositioningPivotForeignKey(), '=', $this->getKey())
+            ->where($this->pivotModelRestrictions)
             ->first();
     }
 
@@ -60,7 +82,7 @@ trait HasPositionThroughPivot
             $selects = static::getPositioningPivotModelFields();
             $pivotkey = 'pivot_'.static::getPositioningPivotForeignKey();
             $selects[] = \DB::raw(static::getPositioningPivotForeignKey().' as '.$pivotkey);
-            return $builder->joinSub(
+            return $builder->rightJoinSub(
                 static::getPositioningPivotModelclass()::select($selects),
                 '_ptr',
                 $model->getTable().'.'.$model->getKeyName(),
@@ -72,12 +94,13 @@ trait HasPositionThroughPivot
 
     public function exchangePositionWithElementInPosition($position)
     {
-        $element = self::inPosition($position)
+        $element = static::getBaseQuery()::inPosition($position)
             ->withRestrictions($this->buildRestrictions())
             ->first();
         if ($element === null) {
             return false;
         }
+        $element->setPivotModelRestrictions($this->pivotModelRestrictions);
 
         return $this->exchangePositionWithElement($element);
     }
@@ -87,6 +110,7 @@ trait HasPositionThroughPivot
         if ($element === null) {
             return false;
         }
+        $element->setPivotModelRestrictions($this->pivotModelRestrictions);
         $transactionResult = \DB::transaction(function() use ($element) {
             $positionField = static::getPositionField();
             $position = $element->$positionField;
@@ -111,7 +135,7 @@ trait HasPositionThroughPivot
     public function buildRestrictions()
     {
         $result = [];
-        foreach (self::getRestrictingFields() as $field) {
+        foreach (static::getRestrictingFields() as $field) {
             $result[$field] = $this->$field;
         }
 
@@ -136,7 +160,7 @@ trait HasPositionThroughPivot
     public static function getFirstAvailablePosition($restrictions = [])
     {
         $positionField = static::getPositionField();
-        $result = self::query()
+        $result = static::getBaseQuery()
             ->withRestrictions($restrictions)
             ->max($positionField);
 
@@ -146,7 +170,7 @@ trait HasPositionThroughPivot
     public static function allByPosition($restrictions = [], $direction = 'asc')
     {
         $positionField = static::getPositionField();
-        return self::where('id', '>', 0)
+        return static::getBaseQuery()::where('id', '>', 0)
             ->withRestrictions($restrictions)
             ->orderBy($positionField, $direction)
             ->get();
@@ -155,7 +179,7 @@ trait HasPositionThroughPivot
     public static function allByPositionPaginated($itemsPerPage = 10)
     {
         $positionField = static::getPositionField();
-        return self::where('id', '>', 0)
+        return static::getBaseQuery()::where('id', '>', 0)
             ->orderBy($positionField, 'asc')
             ->paginate($itemsPerPage);
     }
@@ -164,7 +188,7 @@ trait HasPositionThroughPivot
     {
         $transactionResult = \DB::transaction(function () {
             $positionField = static::getPositionField();
-            $itemsAbove = self::where($positionField, '>', $this-$positionField)
+            $itemsAbove = static::getBaseQuery()::where($positionField, '>', $this-$positionField)
                 ->withRestrictions($this->buildRestrictions())
                 ->get();
 
@@ -181,20 +205,18 @@ trait HasPositionThroughPivot
     public function findPreviousElementByPosition()
     {
         $positionField = static::getPositionField();
-        return self::withRestrictions($this->buildRestrictions())
+        return static::getBaseQuery()::withRestrictions($this->buildRestrictions())
             ->where($positionField, '<', $this->$positionField)
             ->orderBy($positionField, 'desc')
-            ->limit(1)
             ->first();
     }
 
     public function findNextElementByPosition()
     {
         $positionField = static::getPositionField();
-        return self::withRestrictions($this->buildRestrictions())
+        return static::getBaseQuery()->withRestrictions($this->buildRestrictions())
             ->where($positionField, '>', $this->$positionField)
             ->orderBy($positionField, 'asc')
-            ->limit(1)
             ->first();
     }
 
@@ -206,7 +228,7 @@ trait HasPositionThroughPivot
             return false;
         }
         $transactionResult = \DB::transaction(function() use ($position, $positionField) {
-            $max = self::getFirstAvailablePosition($this->buildRestrictions());
+            $max = static::getFirstAvailablePosition($this->buildRestrictions());
             if ($position >= $max) {
                 $position = $max - 1;
             }
@@ -215,7 +237,7 @@ trait HasPositionThroughPivot
             }
             $start = $position < $this->$positionField ? $position : $this->$positionField + 1;
             $end = $position < $this->$positionField ? $this->$positionField - 1 : $position;
-            $affectedElements = self::withRestrictions($this->buildRestrictions())
+            $affectedElements = static::withRestrictions($this->buildRestrictions())
                 ->whereBetween($positionField, [$start, $end])
                 ->get();
             $step = $position < $this->$positionField ? 1 : -1;
