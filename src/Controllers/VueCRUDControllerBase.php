@@ -383,6 +383,9 @@ class VueCRUDControllerBase
     {
         $result = false;
         $current = $this->getSubject(request()->get('id'));
+        if (method_exists($current, 'setPivotModelRestrictions')) {
+            $current->setPivotModelRestrictions(request()->all());
+        }
         if (request()->has('direction')) {
             if (request()->get('direction') == 1) {
                 $result = $current->moveDown();
