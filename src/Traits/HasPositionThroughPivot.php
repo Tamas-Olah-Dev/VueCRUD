@@ -205,7 +205,7 @@ trait HasPositionThroughPivot
     public function findPreviousElementByPosition()
     {
         $positionField = static::getPositionField();
-        return static::getBaseQuery()::withRestrictions($this->buildRestrictions())
+        return static::getBaseQuery()->withRestrictions($this->buildRestrictions())
             ->where($positionField, '<', $this->$positionField)
             ->orderBy($positionField, 'desc')
             ->first();
