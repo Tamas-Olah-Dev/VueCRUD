@@ -62,7 +62,7 @@ trait hasPosition
     {
         $transactionResult = \DB::transaction(function () {
             $positionField = static::getPositionField();
-            $itemsAbove = self::where($positionField, '>', $this-$positionField)
+            $itemsAbove = self::where($positionField, '>', $this->$positionField)
                 ->withRestrictions($this->buildRestrictions())
                 ->get();
 

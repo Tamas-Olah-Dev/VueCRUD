@@ -188,7 +188,7 @@ trait HasPositionThroughPivot
     {
         $transactionResult = \DB::transaction(function () {
             $positionField = static::getPositionField();
-            $itemsAbove = static::getBaseQuery()::where($positionField, '>', $this-$positionField)
+            $itemsAbove = static::getBaseQuery()->where($positionField, '>', $this->$positionField)
                 ->withRestrictions($this->buildRestrictions())
                 ->get();
 

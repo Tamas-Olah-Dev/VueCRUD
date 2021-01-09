@@ -4,7 +4,8 @@
              :id="'quill-container-'+customId"
              :key="'quill-container-'+customId"
              class="quill-wrapper-quill-container"
-             style="width: 100%; height: 100%;"
+             style="width: 100%;"
+             :style="{'height': cssHeight}"
         ></div>
         <div v-if="showCodePopup" style="width: 100vw; height: 100vh; position: fixed; z-index: 50; display: flex; align-items: center; justify-content: center; background-color: rgba(7,7,7,.6); top: 0px; left: 0px;">
             <div style="width: 80%; height: 80%; display: flex; flex-direction: column; background-color: white; padding: 1em">
@@ -33,6 +34,7 @@
             value: {type: String, default: ''},
             customId: {type: String, default: Math.floor(Math.random() * 100000).toString()},
             colors: {type: Array, default: () => {return [];}},
+            cssHeight: {type: String, default: '100%'},
             ajaxOperationsUrl: {type: String, default: ''}
         },
         data: function () {
