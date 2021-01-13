@@ -48,10 +48,10 @@
                      class="form-step-header"
                      v-bind:class="formHeadClass(step)"
                      v-html="config.stepLabels[step]"></div>
-                <section v-for="group in groups[step]" v-bind:class="getClassOverrideOrDefaultClass('edit-form-group', 'edit-form-group')">
-                    <div v-if="groups[step].length > 0" v-html="group"
+                <section v-for="group in groups[step]" v-bind:class="groups[step].length > 1 ? getClassOverrideOrDefaultClass('edit-form-group', 'edit-form-group') : ''"  style="width: 100%">
+                    <div v-if="groups[step].length > 1" v-html="group"
                          v-bind:class="getClassOverrideOrDefaultClass('edit-form-group-head', 'edit-form-group-head')"></div>
-                    <section v-bind:style="{'padding-left': groups[step].length > 1 ? '2rem' : '0px'}">
+                    <section v-bind:class="{'edit-form-group-section': groups[step].length > 1}" style="width: 100%">
                         <div class="row" style="position:relative"
                              v-bind:class="getClassOverrideOrDefaultClass('edit-form-step-body', 'edit-form-step-body')"
                         >

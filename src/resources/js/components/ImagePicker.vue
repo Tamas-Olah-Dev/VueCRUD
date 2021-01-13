@@ -1,7 +1,7 @@
 <template>
-    <div style="display: flex; justify-content: space-between; align-items: center">
+    <div style="display: flex; justify-content: space-between; align-items: start">
         <div class="image-picker-input-container">
-            <label :for="'selected-file-'+fieldname" style="display:flex; max-width: 80%">{{ formElementLabel }}
+            <label :for="'selected-file-'+fieldname" style="display:flex; margin-top:0px; flex-grow:1">{{ formElementLabel }}
                 <input :id="'selected-file-'+fieldname"
                        type="file"
                        accept="image/jpeg,image/png"
@@ -39,7 +39,8 @@
             value: {type: String},
             fieldname: {type: String, default: 'fieldname'},
             formElementLabel: {type: String, default: ''},
-            additionalFileTypes: {type: Array, default: () => {return []}}
+            additionalFileTypes: {type: Array, default: () => {return []}},
+            classOverrides: {type: Object, default: () => {return {}}}
         },
         data: function() {
             return {
@@ -100,6 +101,8 @@
     .image-picker-input-container {
         display:flex;
         justify-content: flex-start;
+        flex-grow:1;
+        margin-right: 4rem;
     }
     .image-picker-input-container > label > .input-group > .form-control {
         outline-width: 1px !important;
