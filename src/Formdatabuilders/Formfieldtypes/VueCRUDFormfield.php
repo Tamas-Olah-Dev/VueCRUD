@@ -35,6 +35,7 @@ class VueCRUDFormfield
     protected $placeholder;
     protected $nullableIfRequired;
     protected $staticValue;
+    protected $group;
 
     /**
      * VueCRUDFormfield constructor.
@@ -65,6 +66,7 @@ class VueCRUDFormfield
         $this->placeholder = '';
         $allowedKeys = array_keys($this->toArray());
         $this->step = 1;
+        $this->group = null;
         foreach ($properties as $property => $value) {
             if (array_search($property, $allowedKeys) !== false) {
                 $this->$property = $value;
@@ -91,7 +93,8 @@ class VueCRUDFormfield
             'helpTooltip'      => $this->helpTooltip,
             'onlyWhenCreating' => $this->onlyWhenCreating,
             'customOptions'    => $this->customOptions,
-            'conditions' => $this->conditions,
+            'conditions'       => $this->conditions,
+            'group'            => $this->group,
         ];
 
         return $result;
@@ -555,6 +558,24 @@ class VueCRUDFormfield
     public function getStaticValue()
     {
         return $this->staticValue;
+    }
+
+    /**
+     * @param int $group
+     * @return VueCRUDFormfield
+     */
+    public function setGroup($group): VueCRUDFormfield
+    {
+        $this->group = $group;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getGroup()
+    {
+        return $this->group;
     }
 
 }

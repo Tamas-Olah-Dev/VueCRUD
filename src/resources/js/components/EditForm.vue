@@ -3,7 +3,7 @@
          style="position:relative"
          v-bind:class="getClassOverrideOrDefaultClass('edit-form-container', 'edit-form-container')"
     >
-        <div v-if="!loaded" v-html="spinnerSrc" style="width:100%; display:flex; justify-content: center"></div>
+        <div v-if="!loaded" v-html="spinnerSrcCustomSize" style="width:100%; display:flex; justify-content: center; height: 2rem; margin-top: 2rem; margin-bottom: 2rem"></div>
         <div v-if="loaded && (typeof(formTitle != 'undefined'))"
              v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-title-container', 'edit-form-form-title-container')"
         ><h4 v-html="formTitle"></h4></div>
@@ -21,8 +21,9 @@
                             v-bind:class="buttons['save']['class']"
                             v-on:click="submitForm"
                             v-bind:disabled="loading"
+                            style="display: flex; align-items: center; justify-content: center"
                     >
-                        <span v-if="loading" class="button-loading-indicator" v-html="spinnerSrc"></span>
+                        <span v-if="loading" style="margin-right: 4px" class="button-loading-indicator" v-html="spinnerSrc"></span>
                         <span v-if="currentStep != lastStep" v-html="buttons['proceed']['html']"></span>
                         <span v-if="currentStep == lastStep" v-html="buttons['save']['html']"></span>
                     </button>
@@ -35,8 +36,11 @@
                             v-html="buttons['cancel']['html']"
                     ></button>
                 </div>
+                <div v-if="validationErrorMessage != ''"
+                     style="width: 100%; padding-top: .5rem; padding-bottom: .5rem; text-align: left; padding-left: 1rem; color: red"
+                     v-html="validationErrorMessage"
+                ></div>
             </div>
-
             <div v-for="step in stepsToRender"
                  v-bind:class="getClassOverrideOrDefaultClass('edit-form-step', 'edit-form-step')"
             >
@@ -44,195 +48,201 @@
                      class="form-step-header"
                      v-bind:class="formHeadClass(step)"
                      v-html="config.stepLabels[step]"></div>
-                <div class="row" style="position:relative"
-                     v-bind:class="getClassOverrideOrDefaultClass('edit-form-step-body', 'edit-form-step-body')"
-                >
-                    <div v-if="currentStep != step" class="disabled-overlay"></div>
-                    <div v-for="data, fieldname in subjectDataForStep(step)"
-                         v-bind:style="{height: typeof(data.customOptions['cssHeight']) == 'undefined' ? 'auto' : data.customOptions['cssHeight']}"
-                         v-bind:class="data.containerClass">
-                        <template v-if="!shouldHideField(fieldname)">
-                            <label v-if="data.label != null">
-                                {{ data.label }}
-                                <span v-if="data.mandatory"> *</span>
-                                <span class="edit-form-label-tooltip" v-if="typeof(data.helpTooltip) != 'undefined'" v-html="data.helpTooltip"></span>
-                                <span v-if="errorExists(fieldname)" class="text-danger validation-error-label-message" v-html="errors[fieldname][0]"></span>
-                            </label>
-                            <div v-if="data.kind == 'color'"
-                                 style="display: flex; align-items:center; justify-content: center">
-                                <input class="form-control"
-                                       type="text"
-                                       v-bind:value="subjectData[fieldname].value">
-                                <input class="form-control" type="color"
-                                       v-model="subjectData[fieldname].value"
-                                       style="width: 3em; padding: 0px"
-                                >
-                            </div>
-                            <input v-if="data.kind == 'input' && data.type != 'password'  && data.type != 'number'"
-                                   v-model="subjectData[fieldname].value"
-                                   v-bind:placeholder="subjectData[fieldname].placeholder"
-                                   v-bind:class="data.class"
-                                   v-bind:list="Object.keys(subjectData[fieldname].valueset).length > 0 ? fieldname+'-lookup' : null"
-                                   type="text"
-                            >
-                            <datalist v-if="data.kind == 'input' && data.type != 'password'  && data.type != 'number' && Object.keys(subjectData[fieldname].valueset).length > 0"
-                                      v-bind:id="fieldname+'-lookup'"
-                            >
-                                <option v-for="valuesetvalue, valuesetitem in data.valueset"
-                                        v-bind:value="valuesetvalue"
-                                ></option>
-                            </datalist>
-                            <input v-if="data.kind == 'input' && data.type == 'number'"
-                                   v-model="subjectData[fieldname].value"
-                                   type="number"
-                                   v-bind:placeholder="subjectData[fieldname].placeholder"
-                                   v-bind:class="data.class"
-                                   v-bind:min="numberFieldMin(fieldname)"
-                                   v-bind:max="numberFieldMax(fieldname)"
-                                   v-bind:step="numberFieldStep(fieldname)"
-                            >
-                            <div v-if="data.kind == 'slug'">
-                                <input v-model="subjectData[fieldname].value"
-                                       v-bind:class="data.class"
-                                       style="padding-right: 1.5em; display: inline-block; width: 90%">
-                                <span style="margin-left: -1.5em; cursor:pointer"
-                                      v-on:click="generateSlug(data.customOptions['source'], fieldname)"
-                                >↺</span>
-                            </div>
-                            <input v-if="data.kind == 'input' && data.type == 'password'"
-                                   v-model="subjectData[fieldname].value"
-                                   v-bind:placeholder="subjectData[fieldname].placeholder"
-                                   v-bind:class="data.class"
-                                   type="password"
-                            >
-                            <number-field v-if="data.kind == 'numberfield'"
-                                          editable="true"
-                                          input-class="form-control col-12"
-                                          show-currency-label="true"
-                                          container-class="col-12"
-                                          v-model="subjectData[fieldname].value"
-                                          v-bind="JSON.parse(data.props)"
-                            ></number-field>
-
-                            <textarea v-if="data.kind == 'text' && data.type == 'simple'"
-                                      v-model="subjectData[fieldname].value"
-                                      v-bind:placeholder="subjectData[fieldname].placeholder"
-                                      v-bind:class="data.class"
-                            ></textarea>
-                            <div v-if="data.kind == 'text' && data.type == 'static'"
-                            >
-                                <div v-html="subjectData[fieldname].staticValue"></div>
-                                <input v-bind:value="subjectData[fieldname].value" type="hidden">
-                            </div>
-                            <div v-if="data.kind == 'text' && data.type == 'richtext-trix'" v-bind:class="data.class" style="min-height:95%; height:95%; margin-bottom: 2em">
-                                <trix-wrapper v-model="subjectData[fieldname].value"
-                                              v-bind:fieldname="fieldname"
-                                              v-bind="JSON.parse(data.props)"
-                                              v-bind:ajax-operations-url="ajaxOperationsUrl"
-                                ></trix-wrapper>
-                            </div>
-                            <div v-if="data.kind == 'text' && data.type == 'richtext-quill'" v-bind:class="data.class" style="min-height:95%; height:95%; margin-bottom: 2em">
-                                <quill-wrapper v-model="subjectData[fieldname].value"
-                                               v-bind:fieldname="fieldname"
-                                               v-bind="JSON.parse(data.props)"
-                                               v-bind:ajax-operations-url="ajaxOperationsUrl"
-                                ></quill-wrapper>
-                            </div>
-                            <select v-if="data.kind == 'select' && (data.type == null || data.type == 'yesno' || data.type == 'custom')"
-                                    v-model="subjectData[fieldname].value"
-                                    v-bind:style="subjectData[fieldname].value == -1 ? {'color': 'lightgray'} : {}"
-                                    v-bind:class="data.class"
-                            >
-                                <option v-for="valuesetvalue, valuesetitem in data.valuesetSorted"
-                                        v-bind:value="valuesetvalue"
-                                        v-bind:style="valuesetvalue == -1 ? {'color': 'lightgray'} : {'color': 'black'}"
-                                        v-html="valuesetitem">
-                                </option>
-                            </select>
-                            <select-or-add-field v-if="data.kind == 'select' && data.type == 'select-or-add-field'"
-                                                 v-bind="JSON.parse(data.props)"
-                                                 v-model="subjectData[fieldname].value"
-                            ></select-or-add-field>
-                            <datepicker v-if="data.kind == 'datepicker'"
-                                        v-bind="JSON.parse(data.props)"
-                                        v-model="subjectData[fieldname].value"
-                                        v-bind:class-overrides="classOverrides"
-                            ></datepicker>
-                            <image-picker v-if="data.kind == 'imagepicker'"
-                                          v-bind="JSON.parse(data.props)"
-                                          v-model="subjectData[fieldname].value"
-                                          v-bind:upload-url="ajaxOperationsUrl"
-                                          v-bind:class-overrides="classOverrides"
-                                          :key="fieldname"
-                                          :fieldname="fieldname"
-                            ></image-picker>
-                            <span v-if="data.kind == 'radio'">
-                                <p v-for="valuesetvalue, valuesetitem in data.valuesetSorted">
-                                    <input
-                                            type="radio"
-                                            v-model="subjectData[fieldname].value"
-                                            :id="fieldname+'_'+valuesetvalue"
-                                            :value="valuesetvalue">
-                                    <label :for="fieldname+'_'+valuesetvalue" v-html="valuesetitem">
+                <section v-for="group in groups[step]" v-bind:class="getClassOverrideOrDefaultClass('edit-form-group', 'edit-form-group')">
+                    <div v-if="groups[step].length > 0" v-html="group"
+                         v-bind:class="getClassOverrideOrDefaultClass('edit-form-group-head', 'edit-form-group-head')"></div>
+                    <section v-bind:style="{'padding-left': groups[step].length > 1 ? '2rem' : '0px'}">
+                        <div class="row" style="position:relative"
+                             v-bind:class="getClassOverrideOrDefaultClass('edit-form-step-body', 'edit-form-step-body')"
+                        >
+                            <div v-if="currentStep != step" class="disabled-overlay"></div>
+                            <div v-for="data, fieldname in stepSubjectDataForGroup(subjectDataForStep(step), group)"
+                                 v-bind:style="{height: typeof(data.customOptions['cssHeight']) == 'undefined' ? 'auto' : data.customOptions['cssHeight']}"
+                                 v-bind:class="data.containerClass">
+                                <template v-if="!shouldHideField(fieldname)">
+                                    <label v-if="data.label != null">
+                                        {{ data.label }}
+                                        <span v-if="data.mandatory"> *</span>
+                                        <span class="edit-form-label-tooltip" v-if="typeof(data.helpTooltip) != 'undefined'" v-html="data.helpTooltip"></span>
+                                        <span v-if="errorExists(fieldname)" class="text-danger validation-error-label-message" v-html="errors[fieldname][0]"></span>
                                     </label>
-                                </p>
-                            </span>
-                            <span v-if="data.kind == 'checkbox'">
-                                <p v-for="valuesetvalue, valuesetitem in data.valuesetSorted">
-                                    <input
-                                            type="checkbox"
-                                            v-model="subjectData[fieldname].value[valuesetvalue]"
-                                            :id="fieldname+'_'+valuesetvalue"
-                                            :value="valuesetvalue">
-                                    <label :for="fieldname+'_'+valuesetvalue" v-html="valuesetitem">
-                                    </label>
-                                </p>
-                            </span>
-                            <multi-select v-if="data.kind == 'vue-multiselect'"
-                                          v-bind="JSON.parse(data.props)"
-                                          :valueset="data.valuesetSorted"
-                                          v-model="subjectData[fieldname].value"
-                                          v-bind:class-overrides="classOverrides"
-                            ></multi-select>
-                            <searchable-select v-if="data.kind == 'searchable-select'"
-                                               v-bind="JSON.parse(data.props)"
-                                               :valueset="data.valuesetSorted"
+                                    <div v-if="data.kind == 'color'"
+                                         style="display: flex; align-items:center; justify-content: center">
+                                        <input class="form-control"
+                                               type="text"
+                                               v-bind:value="subjectData[fieldname].value">
+                                        <input class="form-control" type="color"
                                                v-model="subjectData[fieldname].value"
-                                               v-bind:class-overrides="classOverrides"
-                            ></searchable-select>
-                            <treeselect v-if="data.kind == 'vue-treeselect'"
-                                        v-bind="JSON.parse(data.props)"
-                                        :options="data.valuesetSorted"
-                                        v-model="subjectData[fieldname].value"
-                                        v-bind:class-overrides="classOverrides"
-                            ></treeselect>
-                            <component v-if="data.kind == 'custom-component'"
-                                       v-bind:is="data.type"
-                                       v-bind="JSON.parse(data.props)"
-                                       v-model="subjectData[fieldname].value"
-                                       v-bind:errors="componentError(fieldname)"
-                                       :buttons="buttons"
-                                       v-bind:class-overrides="classOverrides"
-                            ></component>
-                            <select v-if="data.kind == 'multiselect'"
-                                    style="height: 200px; min-height: 200px"
-                                    class="form-control"
-                                    v-bind:class="data.class"
-                                    multiple="multiple"
-                                    v-model="subjectData[fieldname].value"
-                            >
-                                <option v-for="valuesetvalue, valuesetitem in data.valuesetSorted"
-                                        v-bind:value="valuesetvalue" v-html="valuesetitem"
-                                ></option>
-                            </select>
-                            <recaptcha-component v-if="data.kind == 'recaptcha'"
-                                                 :g-key="JSON.parse(data.props).key"
-                                                 v-model="subjectData[fieldname].value">
+                                               style="width: 3em; padding: 0px"
+                                        >
+                                    </div>
+                                    <input v-if="data.kind == 'input' && data.type != 'password'  && data.type != 'number'"
+                                           v-model="subjectData[fieldname].value"
+                                           v-bind:placeholder="subjectData[fieldname].placeholder"
+                                           v-bind:class="data.class"
+                                           v-bind:list="Object.keys(subjectData[fieldname].valueset).length > 0 ? fieldname+'-lookup' : null"
+                                           type="text"
+                                    >
+                                    <datalist v-if="data.kind == 'input' && data.type != 'password'  && data.type != 'number' && Object.keys(subjectData[fieldname].valueset).length > 0"
+                                              v-bind:id="fieldname+'-lookup'"
+                                    >
+                                        <option v-for="valuesetvalue, valuesetitem in data.valueset"
+                                                v-bind:value="valuesetvalue"
+                                        ></option>
+                                    </datalist>
+                                    <input v-if="data.kind == 'input' && data.type == 'number'"
+                                           v-model="subjectData[fieldname].value"
+                                           type="number"
+                                           v-bind:placeholder="subjectData[fieldname].placeholder"
+                                           v-bind:class="data.class"
+                                           v-bind:min="numberFieldMin(fieldname)"
+                                           v-bind:max="numberFieldMax(fieldname)"
+                                           v-bind:step="numberFieldStep(fieldname)"
+                                    >
+                                    <div v-if="data.kind == 'slug'">
+                                        <input v-model="subjectData[fieldname].value"
+                                               v-bind:class="data.class"
+                                               style="padding-right: 1.5em; display: inline-block; width: 90%">
+                                        <span style="margin-left: -1.5em; cursor:pointer"
+                                              v-on:click="generateSlug(data.customOptions['source'], fieldname)"
+                                        >↺</span>
+                                    </div>
+                                    <input v-if="data.kind == 'input' && data.type == 'password'"
+                                           v-model="subjectData[fieldname].value"
+                                           v-bind:placeholder="subjectData[fieldname].placeholder"
+                                           v-bind:class="data.class"
+                                           type="password"
+                                    >
+                                    <number-field v-if="data.kind == 'numberfield'"
+                                                  editable="true"
+                                                  input-class="form-control col-12"
+                                                  show-currency-label="true"
+                                                  container-class="col-12"
+                                                  v-model="subjectData[fieldname].value"
+                                                  v-bind="JSON.parse(data.props)"
+                                    ></number-field>
 
-                            </recaptcha-component>
-                        </template>
-                    </div>
-                </div>
+                                    <textarea v-if="data.kind == 'text' && data.type == 'simple'"
+                                              v-model="subjectData[fieldname].value"
+                                              v-bind:placeholder="subjectData[fieldname].placeholder"
+                                              v-bind:class="data.class"
+                                    ></textarea>
+                                    <div v-if="data.kind == 'text' && data.type == 'static'"
+                                    >
+                                        <div v-html="subjectData[fieldname].staticValue"></div>
+                                        <input v-bind:value="subjectData[fieldname].value" type="hidden">
+                                    </div>
+                                    <div v-if="data.kind == 'text' && data.type == 'richtext-trix'" v-bind:class="data.class" style="min-height:95%; height:95%; margin-bottom: 2em">
+                                        <trix-wrapper v-model="subjectData[fieldname].value"
+                                                      v-bind:fieldname="fieldname"
+                                                      v-bind="JSON.parse(data.props)"
+                                                      v-bind:ajax-operations-url="ajaxOperationsUrl"
+                                        ></trix-wrapper>
+                                    </div>
+                                    <div v-if="data.kind == 'text' && data.type == 'richtext-quill'" v-bind:class="data.class" style="min-height:95%; height:95%; margin-bottom: 2em">
+                                        <quill-wrapper v-model="subjectData[fieldname].value"
+                                                       v-bind:fieldname="fieldname"
+                                                       v-bind="JSON.parse(data.props)"
+                                                       v-bind:ajax-operations-url="ajaxOperationsUrl"
+                                        ></quill-wrapper>
+                                    </div>
+                                    <select v-if="data.kind == 'select' && (data.type == null || data.type == 'yesno' || data.type == 'custom')"
+                                            v-model="subjectData[fieldname].value"
+                                            v-bind:style="subjectData[fieldname].value == -1 ? {'color': 'lightgray'} : {}"
+                                            v-bind:class="data.class"
+                                    >
+                                        <option v-for="valuesetvalue, valuesetitem in data.valuesetSorted"
+                                                v-bind:value="valuesetvalue"
+                                                v-bind:style="valuesetvalue == -1 ? {'color': 'lightgray'} : {'color': 'black'}"
+                                                v-html="valuesetitem">
+                                        </option>
+                                    </select>
+                                    <select-or-add-field v-if="data.kind == 'select' && data.type == 'select-or-add-field'"
+                                                         v-bind="JSON.parse(data.props)"
+                                                         v-model="subjectData[fieldname].value"
+                                    ></select-or-add-field>
+                                    <datepicker v-if="data.kind == 'datepicker'"
+                                                v-bind="JSON.parse(data.props)"
+                                                v-model="subjectData[fieldname].value"
+                                                v-bind:class-overrides="classOverrides"
+                                    ></datepicker>
+                                    <image-picker v-if="data.kind == 'imagepicker'"
+                                                  v-bind="JSON.parse(data.props)"
+                                                  v-model="subjectData[fieldname].value"
+                                                  v-bind:upload-url="ajaxOperationsUrl"
+                                                  v-bind:class-overrides="classOverrides"
+                                                  :key="fieldname"
+                                                  :fieldname="fieldname"
+                                    ></image-picker>
+                                    <span v-if="data.kind == 'radio'">
+                                    <p v-for="valuesetvalue, valuesetitem in data.valuesetSorted">
+                                        <input
+                                                type="radio"
+                                                v-model="subjectData[fieldname].value"
+                                                :id="fieldname+'_'+valuesetvalue"
+                                                :value="valuesetvalue">
+                                        <label :for="fieldname+'_'+valuesetvalue" v-html="valuesetitem">
+                                        </label>
+                                    </p>
+                                </span>
+                                    <span v-if="data.kind == 'checkbox'">
+                                    <p v-for="valuesetvalue, valuesetitem in data.valuesetSorted">
+                                        <input
+                                                type="checkbox"
+                                                v-model="subjectData[fieldname].value[valuesetvalue]"
+                                                :id="fieldname+'_'+valuesetvalue"
+                                                :value="valuesetvalue">
+                                        <label :for="fieldname+'_'+valuesetvalue" v-html="valuesetitem">
+                                        </label>
+                                    </p>
+                                </span>
+                                    <multi-select v-if="data.kind == 'vue-multiselect'"
+                                                  v-bind="JSON.parse(data.props)"
+                                                  :valueset="data.valuesetSorted"
+                                                  v-model="subjectData[fieldname].value"
+                                                  v-bind:class-overrides="classOverrides"
+                                    ></multi-select>
+                                    <searchable-select v-if="data.kind == 'searchable-select'"
+                                                       v-bind="JSON.parse(data.props)"
+                                                       :valueset="data.valuesetSorted"
+                                                       v-model="subjectData[fieldname].value"
+                                                       v-bind:class-overrides="classOverrides"
+                                    ></searchable-select>
+                                    <treeselect v-if="data.kind == 'vue-treeselect'"
+                                                v-bind="JSON.parse(data.props)"
+                                                :options="data.valuesetSorted"
+                                                v-model="subjectData[fieldname].value"
+                                                v-bind:class-overrides="classOverrides"
+                                    ></treeselect>
+                                    <component v-if="data.kind == 'custom-component'"
+                                               v-bind:is="data.type"
+                                               v-bind="JSON.parse(data.props)"
+                                               v-model="subjectData[fieldname].value"
+                                               v-bind:errors="componentError(fieldname)"
+                                               :buttons="buttons"
+                                               v-bind:class-overrides="classOverrides"
+                                    ></component>
+                                    <select v-if="data.kind == 'multiselect'"
+                                            style="height: 200px; min-height: 200px"
+                                            class="form-control"
+                                            v-bind:class="data.class"
+                                            multiple="multiple"
+                                            v-model="subjectData[fieldname].value"
+                                    >
+                                        <option v-for="valuesetvalue, valuesetitem in data.valuesetSorted"
+                                                v-bind:value="valuesetvalue" v-html="valuesetitem"
+                                        ></option>
+                                    </select>
+                                    <recaptcha-component v-if="data.kind == 'recaptcha'"
+                                                         :g-key="JSON.parse(data.props).key"
+                                                         v-model="subjectData[fieldname].value">
+
+                                    </recaptcha-component>
+                                </template>
+                            </div>
+                        </div>
+                    </section>
+                </section>
             </div>
         </form>
         <div class="row" v-if="nonFormErrorKeys.length > 0">
@@ -247,14 +257,20 @@
         <div class="row" v-if="!formDisabled"
              v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-buttons-container', 'edit-form-form-buttons-container')"
         >
+            <div v-if="validationErrorMessage != ''"
+                 style="width: 100%; padding-top: .5rem; padding-bottom: .5rem; text-align: left; padding-left: 1rem; color: red"
+                 v-html="validationErrorMessage"
+            ></div>
+
             <div v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-button-container', 'col')"
             >
                 <button type="button"
                         v-bind:class="buttons['save']['class']"
                         v-on:click="submitForm"
                         v-bind:disabled="loading"
+                        style="display: flex; align-items: center; justify-content: center"
                 >
-                    <span v-if="loading" class="button-loading-indicator" v-html="spinnerSrc"></span>
+                    <span v-if="loading" style="margin-right: 4px" class="button-loading-indicator" v-html="spinnerSrc"></span>
                     <span v-if="currentStep != lastStep" v-html="buttons['proceed']['html']"></span>
                     <span v-if="currentStep == lastStep" v-html="buttons['save']['html']"></span>
                 </button>
@@ -306,6 +322,8 @@
                 config: {},
                 currentStep: -1,
                 resultMessageClass: '',
+                groups: [],
+                currentGroup: 'default',
             }
         },
         mounted() {
@@ -316,6 +334,9 @@
                 return this.config.steps.filter((step) => {
                     return step <= this.currentStep;
                 })
+            },
+            groupsToRender: function() {
+
             },
             lastStep: function() {
                 if (typeof(this.config['steps']) != 'undefined') {
@@ -364,6 +385,11 @@
                 return Object.keys(this.errors).filter((key) => {
                     return typeof(this.subjectData[key]) == 'undefined';
                 });
+            },
+            validationErrorMessage: function() {
+                return Object.keys(this.errors).length > 0
+                    ? this.translate('Please review the invalid values and try again.')
+                    : '';
             }
         },
         methods: {
@@ -433,6 +459,15 @@
 
                 return result;
             },
+            stepSubjectDataForGroup: function(subjectdata, group) {
+                let result = {};
+                Object.keys(subjectdata).forEach((key) => {
+                    if (subjectdata[key].group == group) {
+                        result[key] = subjectdata[key];
+                    }
+                });
+                return result;
+            },
             removeConfigFromSubjectData: function(subjectData) {
                 let result = {};
                 for (var item in subjectData) {
@@ -483,6 +518,15 @@
                         this.subjectData = this.removeConfigFromSubjectData(response.data);
                         this.config = response.data.config;
                         this.currentStep = this.config.mode == 'creating' ? 1 : this.lastStep;
+                        this.groups = {};
+                        Object.keys(this.subjectData).forEach((key) => {
+                            if (typeof(this.groups[this.subjectData[key].step]) == 'undefined') {
+                                this.groups[this.subjectData[key].step] = [];
+                            }
+                            if (this.groups[this.subjectData[key].step].indexOf(this.subjectData[key].group) == -1) {
+                                this.groups[this.subjectData[key].step].push(this.subjectData[key].group);
+                            }
+                        });
                         this.loaded = true;
                         this.dirty = false;
                         this.$emit('edit-form-loaded');

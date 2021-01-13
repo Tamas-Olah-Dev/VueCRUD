@@ -143,6 +143,7 @@ abstract class VueCRUDFormdatabuilder
                     'conditions'     => $fieldData->getConditions(),
                     'hideIf'         => $fieldData->getHideIf(),
                     'placeholder'    => $fieldData->getPlaceholder(),
+                    'group'          => $fieldData->getGroup(),
                 ];
                 $this->formdata[$fieldId] = $element;
             }
@@ -220,7 +221,7 @@ abstract class VueCRUDFormdatabuilder
                 $fieldDataRules = $fieldData->getRules();
                 if (\Route::getCurrentRoute()->hasParameter('subject')) {
                     $fieldDataRules = collect($fieldDataRules)->transform(function ($fieldDataRule, $key) {
-                        if(is_string($fieldDataRule)) {
+                        if (is_string($fieldDataRule)) {
                             if (\Illuminate\Support\Str::contains($fieldDataRule, 'unique:')) {
                                 $table = \Illuminate\Support\Str::after($fieldDataRule, ':');
                                 return Rule::unique($table)->ignore(\Route::getCurrentRoute()->parameters()['subject']->id);
@@ -285,12 +286,12 @@ abstract class VueCRUDFormdatabuilder
                             $messages[$fieldId.'.same'] = __('The two fields do not match').$label;
                             break;
                         case 'min':
-                            $messages[$fieldId.'.min'] = __('Value has to be at least :min', ['min' => $field->getMin()]);
+                            $messages[$fieldId.'.min'] = __('Value has to be at least :min',
+                                ['min' => $field->getMin()]);
                             break;
                         case 'max':
                             $messages[$fieldId.'.max'] = __('Value cannot exceed :max', ['max' => $field->getMax()]);
                             break;
-
                     }
                 }
             }
@@ -318,7 +319,7 @@ abstract class VueCRUDFormdatabuilder
             return false;
         }
         if (request()->has('subjectdata')) {
-            if (! $fieldData->meetsConditions((array) json_decode(request()->get('subjectdata')))) {
+            if (! $fieldData->meetsConditions((array)json_decode(request()->get('subjectdata')))) {
                 return false;
             }
         }
@@ -341,7 +342,7 @@ abstract class VueCRUDFormdatabuilder
             return false;
         }
         if (request()->has('subjectdata')) {
-            if (! $fieldData->meetsConditions((array) json_decode(request()->get('subjectdata')))) {
+            if (! $fieldData->meetsConditions((array)json_decode(request()->get('subjectdata')))) {
                 return false;
             }
         }
