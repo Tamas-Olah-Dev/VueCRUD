@@ -62,6 +62,18 @@ class VueCRUDRequestBase extends FormRequest
             : VueCRUDFormdatabuilder::REQUEST_TYPE_CREATING;
     }
 
+    public function getRequestSubjectId()
+    {
+        if (\Route::getCurrentRoute()->hasParameter('id')) {
+            return \Route::getCurrentRoute()->originalParameter('id');
+        }
+        if (\Route::getCurrentRoute()->hasParameter('subject')) {
+            return \Route::getCurrentRoute()->originalParameter('subject');
+        }
+
+        return null;
+    }
+
     protected function nullIfInvalid($value)
     {
         if ($value == -1) {

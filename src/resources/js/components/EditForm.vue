@@ -49,14 +49,25 @@
                      v-bind:class="formHeadClass(step)"
                      v-html="config.stepLabels[step]"></div>
                 <section v-for="group in groups[step]" v-bind:class="groups[step].length > 1 ? getClassOverrideOrDefaultClass('edit-form-group', 'edit-form-group') : ''"  style="width: 100%">
-                    <div v-if="groups[step].length > 1" v-html="group"
-                         v-bind:class="getClassOverrideOrDefaultClass('edit-form-group-head', 'edit-form-group-head')"></div>
-                    <section v-bind:class="{'edit-form-group-section': groups[step].length > 1}" style="width: 100%">
+                    <div v-if="groups[step].length > 1"
+                         v-on:click="toggleGroupVisibility(group)"
+                         v-bind:class="getClassOverrideOrDefaultClass('edit-form-group-head', 'edit-form-group-head')"
+                         style="display: flex; align-items: center; justify-content: space-between; cursor:pointer"
+                    >
+                        <span v-html="group"></span>
+                        <span class="vuecrud-caret" v-bind:class="{'open': openGroups.includes(group)}">&#9666;</span>
+                    </div>
+                    <section v-bind:class="{'edit-form-group-section': groups[step].length > 1}"
+                             v-show="groups[step].length  == 1 || (groups[step].length > 1 && openGroups.includes(group))"
+                             style="width: 100%">
                         <div class="row" style="position:relative"
+                             :data-group="group"
                              v-bind:class="getClassOverrideOrDefaultClass('edit-form-step-body', 'edit-form-step-body')"
                         >
                             <div v-if="currentStep != step" class="disabled-overlay"></div>
                             <div v-for="data, fieldname in stepSubjectDataForGroup(subjectDataForStep(step), group)"
+                                 :data-group="group"
+
                                  v-bind:style="{height: typeof(data.customOptions['cssHeight']) == 'undefined' ? 'auto' : data.customOptions['cssHeight']}"
                                  v-bind:class="data.containerClass">
                                 <template v-if="!shouldHideField(fieldname)">
@@ -323,7 +334,7 @@
                 currentStep: -1,
                 resultMessageClass: '',
                 groups: [],
-                currentGroup: 'default',
+                openGroups: [],
             }
         },
         mounted() {
@@ -525,6 +536,9 @@
                             }
                             if (this.groups[this.subjectData[key].step].indexOf(this.subjectData[key].group) == -1) {
                                 this.groups[this.subjectData[key].step].push(this.subjectData[key].group);
+                                if (this.config.mode == 'creating') {
+                                    this.openGroups.push(this.subjectData[key].group);
+                                }
                             }
                         });
                         this.loaded = true;
@@ -625,6 +639,15 @@
                 })
 
                 this.subjectData[fieldname].value = this.slugify(sourceText.trim());
+            },
+            toggleGroupVisibility: function(group) {
+                if (this.openGroups.indexOf(group) == -1) {
+                    this.openGroups.push(group);
+                } else {
+                    this.openGroups = this.openGroups.filter((item) => {
+                        return item != group;
+                    });
+                }
             }
         },
         watch: {
@@ -661,5 +684,16 @@
         border-top: 2px solid lightgrey;
         border-left: 1px solid lightgrey;
         padding: 5px;
+    }
+    .vuecrud-caret {
+        height: 2rem;
+        margin-right: .5rem;
+    }
+    .vuecrud-caret {
+        transition: transform 200ms ease-in-out;
+        transform-origin: center;
+    }
+    .vuecrud-caret.open {
+        transform: rotate(-90deg);
     }
 </style>
