@@ -197,10 +197,10 @@ trait VueCRUDManageable
             'save' => self::buildButtonFromConfigData('vuecrud.buttons.save', [
                 'class' => 'btn btn-outline-primary btn-block', 'html' => __('Save'),
             ]),
-            'save' => self::buildButtonFromConfigData('vuecrud.buttons.save_and_close', [
+            'save_and_close' => self::buildButtonFromConfigData('vuecrud.buttons.save_and_close', [
                 'class' => 'btn btn-outline-primary btn-block', 'html' => __('Save and close'),
             ]),
-            'save' => self::buildButtonFromConfigData('vuecrud.buttons.save_without_closing', [
+            'save_without_closing' => self::buildButtonFromConfigData('vuecrud.buttons.save_without_closing', [
                 'class' => 'btn btn-outline-primary btn-block', 'html' => __('Save changes'),
             ]),
             'proceed' => self::buildButtonFromConfigData('vuecrud.buttons.proceed', [
