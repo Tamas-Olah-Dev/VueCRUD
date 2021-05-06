@@ -1,5 +1,5 @@
 <template>
-    <div style="display: flex; flex-direction: column; width: 100%">
+    <div style="display: flex; flex-direction: column; width: 100%" class="vuecrud-tabs-container">
         <div style="display: flex; min-height: 1em; white-space: nowrap"
              role="tablist"
              v-if="tabsToShow.length > 1"
@@ -18,7 +18,7 @@
         </div>
         <div v-bind:class="{'tab-contents': tabsToShow.length > 1}">
             <template v-for="tab, tabIndex in tabsToShow">
-                <div v-if="tabIndex == currentTab"
+                <div v-show="tabIndex == currentTab"
                      role="tabpanel"
                      :aria-labelledby="uId+'-tabgroup-tab-'+tabIndex"
                 >
@@ -95,6 +95,9 @@
         border: 1px solid darkgrey;
         border-top: none;
         padding: 5px;
+        flex-grow:1;
+        height: 100%;
+        overflow-y: auto;
     }
     .inactive-tab {
         opacity: .5;

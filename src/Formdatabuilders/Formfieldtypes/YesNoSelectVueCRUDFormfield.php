@@ -3,6 +3,8 @@
 namespace Datalytix\VueCRUD\Formdatabuilders\Formfieldtypes;
 
 
+use Datalytix\VueCRUD\Formdatabuilders\Valuesets\YesNoValueset;
+
 class YesNoSelectVueCRUDFormfield extends VueCRUDFormfield
 {
 
@@ -15,5 +17,6 @@ class YesNoSelectVueCRUDFormfield extends VueCRUDFormfield
         parent::__construct($properties);
         $this->kind = 'select';
         $this->type = 'yesno';
+        $this->setValuesetClass(YesNoValueset::class);
     }
 }

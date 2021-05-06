@@ -20,6 +20,7 @@
                     <div style="display: flex; align-items: center; justify-content: flex-start">
                         <span v-if="loading" style="margin-right: .5rem" class="button-loading-indicator" v-html="spinnerSrc"></span>
                         <button type="button"
+                                v-if="buttons['save_and_close']"
                                 v-bind:class="buttons['save_and_close']['class']"
                                 v-on:click="submitForm"
                                 v-bind:disabled="loading"
@@ -27,9 +28,9 @@
                         >
 
                             <span v-if="currentStep != lastStep" v-html="buttons['proceed']['html']"></span>
-                            <span v-if="currentStep == lastStep" v-html="buttons['save_and_close']['html']"></span>
+                            <span v-if="currentStep == lastStep && buttons['save_and_close']" v-html="buttons['save_and_close']['html']"></span>
                         </button>
-                        <button v-if="currentStep == lastStep"
+                        <button v-if="currentStep == lastStep && buttons['save_without_closing']"
                                 type="button"
                                 v-bind:class="buttons['save_without_closing']['class']"
                                 v-on:click="submitForm(false)"
@@ -54,13 +55,18 @@
                 ></div>
             </div>
             <div v-for="step in stepsToRender"
+                 :key="'step-'+step.toString()"
                  v-bind:class="getClassOverrideOrDefaultClass('edit-form-step', 'edit-form-step')"
             >
                 <div v-if="typeof(config.stepLabels[step]) != 'undefined'"
                      class="form-step-header"
                      v-bind:class="formHeadClass(step)"
                      v-html="config.stepLabels[step]"></div>
-                <section v-for="group in groups[step]" v-bind:class="groups[step].length > 1 ? getClassOverrideOrDefaultClass('edit-form-group', 'edit-form-group') : ''"  style="width: 100%">
+                <section v-for="group in groups[step]"
+                         v-bind:class="groups[step].length > 1 ? getClassOverrideOrDefaultClass('edit-form-group', 'edit-form-group') : ''"
+                         :key="'step-group-'+group"
+                         style="width: 100%"
+                >
                     <div v-if="groups[step].length > 1"
                          v-on:click="toggleGroupVisibility(group)"
                          v-bind:class="getClassOverrideOrDefaultClass('edit-form-group-head', 'edit-form-group-head')"
@@ -79,8 +85,8 @@
                             <div v-if="currentStep != step" class="disabled-overlay"></div>
                             <div v-for="data, fieldname in stepSubjectDataForGroup(subjectDataForStep(step), group)"
                                  :data-group="group"
-
-                                 v-bind:style="{height: typeof(data.customOptions['cssHeight']) == 'undefined' ? 'auto' : data.customOptions['cssHeight']}"
+                                 :key="'step-group-container-'+fieldname"
+                                 v-bind:style="formContainerStyle(data, fieldname)"
                                  v-bind:class="data.containerClass">
                                 <template v-if="!shouldHideField(fieldname)">
                                     <label v-if="data.label != null">
@@ -154,6 +160,7 @@
                                     >
                                         <div v-html="subjectData[fieldname].staticValue"></div>
                                         <input v-bind:value="subjectData[fieldname].value" type="hidden">
+                                        <label v-if="subjectData[fieldname].customOptions['visible']" v-html="subjectData[fieldname].value"></label>
                                     </div>
                                     <div v-if="data.kind == 'text' && data.type == 'richtext-trix'" v-bind:class="data.class" style="min-height:95%; height:95%; margin-bottom: 2em">
                                         <trix-wrapper v-model="subjectData[fieldname].value"
@@ -203,6 +210,7 @@
                                                 type="radio"
                                                 v-model="subjectData[fieldname].value"
                                                 :id="fieldname+'_'+valuesetvalue"
+                                                :key="fieldname+'_'+valuesetvalue"
                                                 :value="valuesetvalue">
                                         <label :for="fieldname+'_'+valuesetvalue" v-html="valuesetitem">
                                         </label>
@@ -214,6 +222,7 @@
                                                 type="checkbox"
                                                 v-model="subjectData[fieldname].value[valuesetvalue]"
                                                 :id="fieldname+'_'+valuesetvalue"
+                                                :key="fieldname+'_'+valuesetvalue"
                                                 :value="valuesetvalue">
                                         <label :for="fieldname+'_'+valuesetvalue" v-html="valuesetitem">
                                         </label>
@@ -290,15 +299,16 @@
                 <div style="display: flex; align-items: center; justify-content: flex-start">
                     <span v-if="loading" style="margin-right: 4px" class="button-loading-indicator" v-html="spinnerSrc"></span>
                     <button type="button"
+                            v-if="buttons['save_and_close']"
                             v-bind:class="buttons['save_and_close']['class']"
                             v-on:click="submitForm"
                             v-bind:disabled="loading"
                             style="display: flex; align-items: center; justify-content: center"
                     >
                         <span v-if="currentStep != lastStep" v-html="buttons['proceed']['html']"></span>
-                        <span v-if="currentStep == lastStep" v-html="buttons['save_and_close']['html']"></span>
+                        <span v-if="currentStep == lastStep && buttons['save_and_close']" v-html="buttons['save_and_close']['html']"></span>
                     </button>
-                    <button v-if="currentStep == lastStep"
+                    <button v-if="currentStep == lastStep && buttons['save_without_closing']"
                             type="button"
                             v-bind:class="buttons['save_without_closing']['class']"
                             v-on:click="submitForm(false)"
@@ -427,6 +437,16 @@
             }
         },
         methods: {
+            formContainerStyle: function(data, fieldname) {
+                let result = {
+                    height: typeof(data.customOptions['cssHeight']) == 'undefined' ? 'auto' : data.customOptions['cssHeight']
+                }
+                if (this.shouldHideField(fieldname)) {
+                    result['padding'] = '0';
+                }
+
+                return result;
+            },
             formHeadClass: function(step) {
                 if (this.currentStep == step) {
                     return this.getClassOverrideOrDefaultClass('edit-form-step-head', 'edit-form-step-head')

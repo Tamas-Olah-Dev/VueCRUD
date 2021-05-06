@@ -15,5 +15,13 @@ class StaticVueCRUDFormfield extends VueCRUDFormfield
         parent::__construct($properties);
         $this->kind = 'text';
         $this->type = 'static';
+        $this->setCustomOptions(['visible' => false]);
+    }
+
+    public function setVisibleValue($value)
+    {
+        $this->customOptions['visible'] = $value;
+
+        return $this;
     }
 }

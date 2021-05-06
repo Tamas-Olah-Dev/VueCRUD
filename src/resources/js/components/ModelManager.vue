@@ -690,13 +690,16 @@
                 return null;
             },
             createUrlWithFilters: function() {
-                let urlparts = window.location.href.split('?');
-                let suffix = '';
-                if (urlparts.length > 1) {
-                    suffix = '?'+urlparts[1]
-                }
-
-                return this.createUrl+suffix;
+                // let urlparts = window.location.href.split('?');
+                // let suffix = '';
+                // if (urlparts.length > 1) {
+                //     suffix = '?'+urlparts[1]
+                // }
+                let currentUrl = new URL(this.createUrl);
+                Object.keys(this.filters).forEach((key) => {
+                    currentUrl.searchParams.set(key, this.filters[key].value);
+                })
+                return currentUrl.toString();
             }
         },
         methods: {
