@@ -7,12 +7,12 @@
             "email": "olah.tamas@caleb.hu"
         }
     ],
-    "repositories": [
-        {
+    "repositories": {
+        "keyvalue": {
             "type": "github",
             "url": "https://github.com/ipeterfulop/keyvalues.package"
         }
-    ],
+    },
     "autoload": {
         "psr-4": {
             "Datalytix\\VueCRUD\\": "src"
