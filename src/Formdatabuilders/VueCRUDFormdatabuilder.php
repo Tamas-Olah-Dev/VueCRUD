@@ -13,11 +13,32 @@ abstract class VueCRUDFormdatabuilder
     public $formdata;
     public $subject;
     public $defaults;
+    protected $fields = null;
+    protected $stepsCache = null;
 
     protected $defaultContainerClass = 'form-group col';
     protected $defaultInputClass = 'form-control';
 
     protected $steps = [];
+
+    public function getCachedFields($field = null)
+    {
+        if ($this->fields == null) {
+            $this->fields = static::getFields();
+        }
+        return $field == null ? $this->fields : $this->fields->get($field);
+    }
+
+    public function getCachedSteps()
+    {
+        if ($this->stepsCache === null) {
+            $this->stepsCache = $this->getCachedFields()->map(function ($item) {
+                return $item->getStep();
+            })->values()->unique()->sort()->values();
+        }
+
+        return $this->stepsCache;
+    }
 
     public function addStepLabel($index, $label)
     {
@@ -45,8 +66,8 @@ abstract class VueCRUDFormdatabuilder
     public function getDefaultOrSubjectValue($fieldId)
     {
         $value = null;
-        if (static::getFields()->get($fieldId)->getDefault() !== null) {
-            $value = static::getFields()->get($fieldId)->getDefault();
+        if ($this->getCachedFields()->get($fieldId)->getDefault() !== null) {
+            $value = $this->getCachedFields()->get($fieldId)->getDefault();
         }
         if ((is_array($this->defaults)) && (isset($this->defaults[$fieldId]))) {
             $value = $this->defaults[$fieldId];
@@ -60,7 +81,7 @@ abstract class VueCRUDFormdatabuilder
 
     public function getValueset($fieldId)
     {
-        $field = static::getFielddata($fieldId);
+        $field = $this->getCachedFields($fieldId);
         if ($field->getType() == 'yesno') {
             $result = collect([]);
             if (($field->getAddChooseMessage()) && (! $this->isValidValue($this->getValue($fieldId)))) {
@@ -96,7 +117,10 @@ abstract class VueCRUDFormdatabuilder
         }
         $valuesetGetterMethod = $field->getValuesetGetter();
         if (method_exists($valuesetClass, $valuesetGetterMethod)) {
-            $valueset = call_user_func($valuesetClass.'::'.$valuesetGetterMethod);
+            $values = collect($this->formdata)->mapWithKeys(function($item, $key) {
+                return [$key => $item['value']];
+            })->all();
+            $valueset = call_user_func($valuesetClass.'::'.$valuesetGetterMethod, $values);
             foreach ($valueset as $index => $value) {
                 $result->put($index, $value);
             }
@@ -107,9 +131,9 @@ abstract class VueCRUDFormdatabuilder
 
     public function getValuesetSorted($fieldId)
     {
-        if (static::getFields()->get($fieldId)->getValuesetSortedGetter() != null) {
-            $valuesetClass = static::getFields()->get($fieldId)->getValuesetClass();
-            $valuesetGetterMethod = static::getFields()->get($fieldId)->getValuesetSortedGetter();
+        if ($this->getCachedFields()->get($fieldId)->getValuesetSortedGetter() != null) {
+            $valuesetClass = $this->getCachedFields()->get($fieldId)->getValuesetClass();
+            $valuesetGetterMethod = $this->getCachedFields()->get($fieldId)->getValuesetSortedGetter();
             if (method_exists($valuesetClass, $valuesetGetterMethod)) {
                 return call_user_func($valuesetClass.'::'.$valuesetGetterMethod);
             }
@@ -122,7 +146,8 @@ abstract class VueCRUDFormdatabuilder
     public function buildAllFields()
     {
         $this->formdata = [];
-        $fields = static::getFields();
+        $this->fields = null;
+        $fields = $this->getCachedFields();
         foreach ($fields as $fieldId => $fieldData) {
             if ($this->shouldBuildField($fieldId)) {
                 $element = [
@@ -158,7 +183,7 @@ abstract class VueCRUDFormdatabuilder
     public function getConditionFields()
     {
         $result = [];
-        foreach (static::getFields() as $field) {
+        foreach ($this->getCachedFields() as $field) {
             foreach ($field->getConditions() as $condition) {
                 $result[$condition['field']] = 1;
             }
@@ -172,7 +197,7 @@ abstract class VueCRUDFormdatabuilder
         return [
             'config' => [
                 'mode'            => $this->subject === null ? 'creating' : 'editing',
-                'steps'           => self::getSteps(),
+                'steps'           => self::getCachedSteps(),
                 'stepLabels'      => $this->steps,
                 'conditionFields' => $this->getConditionFields(),
             ],
@@ -332,9 +357,9 @@ abstract class VueCRUDFormdatabuilder
 
     protected function shouldBuildField($fieldId)
     {
-        $fieldData = self::getFielddata($fieldId);
+        $fieldData = $this->getCachedFields($fieldId);
         if ($this->subject != null) {
-            $step = self::getLastStep();
+            $step = $this->getLastStep();
         } else {
             $step = 1;
         }
@@ -389,9 +414,9 @@ abstract class VueCRUDFormdatabuilder
         })->values()->unique()->sort()->values();
     }
 
-    public static function getLastStep()
+    public function getLastStep()
     {
-        return self::getSteps()->last();
+        return $this->getCachedSteps()->last();
     }
 
     public static function hasMultipleSteps()
