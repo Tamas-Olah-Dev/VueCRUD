@@ -43,6 +43,9 @@ class VueCRUDControllerBase
         $filters = method_exists($class, 'getVueCRUDIndexFilters')
             ? (object) $class::getVueCRUDIndexFilters()
             : (object) [];
+        $contextMenuComponent = method_exists($class, 'getVueCRUDContextMenuComponent')
+            ? $class::getVueCRUDContextMenuComponent()
+            : '';
         $viewData = [
             'title'            => $this->getSubjectNamePlural(),
             'pageTitleContent' => $this->getSubjectNamePlural(),
@@ -61,6 +64,10 @@ class VueCRUDControllerBase
             'massOperations'   => (object) $class::getVueCRUDMassFunctions(),
             'exportOperations' => (object) $class::getVueCRUDExportFunctions(),
             'idProperty'       => $class::getIdProperty(),
+            'contextMenuComponent' => $contextMenuComponent,
+            'paginationItemsPerPageOptions' => config('vuecrud.customizations.paginationItemsPerPageOptions', [20, 50, 100]),
+            'paginationType' => config('vuecrud.customizations.paginationType', 'top'),
+            'paginationItemsPerPageDefault' => config('vuecrud.customizations.paginationItemsPerPageDefault', 20),
         ];
         if (request()->isXmlHttpRequest()) {
             $elementData = static::getElements();
@@ -229,7 +236,7 @@ class VueCRUDControllerBase
     public function setPopupMessageInSession($message, $class = 'success')
     {
         session()->put('popupMessage', $message);
-        session()->put('popupMessageClass', 'alert-'.$class);
+        session()->put('popupMessageClass', config('vuecrud.alertPopupCSSClassPrefix', 'alert-').$class);
     }
 
     protected function getAllowedAjaxOperations()
@@ -238,6 +245,7 @@ class VueCRUDControllerBase
         $classMassOperations = array_keys($class::getVueCRUDOptionalAjaxFunctions());
 
         return array_merge($classMassOperations, [
+            'requestDeleteLabel',
             'storeProfilePicture',
             'removeProfilePicture',
             'trixStoreAttachment',
@@ -257,7 +265,7 @@ class VueCRUDControllerBase
             abort(404);
         }
 
-        return $this->{request()->get('action')}();
+        return $this->{request()->get('action')}($subject);
     }
 
     protected function trixStoreAttachment()
@@ -621,4 +629,13 @@ class VueCRUDControllerBase
         return $result;
     }
 
+    protected function requestDeleteLabel($subject)
+    {
+        $element = $this->getSubject($subject);
+        if (method_exists($element, 'getVueCRUDDeleteConfirmationLabel')) {
+            return $element->getVueCRUDDeleteConfirmationLabel();
+        }
+
+        return __('Are you sure you want to delete this :subject?', ['subject' => mb_strtolower($element::SUBJECT_NAME)]);
+    }
 }

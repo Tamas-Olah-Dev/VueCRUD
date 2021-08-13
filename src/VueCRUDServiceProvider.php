@@ -37,6 +37,7 @@ class VueCRUDServiceProvider extends ServiceProvider
 
         $this->commands([
             \Datalytix\VueCRUD\Commands\VueCRUDGenerate::class,
+            \Datalytix\VueCRUD\Commands\CssClasses::class,
         ]);
     }
 }

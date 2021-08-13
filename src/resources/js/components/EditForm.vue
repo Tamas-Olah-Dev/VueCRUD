@@ -1,24 +1,22 @@
 <template>
-    <div class="container-fluid vue-editform-container"
-         style="position:relative"
-         v-bind:class="getClassOverrideOrDefaultClass('edit-form-container', 'edit-form-container')"
+    <div style="position:relative"
+         v-bind:class="getCSSClass('edit-form-container')"
     >
-        <div v-if="!loaded" v-html="spinnerSrcCustomSize" style="width:100%; display:flex; justify-content: center; height: 2rem; margin-top: 2rem; margin-bottom: 2rem"></div>
+        <div v-if="!loaded" v-html="loadingIndicator" :class="getCSSClass('edit-form-loading-indicator')"></div>
         <div v-if="loaded && (typeof(formTitle != 'undefined'))"
-             v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-title-container', 'edit-form-form-title-container')"
+             v-bind:class="getCSSClass('edit-form-form-title-container')"
         ><h4 v-html="formTitle"></h4></div>
         <div v-if="formDisabled" class="disabled-overlay"></div>
-        <form role="form" class="margin-b-20"  v-on:submit.prevent="submitForm"  v-if="loaded"
-              v-bind:class="getClassOverrideOrDefaultClass('edit-form-form', 'edit-form-form')"
+        <form role="form"  v-on:submit.prevent="submitForm"  v-if="loaded"
+              v-bind:class="getCSSClass('edit-form-form')"
         >
-            <div class="row" v-if="!formDisabled"
-                 style="margin-bottom: 1rem"
-                 v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-buttons-container', 'edit-form-form-buttons-container')"
+            <div v-if="!formDisabled"
+                 v-bind:class="getCSSClass('edit-form-form-buttons-container') + getCSSClass('edit-form-form-start-buttons-container')"
             >
-                <div v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-button-container', 'col')"
-                >
-                    <div style="display: flex; align-items: center; justify-content: flex-start">
-                        <span v-if="loading" style="margin-right: .5rem" class="button-loading-indicator" v-html="spinnerSrc"></span>
+                <div :class="getCSSClass('edit-form-form-buttons-container')">
+
+                    <div :class="getCSSClass('edit-form-save-buttons-container')">
+                        <span v-if="loading" style="margin-right: .5rem" :class="getCSSClass('button-loading-indicator')" v-html="loadingIndicator"></span>
                         <button type="button"
                                 v-if="buttons['save_and_close']"
                                 v-bind:class="buttons['save_and_close']['class']"
@@ -32,7 +30,7 @@
                         </button>
                         <button v-if="currentStep == lastStep && buttons['save_without_closing']"
                                 type="button"
-                                v-bind:class="buttons['save_without_closing']['class']"
+                                v-bind:class="getCSSClass('model-manager-save_without_closing-button')"
                                 v-on:click="submitForm(false)"
                                 v-bind:disabled="loading"
                                 style="display: flex; align-items: center; justify-content: center; margin-left: .5rem"
@@ -41,10 +39,10 @@
                         </button>
                     </div>
                 </div>
-                <div v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-button-container', 'col')"
-                >
+                <div :class="getCSSClass('edit-form-cancel-button-container')">
+
                     <button type="button"
-                            v-bind:class="buttons['cancel']['class']"
+                            v-bind:class="getCSSClass('model-manager-cancel-button')"
                             v-on:click="cancelEditing"
                             v-html="buttons['cancel']['html']"
                     ></button>
@@ -56,31 +54,32 @@
             </div>
             <div v-for="step in stepsToRender"
                  :key="'step-'+step.toString()"
-                 v-bind:class="getClassOverrideOrDefaultClass('edit-form-step', 'edit-form-step')"
+                 v-bind:class="getCSSClass('edit-form-step')"
             >
                 <div v-if="typeof(config.stepLabels[step]) != 'undefined'"
-                     class="form-step-header"
                      v-bind:class="formHeadClass(step)"
                      v-html="config.stepLabels[step]"></div>
                 <section v-for="group in groups[step]"
-                         v-bind:class="groups[step].length > 1 ? getClassOverrideOrDefaultClass('edit-form-group', 'edit-form-group') : ''"
+                         v-bind:class="groups[step].length > 1 ? getCSSClass('edit-form-group') : ''"
                          :key="'step-group-'+group"
                          style="width: 100%"
                 >
                     <div v-if="groups[step].length > 1"
                          v-on:click="toggleGroupVisibility(group)"
-                         v-bind:class="getClassOverrideOrDefaultClass('edit-form-group-head', 'edit-form-group-head')"
+                         v-bind:class="getCSSClass('edit-form-group-head')"
                          style="display: flex; align-items: center; justify-content: space-between; cursor:pointer"
                     >
                         <span v-html="group"></span>
-                        <span class="vuecrud-caret" v-bind:class="{'open': openGroups.includes(group)}">&#9666;</span>
+                        <span class="vuecrud-caret"
+                              v-html="icon('caret-left')"
+                              v-bind:class="{'open': openGroups.includes(group)}"></span>
                     </div>
-                    <section v-bind:class="{'edit-form-group-section': groups[step].length > 1}"
+                    <section v-bind:class="groupSectionClass(step)"
                              v-show="groups[step].length  == 1 || (groups[step].length > 1 && openGroups.includes(group))"
                              style="width: 100%">
-                        <div class="row" style="position:relative"
+                        <div style="position:relative"
                              :data-group="group"
-                             v-bind:class="getClassOverrideOrDefaultClass('edit-form-step-body', 'edit-form-step-body')"
+                             v-bind:class="getCSSClass('edit-form-step-body', 'edit-form-step-body')"
                         >
                             <div v-if="currentStep != step" class="disabled-overlay"></div>
                             <div v-for="data, fieldname in stepSubjectDataForGroup(subjectDataForStep(step), group)"
@@ -92,8 +91,8 @@
                                     <label v-if="data.label != null">
                                         {{ data.label }}
                                         <span v-if="data.mandatory"> *</span>
-                                        <span class="edit-form-label-tooltip" v-if="typeof(data.helpTooltip) != 'undefined'" v-html="data.helpTooltip"></span>
-                                        <span v-if="errorExists(fieldname)" class="text-danger validation-error-label-message" v-html="errors[fieldname][0]"></span>
+                                        <span :class="getCSSClass('edit-form-label-tooltip')" v-if="typeof(data.helpTooltip) != 'undefined'" v-html="data.helpTooltip"></span>
+                                        <span v-if="errorExists(fieldname)" :class="getCSSClass('editform-validation-error-label-message')" v-html="errors[fieldname][0]"></span>
                                     </label>
                                     <div v-if="data.kind == 'color'"
                                          style="display: flex; align-items:center; justify-content: center">
@@ -142,11 +141,17 @@
                                            v-bind:class="data.class"
                                            type="password"
                                     >
+                                    <input v-if="data.kind == 'input' && data.type == 'date'"
+                                           v-model="subjectData[fieldname].value"
+                                           v-bind:placeholder="subjectData[fieldname].placeholder"
+                                           v-bind:class="data.class"
+                                           type="date"
+                                    >
                                     <number-field v-if="data.kind == 'numberfield'"
                                                   editable="true"
-                                                  input-class="form-control col-12"
+                                                  :input-class="getCSSClass('editform-numberfield-input-class')"
                                                   show-currency-label="true"
-                                                  container-class="col-12"
+                                                  :container-class="''"
                                                   v-model="subjectData[fieldname].value"
                                                   v-bind="JSON.parse(data.props)"
                                     ></number-field>
@@ -176,6 +181,13 @@
                                                        v-bind:ajax-operations-url="ajaxOperationsUrl"
                                         ></quill-wrapper>
                                     </div>
+                                    <div v-if="data.kind == 'text' && data.type == 'richtext-tinymce'" v-bind:class="data.class" style="min-height:95%; height:95%; margin-bottom: 2em">
+                                        <tiny-mce-wrapper v-model="subjectData[fieldname].value"
+                                                          v-bind:fieldname="fieldname"
+                                                          v-bind="JSON.parse(data.props)"
+                                                          v-bind:ajax-operations-url="ajaxOperationsUrl"
+                                        ></tiny-mce-wrapper>
+                                    </div>
                                     <select v-if="data.kind == 'select' && (data.type == null || data.type == 'yesno' || data.type == 'custom')"
                                             v-model="subjectData[fieldname].value"
                                             v-bind:style="subjectData[fieldname].value == -1 ? {'color': 'lightgray'} : {}"
@@ -195,6 +207,7 @@
                                                 v-bind="JSON.parse(data.props)"
                                                 v-model="subjectData[fieldname].value"
                                                 v-bind:class-overrides="classOverrides"
+                                                :locale="locale"
                                     ></datepicker>
                                     <image-picker v-if="data.kind == 'imagepicker'"
                                                   v-bind="JSON.parse(data.props)"
@@ -277,30 +290,29 @@
                 </section>
             </div>
         </form>
-        <div class="row" v-if="nonFormErrorKeys.length > 0">
-            <div class="alert alert-danger col col-12"
+        <div :class="getCSSClass('editform-nonform-errors-container')" v-if="nonFormErrorKeys.length > 0">
+            <div :class="getCSSClass('editform-nonform-error')"
                  v-for="key in nonFormErrorKeys" v-html="errors[key][0]"></div>
         </div>
-        <div class="row" v-if="resultMessage != ''">
-            <div class="alert col col-12"
-                 v-bind:class="resultMessageClass"
+        <div :class="getCSSClass('editform-result-message-container')" v-if="resultMessage != ''">
+            <div v-bind:class="getCSSClass('editform-result-message')+' '+resultMessageClass"
                  v-html="resultMessage"></div>
         </div>
-        <div class="row" v-if="!formDisabled"
-             v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-buttons-container', 'edit-form-form-buttons-container')"
+        <div v-if="!formDisabled"
+             v-bind:class="getCSSClass('edit-form-form-buttons-container') + getCSSClass('edit-form-form-end-buttons-container')"
         >
             <div v-if="validationErrorMessage != ''"
-                 style="width: 100%; padding-top: .5rem; padding-bottom: .5rem; text-align: left; padding-left: 1rem; color: red"
+                 :class="getCSSClass('editform-validation-error-message')"
                  v-html="validationErrorMessage"
             ></div>
 
-            <div v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-button-container', 'col')"
+            <div :class="getCSSClass('edit-form-form-button-container')"
             >
-                <div style="display: flex; align-items: center; justify-content: flex-start">
-                    <span v-if="loading" style="margin-right: 4px" class="button-loading-indicator" v-html="spinnerSrc"></span>
+                <div :class="getCSSClass('edit-form-save-buttons-container')">
+                    <span v-if="loading" style="margin-right: 4px" class="button-loading-indicator" v-html="loadingIndicator"></span>
                     <button type="button"
                             v-if="buttons['save_and_close']"
-                            v-bind:class="buttons['save_and_close']['class']"
+                            v-bind:class="getCSSClass('model-manager-save_and_close-button')"
                             v-on:click="submitForm"
                             v-bind:disabled="loading"
                             style="display: flex; align-items: center; justify-content: center"
@@ -310,7 +322,7 @@
                     </button>
                     <button v-if="currentStep == lastStep && buttons['save_without_closing']"
                             type="button"
-                            v-bind:class="buttons['save_without_closing']['class']"
+                            v-bind:class="getCSSClass('model-manager-save_without_closing-button')"
                             v-on:click="submitForm(false)"
                             v-bind:disabled="loading"
                             style="display: flex; align-items: center; justify-content: center; margin-left: .5rem"
@@ -319,10 +331,10 @@
                     </button>
                 </div>
             </div>
-            <div v-bind:class="getClassOverrideOrDefaultClass('edit-form-form-button-container', 'col')"
+            <div v-bind:class="getCSSClass('edit-form-cancel-button-container')"
             >
                 <button type="button"
-                        v-bind:class="buttons['cancel']['class']"
+                        v-bind:class="getCSSClass('model-manager-cancel-button')"
                         v-on:click="cancelEditing"
                         v-html="buttons['cancel']['html']"
                 ></button>
@@ -333,10 +345,9 @@
 
 <script>
     import {translateMixin} from './mixins/translateMixin.js'
-    import {spinner} from './mixins/spinner.js'
-    import {classOverridesMixin} from './mixins/classOverridesMixin.js'
     export default {
-        mixins: [translateMixin, spinner, classOverridesMixin],
+        inject: ['getCSSClass', 'loadingIndicator', 'icon', 'locale'],
+        mixins: [translateMixin],
         props: {
             dataUrl: {type: String},
             saveUrl: {type: String},
@@ -432,11 +443,17 @@
             },
             validationErrorMessage: function() {
                 return Object.keys(this.errors).length > 0
-                    ? this.translate('Please review the invalid values and try again.')
+                    ? this.translate('There were errors saving the data, please review the form and try again')
                     : '';
             }
         },
         methods: {
+            groupSectionClass: function(step) {
+                if (this.groups[step].length > 1) {
+                    return this.getCSSClass('edit-form-group-section');
+                }
+                return '';
+            },
             formContainerStyle: function(data, fieldname) {
                 let result = {
                     height: typeof(data.customOptions['cssHeight']) == 'undefined' ? 'auto' : data.customOptions['cssHeight']
@@ -449,9 +466,9 @@
             },
             formHeadClass: function(step) {
                 if (this.currentStep == step) {
-                    return this.getClassOverrideOrDefaultClass('edit-form-step-head', 'edit-form-step-head')
+                    return this.getCSSClass('edit-form-step-head')
                 } else {
-                    return this.getClassOverrideOrDefaultClass('edit-form-step-head-inactive', 'edit-form-step-head-inactive')
+                    return this.getCSSClass('edit-form-step-head-inactive')
                 }
             },
             numberFieldMin: function(fieldname) {
@@ -730,10 +747,6 @@
         border-top: 2px solid lightgrey;
         border-left: 1px solid lightgrey;
         padding: 5px;
-    }
-    .vuecrud-caret {
-        height: 2rem;
-        margin-right: .5rem;
     }
     .vuecrud-caret {
         transition: transform 200ms ease-in-out;

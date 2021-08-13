@@ -16,7 +16,16 @@ and use
 artisan vendor:publish --force 
 ```
 to publish the JS components. When running this command the first time everything in the package should be published, but later only choose vuecrud-scripts from the tags, so that customized views or configurations aren't overwritten. 
-If you don't have the Vue component auto-discovery enabled in app.js, add the modules published in resources/js/components.
+If you don't have the Vue component auto-discovery enabled in app.js, add the modules published in resources/js/components. 
+
+The Vue root component also has to have the model manager mixin added as shown in resources/js/app.js.sample. The main admin layout needs to create JS variables from the vueCRUD configurations like this (before the #app node)
+```
+<script>
+    window.vueCRUDCSSClasses = {!!  json_encode(config('vuecrud.cssClasses', []))  !!};
+    window.vueCRUDIcons = {!!  json_encode(config('vuecrud.icons', []))  !!};
+</script>
+ ```
+
 
 If everything is done, run
 ```

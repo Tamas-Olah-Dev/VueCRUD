@@ -1,0 +1,6 @@
+import {modelManagerServicesMixin} from './components/mixins/modelManagerServicesMixin.js';
+
+const app = new Vue({
+    el: '#app',
+    mixins: [modelManagerServicesMixin]
+});

@@ -30,5 +30,15 @@ return [
         ],
 
     ],
-    'vueCrudDefaultView' => 'vendor.vue-crud.model-manager'
+    'vueCrudDefaultView' => 'packages.vue-crud.model-manager'
+
+
+    /*
+     * optional fields
+     *
+     * formdatabuilder.defaultContainerClass
+     * formdatabuilder.defaultInputClass
+     * translateConstants
+     * alertPopupCSSClassPrefix
+     */
 ];

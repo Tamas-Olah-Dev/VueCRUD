@@ -16,6 +16,6 @@ class RichttextTinyMCEVueCRUDFormfield extends VueCRUDFormfield
         $this->kind = 'text';
         $this->type = 'richtext-tinymce';
         $this->setCustomOptions(['minHeight' => '600']);
-        $this->props = ['componentId' => bin2hex(random_bytes(8))];
+        $this->props = ['componentId' => random_int(0, 9999999)];
     }
 }

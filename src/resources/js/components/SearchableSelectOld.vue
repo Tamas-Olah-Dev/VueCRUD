@@ -1,22 +1,23 @@
 <template>
-    <div :class="getCSSClass('searchable-select-main')"  ref="container">
-        <div :class="getCSSClass('searchable-select-container')">
-            <div :class="getCSSClass('searchable-select-selected-container')" v-if="multiple">
+    <div class="multi-select-main"  ref="container">
+        <div class="multi-select-container">
+            <div class="multi-select-selected-container" v-if="multiple">
                 <span v-for="item, index in selectedItems"
-                      :class="getCSSClass('searchable-select-item-span')"
+                      class="multi-select-item-span"
                       :key="index"
                 >
                     {{ item.label }}
-                    <span :class="getCSSClass('searchable-select-remove-button')"
+                    <span class="multi-select-remove-button"
                           v-if="allowRemove"
                           v-on:click="removeItem(index)"
                     >X</span>
                 </span>
             </div>
-            <div style="position:relative; display: flex; align-items: center">
-                <input type="text" :class="getCSSClass('searchable-select-input')"
+            <div style="position:relative">
+                <input type="text" class="multi-select-input"
                        readonly
-                       style="width: 100%; padding-right:40px; order: 9999"
+                       style="background-color: white"
+                       v-bind:class="inputClass"
                        v-bind:value="selectedItemLabel"
                        :placeholder="placeholderLabel"
                        v-bind:style="{'color': invalidItem ? 'red' : 'black', 'background-color': disabled ? '#e9ecef' : 'white'}"
@@ -26,23 +27,17 @@
                 >
                 <span ref="caret"
                       v-if="!disabled"
-                      style="position: absolute; right: .3rem; transition: transform 100ms ease-in-out; cursor:pointer; transform-origin:center"
                       v-on:click="openDropdown = !openDropdown"
-                      :class="caretClass"
-                      v-html="icon('caret-left')"
-                ></span>
+                      class="multi-select-dropdown-caret"
+                      v-bind:class="caretClass"
+                >&#9666;</span>
+
             </div>
-            <button v-if="addItemUrl != ''"
-                    :class="getCSSClass('searchable-select-add-button')"
-                    v-html="icon('plus')"
-                    v-on:click="showAddPopup"
-            ></button>
         </div>
 
-        <div :class="getCSSClass('searchable-select-dropdown')"
-             style="margin-top: .3rem"
-             v-show="shouldShowDropdown" ref="dropdown">
-            <input type="text" :class="getCSSClass('searchable-select-input')"
+        <div class="multi-select-dropdown" v-show="shouldShowDropdown" ref="dropdown">
+            <input type="text" class="multi-select-input"
+                   v-bind:class="inputClass"
                    ref="input"
                    v-model="filterText"
                    :placeholder="placeholderLabel"
@@ -52,37 +47,23 @@
                    v-on:keyup.escape="resetFilterTextIfNeeded"
                    v-on:keyup.enter="addSelectedFromDropdownOrInput"
             >
-            <div :class="getCSSClass('searchable-select-dropdown-list')">
+            <div class="multi-select-dropdown-list">
                 <div v-for="subject, index in filteredAvailableItems"
                      :key="index"
                      ref="index"
                      v-html="subject.label"
+                     class="multi-select-available-item"
                      v-on:mouseover="dropdownSelectedIndex = index"
-                     :class="itemClass(subject, index)"
+                     v-bind:class="itemClass(subject, index)"
                      :title="subject.disabledTitle"
                      v-on:click="addItem(subject)"></div>
             </div>
         </div>
-        <popup :visible="showPopup"
-            v-on:close="hideAddPopup"
-        >
-            <edit-form
-                    :key="editFormKey"
-                    v-bind:data-url="addItemUrl"
-                    v-bind:save-url="storeItemUrl"
-                    v-bind:ajax-operations-url="ajaxItemOperationsUrl"
-                    v-on:submit-success="updateValueset"
-                    v-on:editing-canceled="hideAddPopup"
-                    redirect-to-response-on-success="false"
-                    v-bind:buttons="mainButtons"
-            ></edit-form>
-        </popup>
     </div>
 </template>
 
 <script>
     export default {
-        inject: ['loadingIndicator', 'getCSSClass', 'translate', 'icon', 'mainButtons'],
         props: {
             valueset: {type: Array, default: () => []},
             value: {},
@@ -90,14 +71,18 @@
             idProperty: {type: String, default: 'id'},
             labelProperty: {type: String, default: 'name'},
             multiple: {type: Boolean, default: true},
+            inputClass: {type: String, default: 'form-control'},
+            labels: {type: Object, default: () => {
+                    return {
+                        'No options': 'No options',
+                        'Select...': 'Select...'
+                    }
+                }},
             allowRemove: {type: Boolean, default: true},
             respectDisabledAttribute: {type: Boolean, default: false},
             undefinedValue: {type: Number, default: -1},
             undefinedLabel: {type: String, default: ''},
-            disabled: {type: Boolean, default: false},
-            addItemUrl: {type: String, default: ''},
-            storeItemUrl: {type: String, default: ''},
-            ajaxItemOperationsUrl: {type: String, default: ''}
+            disabled: {type: Boolean, default: false}
         },
         data: function() {
             return {
@@ -106,8 +91,6 @@
                 dropdownSelectedIndex: -1,
                 openDropdown: false,
                 invalidItem: false,
-                showPopup: false,
-                editFormKey: Math.random().toString(),
             }
         },
         computed: {
@@ -126,13 +109,13 @@
             },
             placeholderLabel: function() {
                 if (this.valueset.length == 0) {
-                    return this.translate('No options');
+                    return this.labels['No options'];
                 }
                 if ((this.value == null)
                     || (this.value == -1)
                     || ((Array.isArray(this.value)) && (this.value.length == 0)))
                 {
-                    return this.translate('Select...');
+                    return this.labels['Select...'];
                 }
                 return '';
             },
@@ -147,9 +130,7 @@
                 return result;
             },
             caretClass: function() {
-                return this.shouldShowDropdown
-                    ? this.getCSSClass('searchable-select-dropdown-caret') + ' ' + this.getCSSClass('searchable-select-dropdown-caret-open')
-                    : this.getCSSClass('searchable-select-dropdown-caret');
+                return this.shouldShowDropdown ? 'multi-select-dropdown-caret-open' : ''
             },
             shouldShowDropdown: function() {
                 if(this.disabled) {
@@ -197,30 +178,18 @@
             },
         },
         methods: {
-            showAddPopup: function() {
-                this.showPopup = true;
-            },
-            hideAddPopup: function() {
-                this.showPopup = false;
-                this.editFormKey = Math.random().toString()
-            },
-            updateValueset: function(event) {
-                this.$emit('addtovalueset', event);
-                this.$emit('input', event[this.idProperty]);
-                this.hideAddPopup();
-            },
             itemClass: function(item, index) {
-                let result = ['searchable-select-available-item'];
+                let result = [];
                 if (item['id'] == this.undefinedValue) {
-                    result.push(this.getCSSClass('searchable-select-undefined-item'));
+                    result.push('multi-select-undefined-item');
                 }
                 if (this.dropdownSelectedIndex == index) {
-                    result.push(this.getCSSClass('searchable-select-selected'));
+                    result.push('multi-select-selected');
                 }
                 if ((this.respectDisabledAttribute)
                     && (item.hasOwnProperty('disabled'))
                     && (item.disabled)) {
-                    result.push(this.getCSSClass('searchable-select-item-disabled'));
+                    result = ['multi-select-item-disabled']
                 }
                 return result;
             },
@@ -359,13 +328,6 @@
                     this.openDropdown = false;
                 }
             },
-            handleEscape: function(e) {
-                if (e.keyCode == 'Esc') {
-                    this.resetFilterTextIfNeeded();
-                    this.dropdownSelectedIndex = -1;
-                    this.openDropdown = false;
-                }
-            },
             parseValue: function() {
                 this.selectedItems = [];
                 this.selectedItems = this.valueset.filter((item) => {
@@ -393,13 +355,11 @@
             shouldShowDropdown: function() {
                 if (this.shouldShowDropdown) {
                     document.addEventListener('click', this.handleClickOutside, true);
-                    document.addEventListener('keyup', this.handleEscape, true);
                     Vue.nextTick(() => {
                         this.$refs['input'].focus();
                     })
                 } else {
                     document.removeEventListener('click', this.handleClickOutside, true);
-                    document.removeEventListener('keyup', this.handleEscape, true);
                 }
             },
             value: function() {
@@ -412,10 +372,10 @@
     }
 </script>
 <style>
-    .searchable-select-main {
+    .multi-select-main {
         position: relative;
     }
-    .searchable-select-container {
+    .multi-select-container {
         display: flex;
         flex-direction:column;
         flex-wrap: wrap;
@@ -423,53 +383,107 @@
         width: 100%;
         max-width: 100%;
     }
-    .searchable-select-selected-container {
+    .multi-select-selected-container {
         display: flex;
         flex-wrap: wrap;
+        font-size: .7em;
         max-height: 12em;
         overflow-y: auto;
     }
-    .searchable-select-item-span {
+    .multi-select-input {
+        order: 9999;
+        margin: 0px;
+        /*margin-top: 20px;*/
+        border-radius: 5px;
+        width: 100%;
+        padding-right:40px;
+        max-height:20%;
+        margin-bottom: 5px;
+    }
+    .multi-select-item-span {
+        padding: 4px;
+        padding-left: 5px;
+        padding-right: 5px;
+        /*border-radius: 2px;*/
+        box-shadow: 3px 3px lightgrey;
+        background-color: #3e9cb9;
         margin: 3px;
-    }
-    .searchable-select-remove-button {
-        margin-left: .5rem;
-        cursor: pointer;
-        user-select: none;
-    }
-    .searchable-select-remove-button:hover {
         color: white;
     }
-    .searchable-select-dropdown {
+    .multi-select-remove-button {
+        margin-left: 10px;
+        padding: 3px;
+        cursor: pointer;
+        font-weight: bold;
+        color: darkgrey;
+        user-select: none;
+    }
+    .multi-select-remove-button:hover {
+        color: white;
+    }
+    .multi-select-dropdown {
         z-index: 1000;
         width: 100%;
-        max-height: 20rem;
+        /*max-width: 400px;*/
+        padding: 5px;
+        height: 20em;
+        border: 1px solid black;
+        border-top: none;
+        box-shadow: 5px 5px darkgrey;
+        background-color: white;
         position:absolute;
         overflow: hidden;
     }
 
-    .searchable-select-dropdown-list {
+    .multi-select-dropdown-list {
         overflow-y: scroll;
         height: 80%;
         width: 100%;
     }
-    .searchable-select-dropdown-list > div {
+    .multi-select-dropdown-list > div {
         cursor:pointer;
     }
-    .searchable-select-dropdown-list > div.searchable-select-selected {
+    .multi-select-dropdown-list > div.multi-select-selected {
+        /*background-color: lightgoldenrodyellow;*/
         font-weight:bold;
     }
-    .searchable-select-dropdown-caret-open {
+    .multi-select-dropdown-caret {
+        cursor:pointer;
+        position:absolute;
+        z-index: 100;
+        right: 0px;
+        padding-right:10px;
+        bottom: 10%;
+        font-size: 200%;
+        transition: transform 200ms ease-in-out;
+    }
+    .multi-select-clear-button {
+        cursor:pointer;
+        position:absolute;
+        z-index: 100;
+        right: 35px;
+        bottom: -2px;
+        font-size: 1.6em;
+        color: red;
+    }
+    .multi-select-dropdown-caret-open {
         transform: rotate(-90deg);
+        transform-origin: center;
     }
-    .searchable-select-item-disabled {
+    .multi-select-item-disabled {
         cursor: not-allowed !important;
-        opacity: .5;
+        color: darkgrey;
     }
-    .searchable-select-undefined-item {
+    .multi-select-undefined-item {
+        margin-bottom: 2px;
+        padding-bottom: 2px;
+        border-bottom: 1px solid darkgrey;
     }
-    .searchable-select-available-item {
+    .multi-select-available-item {
         line-height: normal;
+        padding-top: .7em;
+        padding-bottom: .7em;
+        border-bottom: 1px solid lightgray;
     }
 
 </style>

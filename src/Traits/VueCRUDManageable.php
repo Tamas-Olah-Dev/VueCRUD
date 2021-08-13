@@ -285,7 +285,6 @@ trait VueCRUDManageable
     // The labels of the tabs will be the $tab property's value
     abstract public static function getVueCRUDIndexFilters();
 
-
     public static function getVueCRUDIndexLink($filters = [], $subjectSlug = null, $nameSuffix = '')
     {
         $subjectSlug = $subjectSlug === null ? self::getSubjectSlug() : $subjectSlug;
@@ -335,5 +334,4 @@ trait VueCRUDManageable
 
         return null;
     }
-
 }

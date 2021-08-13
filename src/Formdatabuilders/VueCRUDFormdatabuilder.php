@@ -16,9 +16,6 @@ abstract class VueCRUDFormdatabuilder
     protected $fields = null;
     protected $stepsCache = null;
 
-    protected $defaultContainerClass = 'form-group col';
-    protected $defaultInputClass = 'form-control';
-
     protected $steps = [];
 
     public function getCachedFields($field = null)
@@ -154,8 +151,8 @@ abstract class VueCRUDFormdatabuilder
                     'step'           => $fieldData->getStep(),
                     'kind'           => $fieldData->getKind(),
                     'type'           => $fieldData->getType(),
-                    'containerClass' => $this->defaultContainerClass.' '.$fieldData->getContainerClass(),
-                    'class'          => $this->defaultInputClass.' '.$fieldData->getAdditionalClass(),
+                    'containerClass' => config('vuecrud.formdatabuilder.defaultContainerClass', 'form-group col').' '.$fieldData->getContainerClass(),
+                    'class'          => config('vuecrud.formdatabuilder.defaultInputClass', 'form-control').' '.$fieldData->getAdditionalClass(),
                     'valueset'       => $this->getValueset($fieldId),
                     'valuesetSorted' => $this->getValuesetSorted($fieldId),
                     'label'          => __($fieldData->getLabel()),

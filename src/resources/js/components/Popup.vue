@@ -4,12 +4,13 @@
          class="popup-inner"
          ref="popup-inner"
          v-bind:style="{'z-index': zIndex}"
-         v-on:click.self="closePopup"
     >
-        <div style="max-height: 90%; width: 80%; background-color: white; padding: 2em; box-shadow: 5px 5px rgba(7,7,7,.7);"
+        <div style="max-height: 90%; width: 80%; background-color: white; padding: 2em; box-shadow: 0 20px 25px -3px rgba(0, 0, 0, 0.1), 0 10px 14px -4px rgba(0, 0, 0, 0.05);"
         >
             <slot></slot>
-            <div style="width: 100%; display: flex; justify-content: center; padding-top: 1em; padding-bottom: 1em" v-if="showCloseButton">
+            <div style="width: 100%; display: flex; justify-content: center; padding-top: 1em; padding-bottom: 1em"
+                 class="popup-inner-button-container"
+                 v-if="showCloseButton">
                 <button v-html="closeButtonLabel" :class="closeButtonClass"
                         v-on:click.self="closePopup"></button>
             </div>
@@ -62,6 +63,9 @@
                     }, 100);
                 } else {
                     this.zIndex = 0;
+                    window.setTimeout(() => {
+                        this.$refs['popup-inner'].classList.remove('popup-inner-active');
+                    }, 100);
                 }
             }
         },

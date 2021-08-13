@@ -1,41 +1,38 @@
 <template>
     <div ref="container" style="position:relative">
-        <div class="input-group vue-datepicker-inputgroup" :ref="'inputgroup'">
+        <div :class="getCSSClass('vuedatepicker-inputgroup')" :ref="'inputgroup'">
             <label v-if="formElementLabel != ''">{{ formElementLabel }}</label>
             <template v-if="disabled">
                 <input v-model="dateLabel"
-                       class="form-control vuedatepicker-input"
-                       v-bind:class="inputClass"
+                       :class="getCSSClass('vuedatepicker-input') + ' ' + inputClass"
                        readonly
                        disabled
-                       style="background-color: #e9ecef"
                 >
             </template>
             <template v-else>
-                <div class="input-group-append vue-datepicker-inputgroup-append">
-                    <input v-model="dateLabel"
-                           class="form-control vuedatepicker-input"
-                           v-bind:class="inputClass"
-                           @click="toggleDatepickerDropdown"
-                           readonly
-                    >
-                    <span v-on:click="resetDate"
-                          v-show="dateValue != null"
-                          class="vuedatepicker-clear-button"
-                    >X</span>
-                    <span class="input-group-text vuedatepicker-calendar-icon"
-                          v-on:click="toggleDatepickerDropdown"
-                          style="padding:5px; cursor:pointer"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" style="max-height:1.5em; max-width: 1.5em">
-                            <path
-                                    style="fill:darkgrey;fill-opacity:1;stroke:none"
-                                    d="M 6 3 C 6 3 5 2.99997 5 4 L 3 4 L 3 7 L 3 18 L 3 19 L 19 19 L 19 18 L 19 7 L 19 4 L 17 4 C 17 2.99997 16 3 16 3 L 13 3 C 13 3 12 2.99997 12 4 L 10 4 C 10 2.99997 9 3 9 3 L 6 3 z M 6 4 L 9 4 L 9 5 L 6 5 L 6 4 z M 13 4 L 16 4 L 16 5 L 13 5 L 13 4 z M 4 7 L 18 7 L 18 18 L 4 18 L 4 7 z M 6 8 L 6 10 L 8 10 L 8 8 L 6 8 z M 10 8 L 10 10 L 12 10 L 12 8 L 10 8 z M 14 8 L 14 10 L 16 10 L 16 8 L 14 8 z M 6 11 L 6 13 L 8 13 L 8 11 L 6 11 z M 10 11 L 10 13 L 12 13 L 12 11 L 10 11 z M 14 11 L 14 13 L 16 13 L 16 11 L 14 11 z M 14 14 L 14 16 L 16 16 L 16 14 L 14 14 z "
-                                    class="ColorScheme-Text"
-                            />
-                        </svg>
-                    </span>
-                    <span v-if="showTimeInputs == 'true'" class="vue-datepicker-time-inputs-container">
+                <div style="position: relative; width: 100%;">
+                    <div style="position:relative">
+                        <input v-model="dateLabel"
+                               :class="getCSSClass('vuedatepicker-input') + ' ' +inputClass"
+                               @click="toggleDatepickerDropdown"
+                               readonly
+                               style="width: 100%"
+                        >
+                        <div style="position: absolute; right: 0; top: 0; height: 100%; display: flex;">
+                            <span v-on:click="resetDate"
+                                  v-show="dateValue != null"
+                                  :class="getCSSClass('vuedatepicker-clear-button')"
+                                  style="margin-right: .5rem"
+                                  v-html="icon('close')"
+                            ></span>
+                                <span :class="getCSSClass('vuedatepicker-calendar-icon')"
+                                      v-on:click="toggleDatepickerDropdown"
+                                      style="cursor:pointer; margin-right: .5rem"
+                                      v-html="icon('calendar')"
+                                ></span>
+                        </div>
+                    </div>
+                    <span v-if="showTimeInputs == 'true'" :class="getCSSClass('vuedatepicker-time-inputs-container')">
                         <input type="text" v-model="hour" style="width: 2em">
                         <span>:</span>
                         <input type="text" v-model="minute" style="width: 2em">
@@ -45,22 +42,23 @@
                 </div>
             </template>
         </div>
-        <div class="vuedatepicker-dropdown" v-if="showDropdownFlag" :ref="'dropdown'" v-bind:class="{'vuedatepicker-dropdown-upwards': upwards}">
-            <div class="vuedatepicker-inputs-container">
-                <input v-model="year" type="number" class="form-control vuedatepicker-year-input">
-                <select v-model="month" class="form-control vuedatepicker-month-select">
+        <div :class="dropdownClass" v-if="showDropdownFlag" :ref="'dropdown'">
+            <div :class="getCSSClass('vuedatepicker-inputs-container')" style="width: 100%; display: flex; align-items: center; justify-content: space-between">
+                <input v-model="year" type="number" :class="getCSSClass('vuedatepicker-year-input')" style="max-width: 6rem">
+                <select v-model="month" :class="getCSSClass('vuedatepicker-month-select')">
                     <option v-for="monthname, monthindex in months"
                             v-bind:value="monthindex"
                             v-html="monthname"></option>
                 </select>
                 <button type="button"
                         v-on:click="gotoToday"
-                        class="vuedatepicker-today-button"
+                        :class="getCSSClass('vuedatepicker-today-button')"
                         v-if="showTodayButton"
-                >&#x2600;</button>
+                        v-html="icon('today')"
+                ></button>
             </div>
-            <div class="vuedatepicker-inputs-container">
-                <table class="vuedatepicker-days-table">
+            <div :class="getCSSClass('vuedatepicker-inputs-container')">
+                <table :class="getCSSClass('vuedatepicker-days-table')">
                     <thead>
                     <tr>
                         <th v-for="weekday in weekdayInitials" v-html="weekday"></th>
@@ -83,9 +81,8 @@
 </template>
 
 <script>
-    import {classOverridesMixin} from './mixins/classOverridesMixin.js'
     export default {
-        mixins: [classOverridesMixin],
+        inject: ['loadingIndicator', 'getCSSClass', 'translate', 'icon'],
         props: {
             upwards: {type: Boolean, default: false},
             formElementLabel: {type: String, default: ''},
@@ -125,6 +122,7 @@
                 todaysDate: null,
                 valueIsObject: false,
                 internalDefault: null,
+                openUpwards: false,
             }
         },
         mounted() {
@@ -155,8 +153,19 @@
             tableStartingDay: function() {
                 return new Date(this.year, this.month, -1 * (this.startingWeekDayOfCurrentMonthAndYear - 1));
             },
+            dropdownClass: function() {
+                let result = this.getCSSClass('vuedatepicker-dropdown');
+                if (this.openUpwards) {
+                    result = result + ' vuedatepicker-dropdown-upwards';
+                }
+
+                return result;
+            }
         },
         methods: {
+            checkUpwardsOpening: function() {
+                this.openUpwards = this.$refs['inputgroup'].getBoundingClientRect().y > window.innerHeight * .75;
+            },
             parseValue: function(value) {
                 if (this.dateRegex.test(value)) {
                     let datetimeparts = value.split(' ');
@@ -229,6 +238,7 @@
                 return weekday == 0 ? 6 : weekday-1;
             },
             toggleDatepickerDropdown: function() {
+                this.checkUpwardsOpening();
                 if (this.showDropdownFlag) {
                     this.hideDatepickerDropdown();
                 } else {
@@ -353,10 +363,7 @@
 <style>
     .vuedatepicker-dropdown {
         z-index:1500;
-        border: 1px solid lightgrey;
         padding:1px;
-        background-color:white;
-        box-shadow: 10px 5px rgba(64,64,64,0.2);
     }
 
     @media only screen and (max-width: 600px) {
@@ -390,12 +397,12 @@
         border:1px dotted lightgrey;
         padding:2px;
         height:2.6em;
+        transition: border 200ms ease-in-out;
     }
     .vuedatepicker-days-table td:hover{
         border: 1px solid black
     }
     .vuedatepicker-current-month {
-        background-color:white;
     }
     .vuedatepicker-other-month {
         background-color:#E6E6E6;
@@ -408,7 +415,6 @@
         color: blue;
     }
     .vuedatepicker-input {
-        background-color:white !important;
         flex-grow: 1;
     }
 
@@ -433,42 +439,20 @@
     .vuedatepicker-today-button:hover {
         opacity:1;
     }
-    .vue-datepicker-time-inputs-container {
+    .vuedatepicker-time-inputs-container {
         display: flex;
         align-items: center;
         margin-left: 5px;
         margin-right: 5px;
     }
-    .vue-datepicker-time-inputs-container > span {
+    .vuedatepicker-time-inputs-container > span {
         padding-left: 3px;
         padding-right: 3px;
     }
-    .vue-datepicker-time-inputs-container > input {
+    .vuedatepicker-time-inputs-container > input {
         text-align: center;
         padding-left: 1px;
         padding-right: 1px;
         border-radius: 2px;
-    }
-    .vue-datepicker-inputgroup-append {
-        width: 100%;
-        display:flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        align-items: center;
-    }
-    .vuedatepicker-clear-button {
-        cursor:pointer;
-        position:absolute;
-        right:2.5rem;
-        padding-right: .5rem;
-    }
-    .vuedatepicker-calendar-icon {
-        width: 2em;
-        border-left: 1px solid darkgrey;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        right: 1px;
-        position: absolute;
     }
 </style>
