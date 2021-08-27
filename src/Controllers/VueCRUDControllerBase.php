@@ -43,9 +43,6 @@ class VueCRUDControllerBase
         $filters = method_exists($class, 'getVueCRUDIndexFilters')
             ? (object) $class::getVueCRUDIndexFilters()
             : (object) [];
-        $contextMenuComponent = method_exists($class, 'getVueCRUDContextMenuComponent')
-            ? $class::getVueCRUDContextMenuComponent()
-            : '';
         $viewData = [
             'title'            => $this->getSubjectNamePlural(),
             'pageTitleContent' => $this->getSubjectNamePlural(),
@@ -64,11 +61,16 @@ class VueCRUDControllerBase
             'massOperations'   => (object) $class::getVueCRUDMassFunctions(),
             'exportOperations' => (object) $class::getVueCRUDExportFunctions(),
             'idProperty'       => $class::getIdProperty(),
-            'contextMenuComponent' => $contextMenuComponent,
             'paginationItemsPerPageOptions' => config('vuecrud.customizations.paginationItemsPerPageOptions', [20, 50, 100]),
             'paginationType' => config('vuecrud.customizations.paginationType', 'top'),
             'paginationItemsPerPageDefault' => config('vuecrud.customizations.paginationItemsPerPageDefault', 20),
         ];
+        foreach(['headerButtonsComponent', 'editFormComponent', 'filterComponent', 'contextMenuComponent', 'listComponent', 'deleteConfirmationComponent'] as $component) {
+            $methodName = 'getVueCRUD'.ucfirst($component).'s';
+            if (method_exists($class, $methodName)) {
+                $viewData[$component] = $class::$methodName()[0];
+            }
+        }
         if (request()->isXmlHttpRequest()) {
             $elementData = static::getElements();
 

@@ -83,6 +83,9 @@
             this.filters = {...this.value};
         },
         methods: {
+            emitComponentChange: function(subComponents, options) {
+                this.$emit('component', {subComponents: subComponents, options: options});
+            },
             emitValue: function() {
                 this.$emit('input', this.filters);
             },

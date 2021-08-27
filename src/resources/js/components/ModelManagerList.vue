@@ -11,7 +11,10 @@
                           v-on:keydown.enter="toggleSelectAll"
                           v-on:keydown.space="toggleSelectAll"
                           role="button"
-                          style="cursor:pointer; user-select: none"></span>
+                          style="cursor:pointer; user-select: none"
+                          v-html="icon('checkmark')"
+                    ></span>
+
                 </th>
                 <th v-for="columnName, columnField in columns"
                     v-bind:class="tableHeadClass(columnField)"
@@ -22,8 +25,14 @@
                 >
                     <span v-html="columnName"></span>
                     <span style="margin-left: .25rem"
-                          :class="getCSSClass('model-manager-sorting-icon') /*'⇵'*/"
-                          v-if="columnIsSorting(columnField)"
+                          :class="getCSSClass('model-manager-sorting-icon')"
+                          v-html="icon('sorting')"
+                          v-if="columnIsSorting(columnField) && currentSortingColumn != columnField"
+                    ></span>
+                    <span style="margin-left: .25rem"
+                          :class="getCSSClass('model-manager-sorting-icon')"
+                          v-html="icon('sorting-'+currentSortingDirection)"
+                          v-if="currentSortingColumn == columnField"
                     ></span>
                 </th>
                 <th :class="getCSSClass('model-manager-table-head-operations')" v-if="allowOperations">{{ translate('Operations') }}</th>
@@ -109,7 +118,7 @@
 
 <script>
     export default {
-        inject: ['loadingIndicator', 'getCSSClass', 'translate'],
+        inject: ['loadingIndicator', 'getCSSClass', 'translate', 'icon'],
         props: {
             idProperty: {type: String, default: 'id'},
             operationsUrl: {type: String},

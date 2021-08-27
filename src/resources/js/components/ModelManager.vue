@@ -270,7 +270,18 @@
         },
         methods: {
             handleComponentChangeMessage: function(payload) {
-
+                if (payload.subComponents) {
+                    Object.keys(this.subComponents).forEach((subComponent) => {
+                        if (payload.subComponents[subComponent]) {
+                            this.subComponents[subComponent] = payload.subComponents[subComponent];
+                        }
+                    });
+                }
+                if (payload.options) {
+                    Object.keys(payload.options).forEach((option) => {
+                        Vue.set(this, option, payload.options[option]);
+                    })
+                }
             },
             errorNotification: function(error) {
                 this.notificationTimeout = 0;
@@ -375,7 +386,6 @@
                 }
                 let filterData = this.getFilterData();
 
-                this.initialLoading = false;
                 window.axios.get(this.indexUrl, {params: filterData})
                     .then((response) => {
                         this.title = response.data.title;
@@ -398,11 +408,13 @@
                             }
                         }
                         this.positionedView = response.data.positionedView;
-                        Object.keys(this.subComponents).forEach((subComponent) => {
-                            if (response.data[subComponent]) {
-                                this.subComponents[subComponent] = response.data[subComponent];
-                            }
-                        });
+                        if (this.initialLoading) {
+                            Object.keys(this.subComponents).forEach((subComponent) => {
+                                if (response.data[subComponent]) {
+                                    this.subComponents[subComponent] = response.data[subComponent];
+                                }
+                            });
+                        }
                         let possibleOverrides = [
                             'massOperations',
                             'exportOperations',
@@ -415,6 +427,8 @@
                         })
                         this.mode = 'list';
                         this.fetchMode = 'search';
+                        this.initialLoading = false;
+
                     });
             },
             resetPageAndReload: function() {
@@ -518,7 +532,9 @@
                 }
             },
             itemsPerPage: function() {
-                this.resetPageAndReload();
+                if (!this.initialLoading) {
+                    this.resetPageAndReload();
+                }
             }
         }
     }
