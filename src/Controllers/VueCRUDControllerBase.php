@@ -640,4 +640,14 @@ class VueCRUDControllerBase
 
         return __('Are you sure you want to delete this :subject?', ['subject' => mb_strtolower($element::SUBJECT_NAME)]);
     }
+
+    public function list()
+    {
+        $class = static::SUBJECT_CLASS;
+        $sorting = collect(array_keys($class::getVueCRUDSortingIndexColumns()))->first();
+
+        return response()->json($class::query()->when($sorting != null, function($query) use ($sorting) {
+            return $query->orderBy($sorting, 'asc');
+        })->get());
+    }
 }

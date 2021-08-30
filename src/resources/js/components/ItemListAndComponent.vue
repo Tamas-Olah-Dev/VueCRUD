@@ -24,6 +24,7 @@
             <component :is="component"
                        v-on:input="addItem($event)"
                        v-on:addtovalueset="addItemToValueset($event)"
+                       v-on:valueset="setValueset($event)"
                        v-bind="componentPropsFiltered"></component>
         </div>
 
@@ -66,6 +67,9 @@
             addItemToValueset: function(item) {
                 this.additionalValuesetItems.push(item);
             },
+            setValueset: function(valueset) {
+                this.additionalValuesetItems = valueset;
+            },
 
             getBasename: function(string) {
                 let pieces = string.split('/');
@@ -102,10 +106,10 @@
                     this.componentProps[this.componentValuesetKey].forEach((i) => {
                         result[i[this.idProperty]] = i[this.labelProperty];
                     });
-                    this.additionalValuesetItems.forEach((i) => {
-                        result[i[this.idProperty]] = i[this.labelProperty];
-                    })
                 }
+                this.additionalValuesetItems.forEach((i) => {
+                    result[i[this.idProperty]] = i[this.labelProperty];
+                })
                 return result;
             }
         },

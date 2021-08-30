@@ -1,13 +1,11 @@
 <template>
-    <div>
-        <div>
-            <component :is="subComponent"
-                       v-bind="subComponentProps"
-                       v-on:input="emitInput($event)"
-                       v-bind:value="subComponentValue"
-            ></component>
-        </div>
-        <button :class="addButtonClass"
+    <div :class="getCSSClass('model-manager-component-wrapper-container')">
+        <component :is="subComponent"
+                   v-bind="subComponentProps"
+                   v-on:input="emitInput($event)"
+                   v-model="subComponentValue"
+        ></component>
+        <button :class="getCSSClass('model-manager-component-add-button')"
                 type="button"
                 v-html="addButtonHTML"
                 v-on:click="showForm"
@@ -15,6 +13,7 @@
         <popup :visible="showPopup"
                :show-close-button="false">
             <edit-form
+                    v-if="showPopup"
                     v-bind:data-url="formUrl"
                     v-bind:save-url="storeUrl"
                     v-bind:ajax-operations-url="formAjaxOperationsUrl"
@@ -29,12 +28,11 @@
 
 <script>
     export default {
-        inject: ['loadingIndicator', 'getCSSClass', 'translate'],
+        inject: ['loadingIndicator', 'getCSSClass', 'translate', 'icon'],
         props: {
             subComponent: {type: String},
             defaultSubComponentProps: {type: Object},
             subComponentValuesetProp: {type: String},
-            addButtonClass: {type: String, default: 'btn btn-primary'},
             addButtonHTML: {type: String, default: '+'},
             formUrl: {type: String},
             storeUrl: {type: String},
@@ -57,7 +55,8 @@
             fetchValueset: function(callback) {
                 window.axios.get(this.fetchUrl)
                     .then((response) => {
-                        Vue.set(this.subComponentProps, this.subComponentValuesetProp, response.data.elements)
+                        this.$set(this.subComponentProps, this.subComponentValuesetProp, response.data)
+                        this.$emit('valueset', this.subComponentProps[this.subComponentValuesetProp]);
                         if (typeof(callback) != 'undefined') {
                             callback(response.data);
                         }
@@ -69,17 +68,20 @@
             hideFormAndSelect: function(subject) {
                 this.fetchValueset(() => {
                     this.subComponentValue = subject.id;
+                    this.$emit('input', this.subComponentValue)
                 });
                 this.hideForm();
             },
             hideForm: function() {
-                this.fetchValueset();
+                //this.fetchValueset();
                 this.showPopup = false;
             },
         },
+        created() {
+            this.$set(this, 'subComponentValue', this.value);
+            this.subComponentProps = JSON.parse(JSON.stringify(this.defaultSubComponentProps));
+        },
         mounted() {
-            this.subComponentValue = this.value;
-            this.subComponentProps =  {...this.defaultSubComponentProps};
             this.fetchValueset();
         }
     }

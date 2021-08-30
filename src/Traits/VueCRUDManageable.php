@@ -54,6 +54,10 @@ trait VueCRUDManageable
             $urlBase.$subjectSlug.'/{subject}/ajax',
             self::getVueCRUDControllerMethod('ajaxOperations').$nameSuffix
         )->name(self::getVueCRUDRouteName('ajax_operations', $subjectSlug.$nameSuffix));
+        \Route::get(
+            $urlBase.$subjectSlug.'/elements/list',
+            self::getVueCRUDControllerMethod('list').$nameSuffix
+        )->name(self::getVueCRUDRouteName('list', $subjectSlug.$nameSuffix));
 
     }
 
