@@ -6,12 +6,13 @@
                               :class="getCSSClass('item-list-items-container-inner')"
             >
                 <span v-for="label, id in valueLabels"
-                      :key="id"
+                      :key="label+'-'+id"
                       :class="getCSSClass('item-list-item')"
                       >
                     <span :class="getCSSClass('item-list-item-label')"
                           v-html="label"></span>
                     <button :class="getCSSClass('item-list-item-remove-button')"
+                            type="button"
                           @click="removeItem(id)"
                           v-html="icon('close')"></button>
                 </span>
@@ -83,7 +84,9 @@
                     if (this.mode == 'string') {
                         result[i] = this.basename ? this.getBasename(i) : i;
                     } else {
-                        result[i] = this.basename ? this.getBasename(this.keyedItems[i]) : this.keyedItems[i];
+                        if (this.keyedItems[i]) {
+                            result[i] = this.basename ? this.getBasename(this.keyedItems[i]) : this.keyedItems[i];
+                        }
                     }
                 });
                 return result;

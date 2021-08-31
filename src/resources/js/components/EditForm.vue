@@ -206,14 +206,12 @@
                                     <datepicker v-if="data.kind == 'datepicker'"
                                                 v-bind="JSON.parse(data.props)"
                                                 v-model="subjectData[fieldname].value"
-                                                v-bind:class-overrides="classOverrides"
                                                 :locale="locale"
                                     ></datepicker>
                                     <image-picker v-if="data.kind == 'imagepicker'"
                                                   v-bind="JSON.parse(data.props)"
                                                   v-model="subjectData[fieldname].value"
                                                   v-bind:upload-url="ajaxOperationsUrl"
-                                                  v-bind:class-overrides="classOverrides"
                                                   :key="fieldname"
                                                   :fieldname="fieldname"
                                     ></image-picker>
@@ -245,19 +243,16 @@
                                                   v-bind="JSON.parse(data.props)"
                                                   :valueset="data.valuesetSorted"
                                                   v-model="subjectData[fieldname].value"
-                                                  v-bind:class-overrides="classOverrides"
                                     ></multi-select>
                                     <searchable-select v-if="data.kind == 'searchable-select'"
                                                        v-bind="JSON.parse(data.props)"
                                                        :valueset="data.valuesetSorted"
                                                        v-model="subjectData[fieldname].value"
-                                                       v-bind:class-overrides="classOverrides"
                                     ></searchable-select>
                                     <treeselect v-if="data.kind == 'vue-treeselect'"
                                                 v-bind="JSON.parse(data.props)"
                                                 :options="data.valuesetSorted"
                                                 v-model="subjectData[fieldname].value"
-                                                v-bind:class-overrides="classOverrides"
                                     ></treeselect>
                                     <component v-if="data.kind == 'custom-component'"
                                                v-bind:is="data.type"
@@ -265,7 +260,6 @@
                                                v-model="subjectData[fieldname].value"
                                                v-bind:errors="componentError(fieldname)"
                                                :buttons="buttons"
-                                               v-bind:class-overrides="classOverrides"
                                     ></component>
                                     <select v-if="data.kind == 'multiselect'"
                                             style="height: 200px; min-height: 200px"

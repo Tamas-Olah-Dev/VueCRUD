@@ -20,7 +20,7 @@
                     v-on:submit-success="hideFormAndSelect($event)"
                     v-on:editing-canceled="hideForm"
                     redirect-to-response-on-success="false"
-                    :buttons="buttons"
+                    :buttons="mainButtons"
             ></edit-form>
         </popup>
     </div>
@@ -28,7 +28,7 @@
 
 <script>
     export default {
-        inject: ['loadingIndicator', 'getCSSClass', 'translate', 'icon'],
+        inject: ['loadingIndicator', 'getCSSClass', 'translate', 'icon', 'mainButtons'],
         props: {
             subComponent: {type: String},
             defaultSubComponentProps: {type: Object},

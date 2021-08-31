@@ -76,7 +76,7 @@ trait VueCRUDManageable
         return static::getVueCRUDControllerClassname().'@'.$operation;
     }
 
-    protected static function getVueCRUDRouteName($operation, $subjectSlug = null, $nameSuffix = '')
+    public static function getVueCRUDRouteName($operation, $subjectSlug = null, $nameSuffix = '')
     {
         $subjectSlug = self::getSubjectSlug($subjectSlug);
 

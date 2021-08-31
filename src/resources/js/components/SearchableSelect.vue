@@ -32,11 +32,6 @@
                       v-html="icon('caret-left')"
                 ></span>
             </div>
-            <button v-if="addItemUrl != ''"
-                    :class="getCSSClass('searchable-select-add-button')"
-                    v-html="icon('plus')"
-                    v-on:click="showAddPopup"
-            ></button>
         </div>
 
         <div :class="getCSSClass('searchable-select-dropdown')"
@@ -63,20 +58,6 @@
                      v-on:click="addItem(subject)"></div>
             </div>
         </div>
-        <popup :visible="showPopup"
-            v-on:close="hideAddPopup"
-        >
-            <edit-form
-                    :key="editFormKey"
-                    v-bind:data-url="addItemUrl"
-                    v-bind:save-url="storeItemUrl"
-                    v-bind:ajax-operations-url="ajaxItemOperationsUrl"
-                    v-on:submit-success="updateValueset"
-                    v-on:editing-canceled="hideAddPopup"
-                    redirect-to-response-on-success="false"
-                    v-bind:buttons="mainButtons"
-            ></edit-form>
-        </popup>
     </div>
 </template>
 
@@ -95,9 +76,6 @@
             undefinedValue: {type: Number, default: -1},
             undefinedLabel: {type: String, default: ''},
             disabled: {type: Boolean, default: false},
-            addItemUrl: {type: String, default: ''},
-            storeItemUrl: {type: String, default: ''},
-            ajaxItemOperationsUrl: {type: String, default: ''}
         },
         data: function() {
             return {
