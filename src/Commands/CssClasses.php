@@ -78,18 +78,25 @@ class CssClasses extends Command
                 }
             }
         }
-        $results = collect($unfilteredResults)->filter(function($item) {
-            return !array_key_exists(str_ireplace('\'', '', $item), config('vuecrud.cssClasses', []));
-        })->transform(function($item) {
-            $result = str_ireplace('\'', '"', $item);
-            $pieces = explode('", "', $result);
-            if (count($pieces) > 1) {
-                $result = $pieces[0].'"';
-            }
-            return $result.' => "",';
-        });
+        $transformed = collect($unfilteredResults)
+            ->transform(function($item) {
+                $result = str_ireplace('\'', '"', $item);
+                $pieces = explode('", "', $result);
+                if (count($pieces) > 1) {
+                    $result = $pieces[0];
+                }
+                return str_ireplace('"', '', $result);
+            });
+        foreach($transformed as $row) {
+            $results[$row] = config('vuecrud.cssClasses.'.$row, '');
+        }
+        ksort($results);
+        $filecontents = [];
+        foreach ($results as $field => $value) {
+            $filecontents[] = '"'.$field.'" => "'.$value.'",';
+        }
         $filename = storage_path('app'.DIRECTORY_SEPARATOR.'vuecrudcssclasses-'.now()->format('Y-m-d-H-i-s').'.txt');
-        file_put_contents($filename, $results->implode("\n"));
+        file_put_contents($filename, implode("\n", $filecontents));
         $this->info('List generated: '.$filename);
     }
 
