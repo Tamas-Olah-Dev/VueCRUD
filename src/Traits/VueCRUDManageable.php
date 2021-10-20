@@ -18,46 +18,46 @@ trait VueCRUDManageable
 
     public static function setVueCRUDRoutes($subjectSlug = null, $urlBase = '/', $nameSuffix = '')
     {
-        $subjectSlug = self::getSubjectSlug($subjectSlug);
+        $subjectSlug = static::getSubjectSlug($subjectSlug);
         if ($nameSuffix != '') {
             $nameSuffix = substr($nameSuffix, 0, 1) != '_' ? '_'.$nameSuffix : $nameSuffix;
         }
         \Route::get(
             $urlBase.$subjectSlug,
-            self::getVueCRUDControllerMethod('index').$nameSuffix
-        )->name(self::getVueCRUDRouteName('index', $subjectSlug.$nameSuffix));
+            static::getVueCRUDControllerMethod('index').$nameSuffix
+        )->name(static::getVueCRUDRouteName('index', $subjectSlug.$nameSuffix));
         \Route::get(
             $urlBase.$subjectSlug.'/{subject}/show',
-            self::getVueCRUDControllerMethod('details').$nameSuffix
-        )->name(self::getVueCRUDRouteName('details', $subjectSlug.$nameSuffix));
+            static::getVueCRUDControllerMethod('details').$nameSuffix
+        )->name(static::getVueCRUDRouteName('details', $subjectSlug.$nameSuffix));
         \Route::get(
             $urlBase.$subjectSlug.'/new',
-            self::getVueCRUDControllerMethod('create').$nameSuffix
-        )->name(self::getVueCRUDRouteName('create', $subjectSlug.$nameSuffix));
+            static::getVueCRUDControllerMethod('create').$nameSuffix
+        )->name(static::getVueCRUDRouteName('create', $subjectSlug.$nameSuffix));
         \Route::get(
             $urlBase.$subjectSlug.'/{subject}/edit',
-            self::getVueCRUDControllerMethod('edit').$nameSuffix
-        )->name(self::getVueCRUDRouteName('edit', $subjectSlug.$nameSuffix));
+            static::getVueCRUDControllerMethod('edit').$nameSuffix
+        )->name(static::getVueCRUDRouteName('edit', $subjectSlug.$nameSuffix));
         \Route::post(
             $urlBase.$subjectSlug,
-            self::getVueCRUDControllerMethod('store').$nameSuffix
-        )->name(self::getVueCRUDRouteName('store', $subjectSlug.$nameSuffix));
+            static::getVueCRUDControllerMethod('store').$nameSuffix
+        )->name(static::getVueCRUDRouteName('store', $subjectSlug.$nameSuffix));
         \Route::post(
             $urlBase.$subjectSlug.'/{subject}',
-            self::getVueCRUDControllerMethod('update').$nameSuffix
-        )->name(self::getVueCRUDRouteName('update', $subjectSlug.$nameSuffix));
+            static::getVueCRUDControllerMethod('update').$nameSuffix
+        )->name(static::getVueCRUDRouteName('update', $subjectSlug.$nameSuffix));
         \Route::delete(
             $urlBase.$subjectSlug.'/{subject}',
-            self::getVueCRUDControllerMethod('delete').$nameSuffix
-        )->name(self::getVueCRUDRouteName('delete', $subjectSlug.$nameSuffix));
+            static::getVueCRUDControllerMethod('delete').$nameSuffix
+        )->name(static::getVueCRUDRouteName('delete', $subjectSlug.$nameSuffix));
         \Route::post(
             $urlBase.$subjectSlug.'/{subject}/ajax',
-            self::getVueCRUDControllerMethod('ajaxOperations').$nameSuffix
-        )->name(self::getVueCRUDRouteName('ajax_operations', $subjectSlug.$nameSuffix));
+            static::getVueCRUDControllerMethod('ajaxOperations').$nameSuffix
+        )->name(static::getVueCRUDRouteName('ajax_operations', $subjectSlug.$nameSuffix));
         \Route::get(
             $urlBase.$subjectSlug.'/elements/list',
-            self::getVueCRUDControllerMethod('list').$nameSuffix
-        )->name(self::getVueCRUDRouteName('list', $subjectSlug.$nameSuffix));
+            static::getVueCRUDControllerMethod('list').$nameSuffix
+        )->name(static::getVueCRUDRouteName('list', $subjectSlug.$nameSuffix));
 
     }
 
@@ -78,7 +78,7 @@ trait VueCRUDManageable
 
     public static function getVueCRUDRouteName($operation, $subjectSlug = null, $nameSuffix = '')
     {
-        $subjectSlug = self::getSubjectSlug($subjectSlug);
+        $subjectSlug = static::getSubjectSlug($subjectSlug);
 
         return 'vuecrud_'.$subjectSlug.$nameSuffix.'_'.$operation;
     }
@@ -91,9 +91,9 @@ trait VueCRUDManageable
     public static function getVueCRUDOptionalAjaxFunctions()
     {
         return array_merge(
-            self::getVueCRUDMassFunctions(),
-            self::getVueCRUDExportFunctions(),
-            self::getVueCRUDAdditionalAjaxFunctions()
+            static::getVueCRUDMassFunctions(),
+            static::getVueCRUDExportFunctions(),
+            static::getVueCRUDAdditionalAjaxFunctions()
         );
     }
 
@@ -172,9 +172,9 @@ trait VueCRUDManageable
          *   ]
          */
         $result = [
-            'details' => self::buildButtonFromConfigData('vuecrud.buttons.details'),
-            'edit'   => self::buildButtonFromConfigData('vuecrud.buttons.edit'),
-            'delete' => self::buildButtonFromConfigData('vuecrud.buttons.delete'),
+            'details' => static::buildButtonFromConfigData('vuecrud.buttons.details'),
+            'edit'   => static::buildButtonFromConfigData('vuecrud.buttons.edit'),
+            'delete' => static::buildButtonFromConfigData('vuecrud.buttons.delete'),
         ];
 
         if (method_exists(static::class, 'modifyModellistButtons')) {
@@ -187,60 +187,60 @@ trait VueCRUDManageable
 
     public static function getModelManagerMainButtons()
     {
-        if (defined('self::SUBJECT_NAME')) {
+        if (defined('static::SUBJECT_NAME')) {
             $subjectName = config('vuecrud.translateConstants', false)
-                ? ' '.mb_strtolower(__(self::SUBJECT_NAME))
-                : ' '.mb_strtolower(self::SUBJECT_NAME);
+                ? ' '.mb_strtolower(__(static::SUBJECT_NAME))
+                : ' '.mb_strtolower(static::SUBJECT_NAME);
         } else {
             $subjectName = '';
         }
         $result = [
-            'add' => self::buildButtonFromConfigData('vuecrud.buttons.add', [
+            'add' => static::buildButtonFromConfigData('vuecrud.buttons.add', [
                 'class' => 'btn btn-outline-primary', 'html' => __('New'),
             ]),
-            'save' => self::buildButtonFromConfigData('vuecrud.buttons.save', [
+            'save' => static::buildButtonFromConfigData('vuecrud.buttons.save', [
                 'class' => 'btn btn-outline-primary btn-block', 'html' => __('Save'),
             ]),
-            'save_and_close' => self::buildButtonFromConfigData('vuecrud.buttons.save_and_close', [
+            'save_and_close' => static::buildButtonFromConfigData('vuecrud.buttons.save_and_close', [
                 'class' => 'btn btn-outline-primary btn-block', 'html' => __('Save and close'),
             ]),
-            'save_without_closing' => self::buildButtonFromConfigData('vuecrud.buttons.save_without_closing', [
+            'save_without_closing' => static::buildButtonFromConfigData('vuecrud.buttons.save_without_closing', [
                 'class' => 'btn btn-outline-primary btn-block', 'html' => __('Save changes'),
             ]),
-            'proceed' => self::buildButtonFromConfigData('vuecrud.buttons.proceed', [
+            'proceed' => static::buildButtonFromConfigData('vuecrud.buttons.proceed', [
                 'class' => 'btn btn-outline-primary btn-block', 'html' => __('Proceed'),
             ]),
-            'backToList' => self::buildButtonFromConfigData('vuecrud.buttons.backToList', [
+            'backToList' => static::buildButtonFromConfigData('vuecrud.buttons.backToList', [
                 'class' => 'btn btn-outline-secondary', 'html' => __('Back to the list'),
             ]),
-            'cancel' => self::buildButtonFromConfigData('vuecrud.buttons.cancel', [
+            'cancel' => static::buildButtonFromConfigData('vuecrud.buttons.cancel', [
                 'class' => 'btn btn-outline-secondary btn-block', 'html' => __('Cancel'),
             ]),
-            'resetFilters' => self::buildButtonFromConfigData('vuecrud.buttons.resetFilters', [
+            'resetFilters' => static::buildButtonFromConfigData('vuecrud.buttons.resetFilters', [
                 'class' => 'btn btn-outline-secondary', 'html' => __('Reset'),
             ]),
-            'prevPage' => self::buildButtonFromConfigData('vuecrud.buttons.prevPage', [
+            'prevPage' => static::buildButtonFromConfigData('vuecrud.buttons.prevPage', [
                 'class' => 'btn btn-outline-secondary', 'html' => '←',
             ]),
-            'nextPage' => self::buildButtonFromConfigData('vuecrud.buttons.nextPage', [
+            'nextPage' => static::buildButtonFromConfigData('vuecrud.buttons.nextPage', [
                 'class' => 'btn btn-outline-secondary', 'html' => '→',
             ]),
-            'fileUpload' => self::buildButtonFromConfigData('vuecrud.buttons.fileUpload', [
+            'fileUpload' => static::buildButtonFromConfigData('vuecrud.buttons.fileUpload', [
                 'class' => 'btn btn-outline-primary', 'html' => '+',
             ]),
-            'search' => self::buildButtonFromConfigData('vuecrud.buttons.search', [
+            'search' => static::buildButtonFromConfigData('vuecrud.buttons.search', [
                 'class' => 'btn btn-outline-secondary', 'html' => __('Search'),
             ]),
-            'confirmDeletion' => self::buildButtonFromConfigData('vuecrud.buttons.confirmDeletion', [
+            'confirmDeletion' => static::buildButtonFromConfigData('vuecrud.buttons.confirmDeletion', [
                 'class' => 'btn btn-danger', 'html' => __('Yes'),
             ]),
-            'cancelDeletion' => self::buildButtonFromConfigData('vuecrud.buttons.cancelDeletion', [
+            'cancelDeletion' => static::buildButtonFromConfigData('vuecrud.buttons.cancelDeletion', [
                 'class' => 'btn btn-secondary', 'html' => __('No'),
             ]),
-            'massOperations' => self::buildButtonFromConfigData('vuecrud.buttons.massOperations', [
+            'massOperations' => static::buildButtonFromConfigData('vuecrud.buttons.massOperations', [
                 'class' => 'btn btn-primary', 'html' => __('Operations on the selected items'),
             ]),
-            'exportOperations' => self::buildButtonFromConfigData('vuecrud.buttons.exportOperations', [
+            'exportOperations' => static::buildButtonFromConfigData('vuecrud.buttons.exportOperations', [
                 'class' => 'btn btn-primary', 'html' => __('Export items'),
             ]),
         ];
@@ -291,8 +291,8 @@ trait VueCRUDManageable
 
     public static function getVueCRUDIndexLink($filters = [], $subjectSlug = null, $nameSuffix = '')
     {
-        $subjectSlug = $subjectSlug === null ? self::getSubjectSlug() : $subjectSlug;
-        return route(self::getVueCRUDRouteName('index', $subjectSlug, $nameSuffix), $filters);
+        $subjectSlug = $subjectSlug === null ? static::getSubjectSlug() : $subjectSlug;
+        return route(static::getVueCRUDRouteName('index', $subjectSlug, $nameSuffix), $filters);
     }
 
 
