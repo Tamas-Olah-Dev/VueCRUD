@@ -146,6 +146,7 @@ class VueCRUDControllerBase
         $subject = $this->getSubject($subject);
         $formdatabuilderClass = $subject::getVueCRUDFormdatabuilderClassname();
         $formDataBuilder = new $formdatabuilderClass($subject);
+        $formDataBuilder->setFormTitle($this->getEditFormTitle());
         if (request()->isXmlHttpRequest()) {
             return response($formDataBuilder->buildJson());
         }
@@ -154,7 +155,7 @@ class VueCRUDControllerBase
             'editDataUrl' => route($this->getRouteName('edit'), ['subject' => $subject->id]),
             'storeUrl'    => route($this->getRouteName('update'), ['subject' => $subject->id]),
             'indexUrl'    => route($this->getRouteName('index')),
-            'formTitle'   => __('Edit').' '.ucfirst($this->getSubjectName()),
+            'formTitle'   => $this->getEditFormTitle(),
         ]);
     }
 
@@ -163,6 +164,7 @@ class VueCRUDControllerBase
         $class = static::SUBJECT_CLASS;
         $formdatabuilderClass = $class::getVueCRUDFormdatabuilderClassname();
         $formDataBuilder = new $formdatabuilderClass();
+        $formDataBuilder->setFormTitle($this->getCreateFormTitle());
         if (request()->isXmlHttpRequest()) {
             return response($formDataBuilder->buildJson());
         }
@@ -171,7 +173,7 @@ class VueCRUDControllerBase
             'editDataUrl' => route($this->getRouteName('create')),
             'storeUrl'    => route($this->getRouteName('store')),
             'indexUrl'    => route($this->getRouteName('index')),
-            'formTitle'   => __('New').$this->getSubjectName(),
+            'formTitle'   => $this->getCreateFormTitle(),
         ]);
     }
 
@@ -649,5 +651,21 @@ class VueCRUDControllerBase
         return response()->json($class::query()->when($sorting != null, function($query) use ($sorting) {
             return $query->orderBy($sorting, 'asc');
         })->get());
+    }
+
+    public function getEditFormTitle()
+    {
+        if (config('vuecrud.formdatabuilder.editFormTitleTranslationString') !== null) {
+            return __(config('vuecrud.formdatabuilder.editFormTitleTranslationString'), ['subject' => mb_strtolower($this->getSubjectName())]);
+        }
+        return __('Edit').' '.mb_strtolower($this->getSubjectName());
+    }
+
+    public function getCreateFormTitle()
+    {
+        if (config('vuecrud.formdatabuilder.createFormTitleTranslationString') !== null) {
+            return __(config('vuecrud.formdatabuilder.createFormTitleTranslationString'), ['subject' => mb_strtolower($this->getSubjectName())]);
+        }
+        return __('New').' '.mb_strtolower($this->getSubjectName());
     }
 }
