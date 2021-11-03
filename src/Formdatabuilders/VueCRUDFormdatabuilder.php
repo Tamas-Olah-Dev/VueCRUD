@@ -15,6 +15,8 @@ abstract class VueCRUDFormdatabuilder
     public $defaults;
     protected $fields = null;
     protected $stepsCache = null;
+    protected $customFormTitle = null;
+    protected $customFormOptions = [];
 
     protected $steps = [];
 
@@ -191,7 +193,7 @@ abstract class VueCRUDFormdatabuilder
 
     protected function buildConfigurationFormdata()
     {
-        return [
+        $result = [
             'config' => [
                 'mode'            => $this->subject === null ? 'creating' : 'editing',
                 'steps'           => self::getCachedSteps(),
@@ -199,6 +201,14 @@ abstract class VueCRUDFormdatabuilder
                 'conditionFields' => $this->getConditionFields(),
             ],
         ];
+        if ($this->customFormTitle !== null) {
+            $result['config']['formTitle'] = $this->customFormTitle;
+        }
+        foreach($this->customFormOptions as $option => $value) {
+            $result['config'][$option] = $value;
+        }
+
+        return $result;
     }
 
     public function getFormdataJson()
@@ -431,5 +441,19 @@ abstract class VueCRUDFormdatabuilder
     protected static function getCurrentStep($default = 1)
     {
         return request()->get('currentStep', $default);
+    }
+
+    public function setFormTitle($formTitle)
+    {
+        $this->customFormTitle = $formTitle;
+
+        return $this;
+    }
+
+    public function setCustomFormOptions($options)
+    {
+        $this->customFormOptions = $options;
+
+        return $this;
     }
 }
