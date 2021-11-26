@@ -338,4 +338,11 @@ trait VueCRUDManageable
 
         return null;
     }
+
+    public function getVuecrudDisabledOperationButtonsAttribute()
+    {
+        // by overriding this on a model we can tailor the operation buttons to be shown
+        // on a given element
+        return [];
+    }
 }

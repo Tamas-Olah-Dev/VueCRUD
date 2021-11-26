@@ -76,6 +76,9 @@ class VueCRUDControllerBase
 
             $viewData['elements'] = $elementData->elements;
             $viewData['counts'] = $elementData->counts;
+            foreach($viewData['elements'] as $element) {
+                $element->append('vuecrud_disabled_operation_buttons');
+            }
             return response()->json($viewData);
         }
         $backlink = $class::getVueCRUDParentIndexLink();
@@ -187,6 +190,11 @@ class VueCRUDControllerBase
     public function delete($subject)
     {
         $element = $this->getSubject($subject);
+        if (method_exists($element, 'allowVueCRUDDeletion')) {
+            if (!$element->allowVueCRUDDeletion()) {
+                abort(403);
+            }
+        }
         if (method_exists($element, 'remove')) {
             $result = $element->remove();
         } else {
