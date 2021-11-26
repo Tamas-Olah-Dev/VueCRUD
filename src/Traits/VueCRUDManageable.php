@@ -343,6 +343,10 @@ trait VueCRUDManageable
     {
         // by overriding this on a model we can tailor the operation buttons to be shown
         // on a given element
+        // and by providing a method that can be implemented we can use a system-wide trait
+        if (method_exists($this, 'getVuecrudDisabledButtons')) {
+            return $this->getVuecrudDisabledButtons();
+        }
         return [];
     }
 }
