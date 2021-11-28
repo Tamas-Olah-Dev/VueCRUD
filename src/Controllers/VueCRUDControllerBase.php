@@ -77,7 +77,9 @@ class VueCRUDControllerBase
             $viewData['elements'] = $elementData->elements;
             $viewData['counts'] = $elementData->counts;
             foreach($viewData['elements'] as $element) {
-                $element->append('vuecrud_disabled_operation_buttons');
+                if ((is_object($element)) && (get_class($element) == static::SUBJECT_CLASS)) {
+                    $element->append('vuecrud_disabled_operation_buttons');
+                }
             }
             return response()->json($viewData);
         }
