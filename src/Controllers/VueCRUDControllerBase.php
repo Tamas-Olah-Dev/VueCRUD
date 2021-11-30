@@ -47,6 +47,7 @@ class VueCRUDControllerBase
             'title'            => $this->getSubjectNamePlural(),
             'pageTitleContent' => $this->getSubjectNamePlural(),
             'pageTitle'        => $this->getSubjectNamePlural().' - '.config('app.name'),
+
             'columns'          => $this->getIndexColumns($positionedView),
             'sortingColumns'   => $this->getSortingColumns($positionedView),
             'sortingField'     => request()->get('sorting_field'),
@@ -65,6 +66,11 @@ class VueCRUDControllerBase
             'paginationType' => config('vuecrud.customizations.paginationType', 'top'),
             'paginationItemsPerPageDefault' => config('vuecrud.customizations.paginationItemsPerPageDefault', 20),
         ];
+        $classPieces = explode('\\', static::SUBJECT_CLASS);
+        $classOnly = array_pop($classPieces);
+        $guidelines = config('vuecrud.userguidelines.'.$classOnly, '');
+        $viewData['guidelines'] = $guidelines;
+
         foreach(['headerButtonsComponent', 'editFormComponent', 'filterComponent', 'contextMenuComponent', 'listComponent', 'deleteConfirmationComponent'] as $component) {
             $methodName = 'getVueCRUD'.ucfirst($component).'s';
             if (method_exists($class, $methodName)) {
