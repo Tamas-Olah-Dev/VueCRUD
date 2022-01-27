@@ -147,6 +147,10 @@ abstract class VueCRUDFormdatabuilder
         $this->formdata = [];
         $this->fields = null;
         $fields = $this->getCachedFields();
+        if (method_exists($this, 'preProcessFormfields')) {
+            $fields = $this->preProcessFormfields($fields);
+        }
+
         foreach ($fields as $fieldId => $fieldData) {
             if ($this->shouldBuildField($fieldId)) {
                 $element = [
