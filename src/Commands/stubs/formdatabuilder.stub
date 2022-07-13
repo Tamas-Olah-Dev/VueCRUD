@@ -16,7 +16,9 @@ class DummyClassVueCRUDFormdatabuilder extends VueCRUDFormdatabuilder
      */
     protected static function getFields()
     {
-        return collect([]);
+        $result = [];
+
+        return collect($result);
     }
 
     public function __construct(DummyClass $subject = null, $defaults = [])

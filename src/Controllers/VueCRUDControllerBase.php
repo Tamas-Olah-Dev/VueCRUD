@@ -482,8 +482,17 @@ class VueCRUDControllerBase
         if (request('respondWith', 'url') == 'url') {
             return route($this->getRouteName('index'));
         }
-
-        return $subject;
+        if (defined(static::class.'::DONT_ADD_UPDATE_ROUTE_TO_RESPONSE_SUBJECT')) {
+            return $subject;
+        }
+        try {
+            $result = $subject->toArray();
+            $result['vuecrudUpdateUrl'] = route($subject::getVueCRUDRouteName('update', $subject::SUBJECT_SLUG),
+                ['subject' => $subject->id]);
+        } catch (\Exception $e) {
+            $result = $subject;
+        }
+        return $result;
     }
 
     protected function exportCsv()

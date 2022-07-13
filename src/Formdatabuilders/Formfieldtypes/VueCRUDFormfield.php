@@ -37,6 +37,7 @@ class VueCRUDFormfield
     protected $staticValue;
     protected $group;
 
+
     /**
      * VueCRUDFormfield constructor.
      * @param array $properties
